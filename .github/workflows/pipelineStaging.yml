@@ -16,6 +16,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: ecuaciclismo
+          path: ecuaciclismo
 
   deploy-backend:
     needs: [checkout-repository]
@@ -24,6 +25,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: ecuaciclismo
+          path: ecuaciclismo
       - name: Open backend folder
         run: cd backend
       - name: Install Node
@@ -40,6 +42,7 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: ecuaciclismo
+          path: ecuaciclismo
       - name: Open frontend folder
         run: cd frontend
       - name: Install Node
