@@ -1,0 +1,14 @@
+name: Build Main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  hello:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Echo
+        run: |
+          echo "Hello!"
