@@ -6,16 +6,21 @@ on:
       - main
 
 jobs:
-  deploy:
+  deploy-backend:
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: Open backend folder
+        run: cd backend
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version: 14
       - name: Install Dependencies
         run: yarn install
+  # deploy-frontend:
+  #   runs-on: ubuntu-18.04
+  #   steps:
