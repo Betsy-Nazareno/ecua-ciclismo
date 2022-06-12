@@ -47,6 +47,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 14
+      - run: npm install -g yarn
+      - run: npm i eslint -g
       - name: Install Dependencies
         run: yarn install
       - name: Ejecutar reglas de eslint
