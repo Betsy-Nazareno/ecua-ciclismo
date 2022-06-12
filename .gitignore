@@ -1,0 +1,35 @@
+# Add any directories, files, or patterns you don't want to be tracked by version control
+
+.idea/
+.DS_Store/
+.DS_Store
+
+# Ignorar migrations
+#*/migrations/
+#!**/migrations/_init_.py
+**/migrations/**
+!**/migrations
+!**/migrations/_init_.py
+#settings.py
+ecuaciclismo/settings.py
+
+# Archivos Subidos
+media/
+
+# Virtual Enviroment
+venv/
+
+#Pycache
+__pycache__/
+
+# Archivos compilados de Python
+*.pyc
+
+db.sqlite3
+
+frontend/node_modules
+
+#/comextweb_arancel/apps/frontend/vue.config.js
+#/comextweb_arancel/apps/frontend/package-lock.json
+#
+#/comextweb_arancel/apps/frontend/src/assets/utils/rutas.json
