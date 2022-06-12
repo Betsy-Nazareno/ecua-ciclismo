@@ -49,7 +49,9 @@ jobs:
           node-version: 14
       - run: npm install -g yarn
       - run: npm i eslint -g
+      - name: Open frontend folder
+        run: cd frontend
       - name: Install Dependencies
         run: yarn install
       - name: Ejecutar reglas de eslint
-        run: cd frontend &&  yarn eslint
+        run: yarn eslint
