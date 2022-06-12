@@ -33,7 +33,7 @@ jobs:
       #     host: ecuacilismoApp.mysql.pythonanywhere-services.com
       #     username: ecuacilismoApp
       #     api-token: 1ea811d29d67d939659a3c9c99ec49cd1e4c5658
-      #     domain-name: ecuacilismoApp.pythonanywhere.com.
+      #     domain-name: ecuacilismoApp.pythonanywhere.com
 
   # deploy-frontend:
   #   needs: [checkout-repository]
