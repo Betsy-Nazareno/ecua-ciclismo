@@ -52,6 +52,6 @@ jobs:
       - name: Open frontend folder
         run: cd frontend
       - name: Install Dependencies
-        run: yarn install
+        run: cd frontend ; yarn install
       - name: Ejecutar reglas de eslint
-        run: yarn eslint
+        run: cd frontend ; yarn eslint
