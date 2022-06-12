@@ -44,7 +44,7 @@ jobs:
           name: ecuaciclismo
           path: /home/runner/work/ecua-ciclismo/ecua-ciclismo
       - name: Ejecutar reglas de eslint
-        run: cd frontend;  yarn eslint
+        run: cd frontend &&  yarn eslint
 
       # - name: Install Node
       #   uses: actions/setup-node@v3
