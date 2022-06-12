@@ -18,36 +18,36 @@ jobs:
           name: ecuaciclismo
           path: /home/runner/work/ecua-ciclismo/ecua-ciclismo
 
-  deploy-backend:
-    needs: [checkout-repository]
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: ecuaciclismo
-          path: /home/runner/work/ecua-ciclismo/ecua-ciclismo
-      - name: Open backend folder
-        run: cd backend
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 14
-      - name: Install Dependencies
-        run: yarn install
+  # deploy-backend:
+  #   needs: [checkout-repository]
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: ecuaciclismo
+  #         path: /home/runner/work/ecua-ciclismo/ecua-ciclismo
+  #     - name: Open backend folder
+  #       run: cd backend
+  #     - name: Install Node
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 14
+  #     - name: Install Dependencies
+  #       run: yarn install
 
-  deploy-frontend:
-    needs: [checkout-repository]
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: ecuaciclismo
-          path: /home/runner/work/ecua-ciclismo/ecua-ciclismo
-      - name: Open frontend folder
-        run: cd frontend
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 14
-      - name: Install Dependencies
-        run: yarn install
+  # deploy-frontend:
+  #   needs: [checkout-repository]
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #     - uses: actions/download-artifact@v2
+  #       with:
+  #         name: ecuaciclismo
+  #         path: /home/runner/work/ecua-ciclismo/ecua-ciclismo
+  #     - name: Open frontend folder
+  #       run: cd frontend
+  #     - name: Install Node
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 14
+  #     - name: Install Dependencies
+  #       run: yarn install
