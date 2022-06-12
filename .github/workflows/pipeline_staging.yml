@@ -28,12 +28,12 @@ jobs:
           path: /home/runner/work/ecua-ciclismo/ecua-ciclismo
       - name: Open backend folder
         run: cd backend
-      - uses: jensvog/pythonanywhere-webapp-reload-action@v1
-        with:
-          host: ecuacilismoApp.mysql.pythonanywhere-services.com
-          username: ecuacilismoApp
-          api-token: 1ea811d29d67d939659a3c9c99ec49cd1e4c5658
-          domain-name: ecuacilismoApp.mysql
+      # - uses: jensvog/pythonanywhere-webapp-reload-action@v1
+      #   with:
+      #     host: ecuacilismoApp.mysql.pythonanywhere-services.com
+      #     username: ecuacilismoApp
+      #     api-token: 1ea811d29d67d939659a3c9c99ec49cd1e4c5658
+      #     domain-name: ecuacilismoApp.mysql
 
   deploy-frontend:
     needs: [checkout-repository]
@@ -43,13 +43,12 @@ jobs:
         with:
           name: ecuaciclismo
           path: /home/runner/work/ecua-ciclismo/ecua-ciclismo
-      - name: Open frontend folder
-        run: cd frontend
       - name: Ejecutar reglas de eslint
-        run: yarn eslint
-      - name: Install Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 14
-      - name: Install Dependencies
-        run: yarn install
+        run: cd frontend;  yarn eslint
+
+      # - name: Install Node
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: 14
+      # - name: Install Dependencies
+      #   run: yarn install
