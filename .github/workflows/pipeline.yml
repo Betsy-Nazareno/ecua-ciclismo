@@ -15,6 +15,7 @@ jobs:
           fetch-depth: 0
       - uses: jensvog/pythonanywhere-webapp-reload-action@v1
         with:
+          host: www.pythonanyhwere.com
           username: ecuaciclismoApp
           api-token: 508bea321c8ab2f92fca799c33bf58335c6f9038
           domain-name: ecuacilismoApp.pythonanywhere.com
