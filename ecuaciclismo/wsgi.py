@@ -1,5 +1,5 @@
 """
-WSGI config for comextweb_arancel project.
+WSGI config for ecuaciclismo project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

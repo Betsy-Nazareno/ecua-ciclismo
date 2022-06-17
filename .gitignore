@@ -29,7 +29,7 @@ db.sqlite3
 
 frontend/node_modules
 
-#/comextweb_arancel/apps/frontend/vue.config.js
-#/comextweb_arancel/apps/frontend/package-lock.json
+#/ecuaciclismo/apps/frontend/vue.config.js
+#/ecuaciclismo/apps/frontend/package-lock.json
 #
-#/comextweb_arancel/apps/frontend/src/assets/utils/rutas.json
+#/ecuaciclismo/apps/frontend/src/assets/utils/rutas.json

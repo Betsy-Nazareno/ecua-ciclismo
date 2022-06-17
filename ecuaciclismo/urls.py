@@ -1,4 +1,4 @@
-"""comextweb_arancel URL Configuration
+"""ecuaciclismo URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.2/topics/http/urls/
@@ -19,9 +19,9 @@ from django.urls import path,re_path
 from django.conf.urls import include, url
 from django.views.static import serve
 
-# from comextweb_arancel.apps.backend.api.api_router import *
-# from comextweb_arancel.apps.backend.api.api_router import router
-# from comextweb_arancel.apps.backend.api.usuario.views import CustomAuthToken, Logout
+from ecuaciclismo.apps.backend.api.api_router import *
+from ecuaciclismo.apps.backend.api.api_router import router
+from ecuaciclismo.apps.backend.api.usuario.views import CustomAuthToken, Logout
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,9 +32,9 @@ urlpatterns = [
     # url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 
     #api
-    # url('^api/', include(router)),
-    # url('^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
-    # url('^api/token-auth/', CustomAuthToken.as_view()),
-    # url(r'^api/logout/', Logout.as_view()),
+    url('^api/', include(router)),
+    url('^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url('^api/token-auth/', CustomAuthToken.as_view()),
+    url(r'^api/logout/', Logout.as_view()),
     # url(r'^auth/', include('rest_framework_social_oauth2.urls')),
 ]

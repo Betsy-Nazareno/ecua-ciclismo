@@ -43,12 +43,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
 
-    # 'comextweb_arancel.base',
-    # 'comextweb_arancel.helpers',
-    #
-    # 'comextweb_arancel.apps.backend.usuario',
-    # 'comextweb_arancel.apps.backend.carga',
-    # 'comextweb_arancel.apps.backend.aranceles',
+    'ecuaciclismo.base',
+    'ecuaciclismo.helpers',
+
+    'ecuaciclismo.apps.backend.usuario',
+    'ecuaciclismo.apps.backend.consejodia',
+    'ecuaciclismo.apps.backend.publicacion',
+    'ecuaciclismo.apps.backend.ruta',
 ]
 
 MIDDLEWARE = [

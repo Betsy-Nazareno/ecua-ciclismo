@@ -4,7 +4,7 @@ from django.db import models
 from rest_framework.authtoken.admin import User
 
 from ecuaciclismo.apps.backend.ruta.models import Etiqueta, Archivo
-from ecuaciclismo.apps.helpers.models import ModeloBase
+from ecuaciclismo.helpers.models import ModeloBase
 
 
 class Publicacion(ModeloBase):

@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 from rest_framework.authtoken.admin import User
 
-from ecuaciclismo.apps.helpers.models import ModeloBase
+from ecuaciclismo.helpers.models import ModeloBase
 
 
 class ConsejoDia(ModeloBase):

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE document SYSTEM "rml_1_0.dtd">
+<document filename="{{ nombre_archivo }}">
+<template pageSize="(21cm, 29.7cm)" leftMargin="1cm" rightMargin="1cm" topMargin="1.5cm" bottomMargin="1.5cm" title="{{ nombre_archivo }}">
+	<pageTemplate id="main">
+			<frame id="first" x1="1cm" y1="1.5cm" width="19cm" height="24.5cm"  />
+			<pageGraphics>
+				<!-- Header -->
+				{% if request.header_rml_logo != 'ocultar' %}
+					{% if 1 %}
+						{% if empresa %}
+							<image file="{{ render_static_root }}media/{{ request.empresa.PATH_SAVE }}{{ empresa.logo }}" x="1.3cm" y="27.7cm" height="1.5cm" />
+						{% else %}
+							{% if request.empresa and request.empresa.logo %}
+								 <image file="{{ render_static_root }}media/{{ request.empresa.PATH_SAVE }}{{ request.empresa.logo }}" x="1.3cm" y="27.7cm" height="1.5cm" mask="auto"/>
+							{% endif %}
+						{% endif %}
+					{% endif %}
+				{% endif %}
+				<setFont name="Helvetica" size="7"/>
+				{% if request.header_rml_data_impresion != 'ocultar' %}
+					<drawRightString x="20cm" y="27.8cm">Fecha: {% now "d/m/Y H:i:s" %}</drawRightString>
+					<setFont name="Helvetica-Bold" size="8"/>
+					<drawRightString x="20cm" y="28.6cm">{{ request.empresa.razon_social|upper }}</drawRightString>
+				{% endif %}
+				<setFont name="Helvetica" size="7"/>
+				<lineMode width="0.5"/>
+				{% if request.header_rml_linea != 'ocultar' %}
+					<lines>1.1cm 27.6cm 20cm 27.6cm</lines>
+				{% endif %}
+				<!-- /Header -->
+
+				<!-- Footer -->
+				{% if request.footer_linea_rml != 'ocultar' %}
+					<lines>1.1cm 1.2cm 20cm 1.2cm</lines>
+				{% endif %}
+				{% if request.footer_link_rml != 'ocultar' %}
+					<drawString x="1.1cm" y="0.8cm">www.signathor.com</drawString>
+					<qrCode height="2cm" width="2cm" value="www.google.com"></qrCode>
+				{% endif %}
+				{% if request.footer_numpaginas_rml != 'ocultar' %}
+					<drawRightString x="20cm" y="0.8cm"><pageNumber/>{% if numpaginas %}/{{ numpaginas }}{% endif %}</drawRightString>
+				{% endif %}
+				<!-- Fin de Footer -->
+
+				<!-- Titulo del documento -->
+				<setFont name="Helvetica-Bold" size="12"/>
+				<drawCentredString x="10.5cm" y="26.4cm">{{ titulo }}</drawCentredString>
+				<!-- Fin de Titulo de documento -->
+			</pageGraphics>
+	</pageTemplate>
+</template>
+<stylesheet>
+	<paraStyle name="normal" fontName="Helvetica" fontSize="8" alignment="LEFT"/>
+	<paraStyle name="formula" fontName="Helvetica-Oblique" fontSize="7" alignment="LEFT"/>
+	<paraStyle name="identado" fontName="Helvetica" leftIndent="0.8cm" fontSize="8" alignment="LEFT"/>
+	<paraStyle name="centrado" fontName="Helvetica" fontSize="8" alignment="CENTER"/>
+	<paraStyle name="derecha" fontName="Helvetica" fontSize="8" alignment="RIGHT"/>
+	<paraStyle name="derechaformula" fontName="Helvetica-Oblique" fontSize="7" alignment="RIGHT"/>
+	<paraStyle name="nomalsmall_text" fontName="Helvetica" fontSize="7"  />
+	<paraStyle name="nomalsmall_centrado" fontName="Helvetica" fontSize="7" alignment="CENTER"/>
+	<paraStyle name="nomalsmall_derecha" fontName="Helvetica" fontSize="7" alignment="RIGHT" />
+	<paraStyle name="smalltext" fontName="Helvetica" fontSize="6"  />
+	<paraStyle name="smallderecha" fontName="Helvetica" fontSize="6" alignment="RIGHT" />
+	<paraStyle name="subtitulo" fontName="Helvetica-BoldOblique" fontSize="10" alignment="LEFT"/>
+	<paraStyle name="normalfondo" fontName="Helvetica" fontSize="8" alignment="LEFT"/>
+
+    <paraStyle name="certificadoTitulo" fontName="Helvetica-Bold" fontSize="10" alignment="LEFT"/>
+
+	<paraStyle name="certificadoTexto" fontName="Helvetica" fontSize="8" alignment="RIGHT"/>
+	<paraStyle name="certificadoSubtitulo" fontName="Helvetica-Bold" fontSize="8" alignment="LEFT"/>
+
+	<paraStyle name="certificadoTextoTabla" fontName="Helvetica" fontSize="8" alignment="LEFT"/>
+	<paraStyle name="certificadoTituloTabla" fontName="Helvetica-Bold" fontSize="8" alignment="LEFT"/>
+
+	<blockTableStyle id="default">
+		<blockFont name="Helvetica" size="8" />
+		<blockAlignment value="LEFT" />
+		<lineStyle kind="GRID" colorName="black" thickness="0.9" />
+		<blockValign value="TOP" />
+		<blockTopPadding length="2.5" />
+		<blockBottomPadding length="0" />
+		{% if 1 %}<blockBackground colorName="#c4c2c2" start="0,0" stop="-1,0"/>{% endif %}
+	</blockTableStyle>
+
+	<blockTableStyle id="default2">
+		<blockFont name="Helvetica" fontSize="4"/>
+		<blockAlignment value="LEFT" />
+		<lineStyle kind="GRID" colorName="black" thickness="0.2" />
+		<blockValign value="TOP" />
+		<blockTopPadding length="2.5" />
+		<blockBottomPadding length="0" />
+		{% if 1 %}<blockBackground colorName="#c4c2c2" start="0,0" stop="-1,0"/>{% endif %}
+	</blockTableStyle>
+
+	<blockTableStyle id="defaultBorder">
+		<blockFont name="Helvetica" size="8" />
+		<blockAlignment value="LEFT" />
+		<lineStyle kind="GRID" colorName="black" thickness="0.9" />
+		<blockValign value="TOP" />
+		<blockTopPadding length="2.5" />
+		<blockBottomPadding length="0" />
+		<blockBackground colorName="#f2f2f2" start="0,0" stop="0,-1"/>
+	</blockTableStyle>
+	<blockTableStyle id="tabla_borde_de_2">
+		<blockFont name="Helvetica" size="8" />
+		<blockAlignment value="LEFT" />
+		<lineStyle kind="GRID" colorName="black" thickness="0.9" />
+		<blockValign value="TOP" />
+		<blockTopPadding length="2.5" />
+		<blockBottomPadding length="0" />
+		<blockBackground colorName="#f2f2f2" start="0,0" stop="0,-1"/>
+		<blockBackground colorName="#f2f2f2" start="2,0" stop="2,-1"/>
+	</blockTableStyle>
+	<blockTableStyle id="tabla_borde_de_8">
+		<blockFont name="Helvetica" size="8" />
+		<blockAlignment value="LEFT" />
+		<lineStyle kind="GRID" colorName="black" thickness="0.9" />
+		<blockValign value="TOP" />
+		<blockTopPadding length="2.5" />
+		<blockBottomPadding length="0" />
+		<blockBackground colorName="#f2f2f2" start="0,0" stop="0,-1"/>
+		<blockBackground colorName="#f2f2f2" start="2,0" stop="2,-1"/>
+		<blockBackground colorName="#f2f2f2" start="4,0" stop="4,-1"/>
+		<blockBackground colorName="#f2f2f2" start="6,0" stop="6,-1"/>
+		<blockBackground colorName="#f2f2f2" start="8,0" stop="8,-1"/>
+	</blockTableStyle>
+	<blockTableStyle id="sinborde">
+		<blockFont name="Helvetica" size="8" />
+		<blockAlignment value="LEFT" />
+		<blockValign value="TOP" />
+		<blockTopPadding length="2.5" />
+		<blockBottomPadding length="0" />
+	</blockTableStyle>
+	<blockTableStyle id="soloborde">
+		<blockFont name="Helvetica" size="8" />
+		<blockAlignment value="LEFT" />
+		<lineStyle kind="GRID" colorName="black" thickness="0.9" />
+		<blockValign value="TOP" />
+		<blockTopPadding length="2.5" />
+		<blockBottomPadding length="0" />
+	</blockTableStyle>
+	<blockTableStyle id="temp001">
+		<blockAlignment value="LEFT"/>
+		<blockFont name="Helvetica-Oblique"/>
+		<lineStyle kind="GRID" colorName="black"/>
+		<lineStyle kind="OUTLINE" colorName="black" thickness="2"/>
+		<blockBackground colorName="pink" start="0,0" stop="-1,0"/>
+		<blockBackground colorName="yellow" start="0,0" stop="-1,0"/>
+	</blockTableStyle>
+	{% block stylesheet %}
+	{% endblock %}
+</stylesheet>
+<story>
+	{% block story %}
+	{% endblock %}
+</story>
+</document>
