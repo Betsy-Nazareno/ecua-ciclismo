@@ -10,7 +10,7 @@ def update(request):
         stored on PythonAnywhere in the git.Repo() as parameter.
         Here the name of my directory is "test.pythonanywhere.com"
         '''
-        #HOLA jdfjkafjsdakfjsdddfff
+        #HOLA jdfjkafjsdakfjsdddfff fff
         repo = git.Repo("Betsy-Nazareno/ecua-ciclismo/ecuaciclismo")
         origin = repo.remotes.origin
         origin.pull()
