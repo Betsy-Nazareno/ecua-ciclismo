@@ -61,8 +61,6 @@ class DetalleUsuarioViewSet(viewsets.ModelViewSet):
 
 
 class CustomAuthToken(ObtainAuthToken):
-    #HOLA
-    #OTRO COMENTARIO
     def post(self, request, *args, **kwargs):
         print(request.data)
         usuario = get_or_none(User,username= request.data.get("user").get("username"))
