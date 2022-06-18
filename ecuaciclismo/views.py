@@ -11,7 +11,7 @@ def update(request):
         Here the name of my directory is "test.pythonanywhere.com"
         '''
         #HOLA jdfjkafjsdakfjsdddfff fff
-        repo = git.Repo("Betsy-Nazareno/ecua-ciclismo/ecuaciclismo")
+        repo = git.Repo("ecua-ciclismo/")
         origin = repo.remotes.origin
         origin.pull()
         return HttpResponse("Updated code on PythonAnywhere")
