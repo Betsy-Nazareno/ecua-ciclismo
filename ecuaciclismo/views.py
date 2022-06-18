@@ -16,7 +16,7 @@ def update(request):
         
         # repo = git.Repo("ecua-ciclismo/")
         # origin = repo.remotes.origin
-        # origin.pull()
+        # origin.pull() 
 
         g = git.Git('ecua-ciclismo/')
         g.pull('origin','main')
