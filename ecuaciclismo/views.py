@@ -14,12 +14,12 @@ def update(request):
         '''
         logging.basicConfig(level=logging.INFO)
         
-        repo = git.Repo("ecua-ciclismo/")
-        origin = repo.remotes.origin
-        origin.pull()
+        # repo = git.Repo("ecua-ciclismo/")
+        # origin = repo.remotes.origin
+        # origin.pull()
 
-        # g = git.Git('ecua-ciclismo/')
-        # g.pull('origin','branch-name')
+        g = git.Git('ecua-ciclismo/')
+        g.pull('origin','main')
        
         return HttpResponse("Updated code on PythonAnywhere")
     else:
