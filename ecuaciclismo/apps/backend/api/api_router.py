@@ -20,7 +20,6 @@ router.register(r'usuario', UsuarioViewSet)
 router.register(r'detalleusuario', DetalleUsuarioViewSet)
 router.register(r'consejodia', ConsejoDiaViewSet)
 
-
 router.register(r'recuperar_credenciales', UsuarioRecuperarCredencialesViewSet)
 
 

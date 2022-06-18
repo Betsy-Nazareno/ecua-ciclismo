@@ -19,13 +19,14 @@ from django.urls import path,re_path
 from django.conf.urls import include, url
 from django.views.static import serve
 
+from ecuaciclismo import views
 from ecuaciclismo.apps.backend.api.api_router import *
 from ecuaciclismo.apps.backend.api.api_router import router
 from ecuaciclismo.apps.backend.api.usuario.views import CustomAuthToken, Logout
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-
+    path("update_server/", views.update, name="update"),
     # url(r'^(?P<application>[a-z1234567890/_-]+)/(?P<folder>media|erplib/media)/$', mediaurl, name='mediaurl'),
     # url(r'^(?P<application>[a-z1234567890/_-]+)/(?P<folder>media|erplib/media)/(?P<path>.*)$', mediaurl, name='mediaurl'),
     # url(r'^media/$', mediaurl),
