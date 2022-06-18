@@ -11,8 +11,13 @@ def update(request):
         Here the name of my directory is "test.pythonanywhere.com"
         '''
         repo = git.Repo("ecua-ciclismo/")
-        origin = repo.remotes.origin
-        origin.pull()
+        #origin = repo.remotes.origin
+        #origin.pull()
+        repo.config_writer()
+        head = repo.heads[0]
+        head.checkout(force=True)
+        remo = repo.remote()
+        remo.pull()
         return HttpResponse("Updated code on PythonAnywhere")
     else:
         return HttpResponse("Couldn't update the code on PythonAnywhere")
