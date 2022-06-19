@@ -2,6 +2,7 @@
 #django
 # from django.db.models.deletion import Collector
 import datetime
+import uuid
 
 from django.conf import settings
 from django.contrib.admin.utils import NestedObjects
@@ -13,9 +14,14 @@ from django.db import models
 
 
 class ModeloBase(models.Model):
-    """ Modelo base para todos los modelos del comextweb """
+    """ Modelo base para todos los modelos del ecuaciclismo """
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     ultimo_cambio = models.DateTimeField(auto_now=True)
+    token = models.CharField(max_length=100, null=True)
+
+    def generar_token(self):
+        token = str(uuid.uuid4())
+        return token
 
     # def as_data(self):
     #     from ecuaciclismo.helpers.tools_utilities import remove_keys_endswidth
@@ -66,6 +72,11 @@ class ModeloBase(models.Model):
     #         # if obj_db.ultimo_cambio > self.ultimo_cambio:
     #         #     raise ApplicationError(u"El registro ha sido modificado por otra persona, por favor intente nuevamente.")
     #     models.Model.save(self)
+
+    def save(self, **kwargs):
+        if self.token is None or self.token == '':
+            self.token = self.generar_token()
+        models.Model.save(self)
 
     class Meta:
         abstract = True
