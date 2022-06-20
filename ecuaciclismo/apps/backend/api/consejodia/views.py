@@ -18,10 +18,9 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         return queryset
 
-    @action(detail=False, url_path='get_consejos_dia', methods=['get'], permission_classes=[permissions.AllowAny])
+    @action(detail=False, url_path='get_consejos_dia', methods=['get'])
     def get_consejos_dia(self, request):
         try:
-            #data = request.query_params
             data = ConsejoDia.get_consejos_del_dia()
 
             return jsonx({'status':'success', 'message':'Información obtenida', 'data': data})
@@ -30,14 +29,17 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 
-    @action(detail=False, url_path='new_consejo_dia', methods=['post'], permission_classes=[permissions.AllowAny])
+    @action(detail=False, url_path='new_consejo_dia', methods=['post'])
     def new_consejo_dia(self, request):
         try:
             data = request.data
             consejo_dia = ConsejoDia()
             consejo_dia.informacion = data['informacion']
             consejo_dia.imagen = data['imagen'] #GESTIONAR CON API
-            consejo_dia.user = get_or_none(User,id=1) #Quemado de momento
+            #Generar token
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            consejo_dia.user = token.user
             consejo_dia.save()
 
             return jsonx({'status': 'success', 'message': 'Consejo del día guardado con éxito.'})
