@@ -15,7 +15,7 @@ class ConsejoDia(ModeloBase):
     def get_consejos_del_dia(cls):
         cursor = connection.cursor()
         sql = '''
-            SELECT id, informacion, imagen, user_id FROM `consejodia_consejodia`
+            SELECT token, informacion, imagen, user_id FROM `consejodia_consejodia`
         '''
 
         cursor.execute(sql)
