@@ -36,13 +36,47 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
             consejo_dia = ConsejoDia()
             consejo_dia.informacion = data['informacion']
             consejo_dia.imagen = data['imagen'] #GESTIONAR CON API
-            #Generar token
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             consejo_dia.user = token.user
             consejo_dia.save()
 
             return jsonx({'status': 'success', 'message': 'Consejo del día guardado con éxito.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='update_consejo_dia', methods=['post'])
+    def update_consejo_dia(self, request):
+        try:
+            data = request.data
+            if data['token'] is not None and data['token'] != '':
+                consejo_dia = ConsejoDia.objects.get(token=data['token'])
+                consejo_dia.informacion = data['informacion']
+                consejo_dia.imagen = data['imagen']  # GESTIONAR CON API
+                from rest_framework.authtoken.models import Token
+                token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+                consejo_dia.user = token.user
+                consejo_dia.save()
+                return jsonx({'status': 'success', 'message': 'Consejo del día actualizado con éxito.'})
+            else:
+                return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='delete_consejo_dia', methods=['delete'])
+    def delete_consejo_dia(self, request):
+        try:
+            data = request.data
+            if data['token'] is not None and data['token'] != '':
+                consejo_dia = ConsejoDia.objects.get(token=data['token'])
+                consejo_dia.delete()
+                return jsonx({'status': 'success', 'message': 'Consejo del día eliminado con éxito.'})
+            else:
+                return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
