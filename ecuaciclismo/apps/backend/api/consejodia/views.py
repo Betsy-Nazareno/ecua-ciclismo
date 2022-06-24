@@ -35,7 +35,7 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
             data = request.data
             consejo_dia = ConsejoDia()
             consejo_dia.informacion = data['informacion']
-            consejo_dia.imagen = data['imagen'] #GESTIONAR CON API
+            consejo_dia.imagen = data['imagen']
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             consejo_dia.user = token.user
