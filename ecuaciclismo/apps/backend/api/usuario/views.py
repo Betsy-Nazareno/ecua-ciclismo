@@ -53,6 +53,34 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
 
+    @action(detail=False, url_path='crear_usuario', methods=['post'])
+    def crear_usuario(self, request):
+        transaction.set_autocommit(False)
+        try:
+            data = request.data
+            from django.contrib.auth.models import User
+            user = User.objects.create_user(username=data['usuario'],
+                                            email=data['email'],
+                                            password=data['password'],
+                                            first_name=data['nombre'],
+                                            last_name=data['apellido']) #username, email, password obligatorio en el form
+            user.save()
+            detalle_usuario = DetalleUsuario()
+            detalle_usuario.usuario = user
+            detalle_usuario.save()
+            transaction.commit()
+            return jsonx({'status': 'success', 'message': 'Se ha creado el usuario con éxito.'})
+
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
 
 class DetalleUsuarioViewSet(viewsets.ModelViewSet):
     serializer_class = DetalleUsuarioSerializer
