@@ -53,7 +53,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
 
-    @action(detail=False, url_path='crear_usuario', methods=['post'])
+    @action(detail=False, url_path='crear_usuario', methods=['post'], permission_classes=[AllowAny])
     def crear_usuario(self, request):
         transaction.set_autocommit(False)
         try:
