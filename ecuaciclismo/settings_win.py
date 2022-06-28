@@ -181,7 +181,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-SERVER_EMAIL = 'notificaciones.comextweb@gmail.com'
+SERVER_EMAIL = 'ecuaciclismo.appmovil@gmail.com'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -189,8 +189,8 @@ EMAIL_SUBJECT_PREFIX = '[Aranceles-DEV]'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'notificaciones.comextweb@gmail.com'
-EMAIL_HOST_PASSWORD = 'dqffhfxcsbgrhnoh'
+EMAIL_HOST_USER = 'ecuaciclismo.appmovil@gmail.com'
+EMAIL_HOST_PASSWORD = 'zccjjgblxbhslecf'
 
 ENVIAR_NOTIFICACIONES_EMAIL_GLOBAL = True
 
