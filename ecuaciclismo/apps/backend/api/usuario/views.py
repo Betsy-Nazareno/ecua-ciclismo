@@ -90,7 +90,6 @@ class DetalleUsuarioViewSet(viewsets.ModelViewSet):
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        print(request.data)
         usuario = get_or_none(User,username= request.data.get("user").get("username"))
         if usuario:
             if not usuario.is_active:
@@ -101,6 +100,7 @@ class CustomAuthToken(ObtainAuthToken):
             serializer.is_valid(raise_exception=True)
         except:
             return HttpResponse(status=400, content=json.dumps({"non_field_errors":["No puede iniciar sesión con las credenciales proporcionadas."]}), content_type="application/json")
+        detalle_usuario = get_or_none(DetalleUsuario, usuario=usuario)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
         response = {
@@ -114,6 +114,7 @@ class CustomAuthToken(ObtainAuthToken):
             # 'plan': Plan.obtener_plan(request.data['plan'] if request.data.get('plan') != None else None),
             'is_staff': user.is_staff,
             'is_superuser': user.is_superuser,
+            'admin': detalle_usuario.admin,
             # 'avatar': settings.URL_DJANGO_SERVER + reverse(servir_imagen_perfil, args=[user.detalleusuario.token_publico]),
             # 'socialMedia': False
         }
