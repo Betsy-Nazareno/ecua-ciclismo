@@ -31,7 +31,7 @@ class ComentarioRuta(ModeloBase):
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
     comentario_texto = models.TextField()
 
-class Etiqueta(ModeloBase):
+class EtiquetaRuta(ModeloBase):
     nombre = models.TextField()
     descripcion = models.TextField()
 
@@ -42,7 +42,7 @@ class Archivo(ModeloBase):
 
 class DetalleEtiquetaRuta(ModeloBase):
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
-    etiqueta = models.ForeignKey(Etiqueta, on_delete=models.PROTECT)
+    etiqueta = models.ForeignKey(EtiquetaRuta, on_delete=models.PROTECT)
 
 class DetalleArchivoRuta(ModeloBase):
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
