@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, connection
 
 from ecuaciclismo.helpers.models import ModeloBase
 
@@ -19,9 +19,29 @@ class DetalleUsuario(ModeloBase):
     nivel = models.IntegerField(default=0)
     foto = models.TextField(null=True)
     admin = models.BooleanField(default=False)
+    token_notificacion = models.TextField(null=True)
 
     def __init__(self, *args, **kwargs):
         super(DetalleUsuario, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def token_notificacion_users(cls, admin):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT detalle_usuario.token_notificacion
+                FROM usuario_detalleusuario AS detalle_usuario
+                WHERE detalle_usuario.admin = 
+            ''' + admin
+
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
 
 class DetalleBicicleta(ModeloBase):
     usuario = models.ForeignKey(User, on_delete=models.PROTECT)

@@ -67,9 +67,44 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             user.save()
             detalle_usuario = DetalleUsuario()
             detalle_usuario.usuario = user
+            detalle_usuario.token_notificacion = data['token_notificacion']
             detalle_usuario.save()
             transaction.commit()
             return jsonx({'status': 'success', 'message': 'Se ha creado el usuario con éxito.'})
+
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='token_notificacion_users', methods=['get'])
+    def token_notificacion_users(self, request):
+        try:
+            data = DetalleUsuario.token_notificacion_users(admin='0')
+
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='token_notificacion_admins', methods=['get'])
+    def token_notificacion_admins(self, request):
+        try:
+            data = DetalleUsuario.token_notificacion_users(admin='1')
+
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
 
         except ApplicationError as msg:
             transaction.rollback()
