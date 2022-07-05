@@ -65,7 +65,7 @@ class Novedad(ModeloBase):
     def get_novedades(cls):
         cursor = connection.cursor()
         sql = '''
-            SELECT novedad.titulo, novedad.descripcion, novedad.descripcion_corta, novedad.token, novedad.nombre, novedad.celular, novedad.direccion
+            SELECT novedad.titulo, novedad.descripcion, novedad.descripcion_corta, novedad.imagen,novedad.token, novedad.nombre, novedad.celular, novedad.direccion
             FROM consejodia_novedad AS novedad
         '''
 
