@@ -137,25 +137,25 @@ class CustomAuthToken(ObtainAuthToken):
             if not usuario.is_active:
                 return HttpResponse(status=400, content=json.dumps({"non_field_errors": ["La cuenta no ha sido activada."]}), content_type="application/json")
 
-        serializer = self.serializer_class(data=request.data['user'], context={'request': request})
-        try:
-            serializer.is_valid(raise_exception=True)
-        except:
-            return HttpResponse(status=400, content=json.dumps({"non_field_errors":["No puede iniciar sesión con las credenciales proporcionadas."]}), content_type="application/json")
+        # serializer = self.serializer_class(data=request.data['email'], context={'request': request})
+        # try:
+        #     serializer.is_valid(raise_exception=True)
+        # except:
+        #     return HttpResponse(status=400, content=json.dumps({"non_field_errors":["No puede iniciar sesión con las credenciales proporcionadas."]}), content_type="application/json")
         detalle_usuario = get_or_none(DetalleUsuario, usuario=usuario)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
+        # user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=usuario)
         response = {
             'token': token.key,
             # 'token_publico': user.detalleusuario.token_publico, #para no hacer visible el ID se usa token de DetalleUsuario
             # 'id': str(user.id),
-            'username': user.username,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email,
+            'username': usuario.username,
+            'first_name': usuario.first_name,
+            'last_name': usuario.last_name,
+            'email': usuario.email,
             # 'plan': Plan.obtener_plan(request.data['plan'] if request.data.get('plan') != None else None),
-            'is_staff': user.is_staff,
-            'is_superuser': user.is_superuser,
+            'is_staff': usuario.is_staff,
+            'is_superuser': usuario.is_superuser,
             'admin': detalle_usuario.admin,
             'foto': detalle_usuario.foto,
             'celular': detalle_usuario.celular,
