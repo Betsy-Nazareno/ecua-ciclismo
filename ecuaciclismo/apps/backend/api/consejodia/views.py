@@ -31,6 +31,17 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 
+    @action(detail=False, url_path='get_historico_consejos_dia', methods=['get'])
+    def get_historico_consejos_dia(self, request):
+        try:
+            data = ConsejoDia.get_historico_consejos_del_dia()
+
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
     @action(detail=False, url_path='new_consejo_dia', methods=['post'])
     def new_consejo_dia(self, request):
         try:
