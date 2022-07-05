@@ -67,7 +67,14 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             user.save()
             detalle_usuario = DetalleUsuario()
             detalle_usuario.usuario = user
-            detalle_usuario.token_notificacion = data['token_notificacion']
+            if request.data.get('foto'):
+                detalle_usuario.foto = data['foto']
+            if request.data.get('celular'):
+                detalle_usuario.celular = data['celular']
+            if request.data.get('genero'):
+                detalle_usuario.genero = data['genero']
+            if request.data.get('token_notificacion'):
+                detalle_usuario.token_notificacion = data['token_notificacion']
             detalle_usuario.save()
             transaction.commit()
             return jsonx({'status': 'success', 'message': 'Se ha creado el usuario con éxito.'})
@@ -125,7 +132,7 @@ class DetalleUsuarioViewSet(viewsets.ModelViewSet):
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        usuario = get_or_none(User,username= request.data.get("user").get("username"))
+        usuario = get_or_none(User,email= request.data.get("user").get("email"))
         if usuario:
             if not usuario.is_active:
                 return HttpResponse(status=400, content=json.dumps({"non_field_errors": ["La cuenta no ha sido activada."]}), content_type="application/json")
@@ -150,6 +157,9 @@ class CustomAuthToken(ObtainAuthToken):
             'is_staff': user.is_staff,
             'is_superuser': user.is_superuser,
             'admin': detalle_usuario.admin,
+            'foto': detalle_usuario.foto,
+            'celular': detalle_usuario.celular,
+            'genero': detalle_usuario.genero,
             # 'avatar': settings.URL_DJANGO_SERVER + reverse(servir_imagen_perfil, args=[user.detalleusuario.token_publico]),
             # 'socialMedia': False
         }

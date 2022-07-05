@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import viewsets
 from rest_framework.authtoken.admin import User
 from rest_framework.decorators import action
@@ -82,6 +84,22 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 
+    @action(detail=False, url_path='republicar_consejo_dia', methods=['post'])
+    def republicar_consejo_dia(self, request):
+        try:
+            data = request.data
+            if data['token'] is not None and data['token'] != '':
+                consejo_dia = ConsejoDia.objects.get(token=data['token'])
+                consejo_dia.ultimo_cambio = datetime.now()
+                consejo_dia.save()
+                return jsonx({'status': 'success', 'message': 'Consejo del día republicado con éxito.'})
+            else:
+                return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
     @action(detail=False, url_path='get_novedades', methods=['get'])
     def get_novedades(self, request):
         try:
@@ -102,9 +120,12 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
             novedad.descripcion = data['descripcion']
             novedad.descripcion_corta = data['descripcion_corta']
             novedad.imagen = data['imagen']
-            from rest_framework.authtoken.models import Token
-            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            novedad.user = token.user
+            if request.data.get('nombre'):
+                novedad.nombre = data['nombre']
+            if request.data.get('celular'):
+                novedad.celular = data['celular']
+            if request.data.get('direccion'):
+                novedad.direccion = data['direccion']
             novedad.save()
 
             return jsonx({'status': 'success', 'message': 'Novedad guardada con éxito.'})
@@ -123,9 +144,12 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
                 novedad.descripcion = data['descripcion']
                 novedad.descripcion_corta = data['descripcion_corta']
                 novedad.imagen = data['imagen']
-                from rest_framework.authtoken.models import Token
-                token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-                novedad.user = token.user
+                if request.data.get('nombre'):
+                    novedad.nombre = data['nombre']
+                if request.data.get('celular'):
+                    novedad.celular = data['celular']
+                if request.data.get('direccion'):
+                    novedad.direccion = data['direccion']
                 novedad.save()
                 return jsonx({'status': 'success', 'message': 'Novedad actualizada con éxito.'})
             else:
