@@ -30,3 +30,30 @@ class ConsejoDia(ModeloBase):
 
         cursor.close()
         return dic
+
+class Novedad(ModeloBase):
+    titulo = models.TextField()
+    descripcion = models.TextField()
+    descripcion_corta = models.TextField()
+    imagen = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    @classmethod
+    def get_novedades(cls):
+        cursor = connection.cursor()
+        sql = '''
+            SELECT novedad.titulo, novedad.descripcion, novedad.descripcion, novedad.descripcion_corta, novedad.token, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.celular
+            FROM consejodia_novedad AS novedad
+            LEFT JOIN `auth_user` AS usuario ON novedad.user_id = usuario.id
+            LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON novedad.user_id = detalle_usuario.usuario_id
+        '''
+
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic

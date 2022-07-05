@@ -3,7 +3,7 @@ from rest_framework.authtoken.admin import User
 from rest_framework.decorators import action
 
 from ecuaciclismo.apps.backend.api.consejodia.serializers import ConsejoDiaSerializer
-from ecuaciclismo.apps.backend.consejodia.models import ConsejoDia
+from ecuaciclismo.apps.backend.consejodia.models import ConsejoDia, Novedad
 from ecuaciclismo.helpers.jsonx import jsonx
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
 from rest_framework import permissions
@@ -75,6 +75,74 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
                 consejo_dia = ConsejoDia.objects.get(token=data['token'])
                 consejo_dia.delete()
                 return jsonx({'status': 'success', 'message': 'Consejo del día eliminado con éxito.'})
+            else:
+                return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='get_novedades', methods=['get'])
+    def get_novedades(self, request):
+        try:
+            data = Novedad.get_novedades()
+
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='new_novedad', methods=['post'])
+    def new_novedad(self, request):
+        try:
+            data = request.data
+            novedad = Novedad()
+            novedad.titulo = data['titulo']
+            novedad.descripcion = data['descripcion']
+            novedad.descripcion_corta = data['descripcion_corta']
+            novedad.imagen = data['imagen']
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            novedad.user = token.user
+            novedad.save()
+
+            return jsonx({'status': 'success', 'message': 'Novedad guardada con éxito.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='update_novedad', methods=['post'])
+    def update_novedad(self, request):
+        try:
+            data = request.data
+            if data['token'] is not None and data['token'] != '':
+                novedad = Novedad.objects.get(token=data['token'])
+                novedad.titulo = data['titulo']
+                novedad.descripcion = data['descripcion']
+                novedad.descripcion_corta = data['descripcion_corta']
+                novedad.imagen = data['imagen']
+                from rest_framework.authtoken.models import Token
+                token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+                novedad.user = token.user
+                novedad.save()
+                return jsonx({'status': 'success', 'message': 'Novedad actualizada con éxito.'})
+            else:
+                return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='delete_novedad', methods=['delete'])
+    def delete_novedad(self, request):
+        try:
+            data = request.data
+            if data['token'] is not None and data['token'] != '':
+                novedad = Novedad.objects.get(token=data['token'])
+                novedad.delete()
+                return jsonx({'status': 'success', 'message': 'Novedad eliminada con éxito.'})
             else:
                 return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
         except ApplicationError as msg:
