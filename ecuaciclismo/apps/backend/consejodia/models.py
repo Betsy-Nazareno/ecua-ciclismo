@@ -19,7 +19,7 @@ class ConsejoDia(ModeloBase):
             FROM consejodia_consejodia AS consejo_dia
             LEFT JOIN `auth_user` AS usuario ON consejo_dia.user_id = usuario.id
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON consejo_dia.user_id = detalle_usuario.usuario_id
-            WHERE consejo_dia.ultimo_cambio > CURDATE()
+            WHERE DATE_FORMAT(consejo_dia.ultimo_cambio, '%Y-%m-%d') = CURDATE()
         '''
 
         cursor.execute(sql)
