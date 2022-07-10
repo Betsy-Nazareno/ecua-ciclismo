@@ -78,3 +78,50 @@ class Novedad(ModeloBase):
 
         cursor.close()
         return dic
+
+class Reaccion(ModeloBase):
+    nombre = models.TextField()
+
+    @classmethod
+    def get_reacciones(cls, consejo_dia_id, nombre_reaccion):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT reaccion.nombre, GROUP_CONCAT(reaccion_consejo.user_id) AS usuarios
+                FROM consejodia_reaccion AS reaccion
+                LEFT JOIN `consejodia_detallereaccionconsejo` AS reaccion_consejo ON reaccion.id = reaccion_consejo.reaccion_id
+                WHERE reaccion_consejo.consejo_dia_id = %s AND reaccion.nombre LIKE %s
+                GROUP BY reaccion.nombre
+            '''
+        nombre_reaccion = '%' + nombre_reaccion + '%'
+        params = [consejo_dia_id, nombre_reaccion]
+        cursor.execute(sql, params)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
+    @classmethod
+    def get_all_reacciones(cls):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT reaccion.nombre
+                FROM consejodia_reaccion AS reaccion
+        '''
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
+class DetalleReaccionConsejo(ModeloBase):
+    consejo_dia = models.ForeignKey(ConsejoDia, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    reaccion = models.ForeignKey(Reaccion, on_delete=models.PROTECT)
