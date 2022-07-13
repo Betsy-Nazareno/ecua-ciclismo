@@ -124,6 +124,9 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
             data = request.data
             if data['token'] is not None and data['token'] != '':
                 consejo_dia = ConsejoDia.objects.get(token=data['token'])
+                detalles_reaccion = DetalleReaccionConsejo.objects.filter(consejo_dia=consejo_dia)
+                for detalle_reaccion in detalles_reaccion:
+                    detalle_reaccion.delete()
                 consejo_dia.delete()
                 return jsonx({'status': 'success', 'message': 'Consejo del día eliminado con éxito.'})
             else:
