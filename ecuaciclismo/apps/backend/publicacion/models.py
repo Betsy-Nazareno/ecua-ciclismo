@@ -70,14 +70,13 @@ class DetalleArchivoPublicacion(ModeloBase):
     archivo = models.ForeignKey(Archivo, on_delete=models.PROTECT)
 
     @classmethod
-    def get_archivo_x_publicacion(cls, id):
+    def get_archivo_x_publicacion(cls, id, tipo):
         cursor = connection.cursor()
         sql = '''
-                SELECT archivo.nombre, archivo.extension, archivo.link
-                FROM `publicacion_detallearchivopublicacion` AS archivo_publicacion
-                LEFT JOIN `ruta_archivo` AS archivo ON archivo_publicacion.archivo_id = archivo.id
-                WHERE archivo_publicacion.publicacion_id = ''' + str(id)
-
+        SELECT archivo.link
+        FROM publicacion_detallearchivopublicacion AS archivo_publicacion
+        LEFT JOIN ruta_archivo AS archivo ON archivo_publicacion.archivo_id = archivo.id
+        WHERE archivo_publicacion.publicacion_id = ''' + str(id) + ''' AND archivo.tipo LIKE \'''' + tipo + '''\''''
         cursor.execute(sql)
         dic = []
         detalles = cursor.fetchall()
@@ -86,7 +85,6 @@ class DetalleArchivoPublicacion(ModeloBase):
             dic.append(diccionario)
 
         cursor.close()
-        # print(dic)
         return dic
 
 class DetalleReaccionPublicacion(ModeloBase):

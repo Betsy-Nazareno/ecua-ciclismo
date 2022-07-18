@@ -6,6 +6,7 @@ from ecuaciclismo.apps.backend.api.publicacion.serializers import PublicacionSer
 from ecuaciclismo.apps.backend.consejodia.models import Reaccion
 from ecuaciclismo.apps.backend.publicacion.models import Publicacion, DetalleEtiquetaPublicacion, \
     DetalleArchivoPublicacion
+from ecuaciclismo.apps.backend.ruta.models import Archivo
 from ecuaciclismo.helpers.jsonx import jsonx
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
 from rest_framework import permissions
@@ -45,7 +46,14 @@ class PublicacionViewSet(viewsets.ModelViewSet):
                         diccionario_reaccion[reaccion['nombre']] = dict_detalles
                 publicacion['reacciones'] = diccionario_reaccion
                 publicacion['etiquetas'] = DetalleEtiquetaPublicacion.get_etiqueta_x_publicacion(publicacion['id'])
-                publicacion['multimedia'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'])
+                print('paso x0')
+                publicacion['audios'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'], Archivo.TIPO_AUDIOS)
+                print('paso x1')
+                publicacion['fotos'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'], Archivo.TIPO_FOTOS)
+                print('paso x2')
+                publicacion['adjuntos'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'], Archivo.TIPO_ADJUNTOS)
+                print('paso x3')
+
             return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
