@@ -3,6 +3,7 @@ from django.db import models, connection
 # Create your models here.
 from rest_framework.authtoken.admin import User
 
+from ecuaciclismo.apps.backend.consejodia.models import Reaccion
 from ecuaciclismo.apps.backend.ruta.models import Archivo
 from ecuaciclismo.helpers.models import ModeloBase
 
@@ -67,3 +68,28 @@ class DetalleEtiquetaPublicacion(ModeloBase):
 class DetalleArchivoPublicacion(ModeloBase):
     publicacion = models.ForeignKey(Publicacion, on_delete=models.PROTECT)
     archivo = models.ForeignKey(Archivo, on_delete=models.PROTECT)
+
+    @classmethod
+    def get_archivo_x_publicacion(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT archivo.nombre, archivo.extension, archivo.link
+                FROM `publicacion_detallearchivopublicacion` AS archivo_publicacion
+                LEFT JOIN `ruta_archivo` AS archivo ON archivo_publicacion.archivo_id = archivo.id
+                WHERE archivo_publicacion.publicacion_id = ''' + str(id)
+
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        # print(dic)
+        return dic
+
+class DetalleReaccionPublicacion(ModeloBase):
+    publicacion = models.ForeignKey(Publicacion, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    reaccion = models.ForeignKey(Reaccion, on_delete=models.PROTECT)

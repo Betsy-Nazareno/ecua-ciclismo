@@ -3,7 +3,9 @@ from rest_framework.authtoken.admin import User
 from rest_framework.decorators import action
 
 from ecuaciclismo.apps.backend.api.publicacion.serializers import PublicacionSerializer
-from ecuaciclismo.apps.backend.publicacion.models import Publicacion, DetalleEtiquetaPublicacion
+from ecuaciclismo.apps.backend.consejodia.models import Reaccion
+from ecuaciclismo.apps.backend.publicacion.models import Publicacion, DetalleEtiquetaPublicacion, \
+    DetalleArchivoPublicacion
 from ecuaciclismo.helpers.jsonx import jsonx
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
 from rest_framework import permissions
@@ -21,15 +23,32 @@ class PublicacionViewSet(viewsets.ModelViewSet):
     @action(detail=False, url_path='get_publicaciones', methods=['get'])
     def get_publicaciones(self, request):
         try:
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            id_user = token.user.id
             data = Publicacion.get_publicaciones()
-            for d in data:
-                print(d['id']) #REMOVER ID
-                d['etiquetas'] = DetalleEtiquetaPublicacion.get_etiqueta_x_publicacion(d['id'])
-            print(data)
-
-            return jsonx({'status':'success', 'message':'Información obtenida', 'data': data})
+            reacciones = Reaccion.get_all_reacciones()
+            for publicacion in data:
+                publicacion_get = Publicacion.objects.get(token=publicacion['token'])
+                diccionario_reaccion = {}
+                for reaccion in reacciones:
+                    dict_detalles = {}
+                    resultado = Reaccion.get_reacciones_publicaciones(publicacion_get.id, reaccion['nombre'])
+                    if len(resultado) > 0:
+                        listado_usuarios = list(resultado[0]['usuarios'].split(","))
+                        dict_detalles['usuarios'] = listado_usuarios
+                        dict_detalles['reaccion_usuario'] = str(id_user) in listado_usuarios
+                        diccionario_reaccion[reaccion['nombre']] = dict_detalles
+                    else:
+                        dict_detalles['usuarios'] = None
+                        dict_detalles['reaccion_usuario'] = False
+                        diccionario_reaccion[reaccion['nombre']] = dict_detalles
+                publicacion['reacciones'] = diccionario_reaccion
+                publicacion['etiquetas'] = DetalleEtiquetaPublicacion.get_etiqueta_x_publicacion(publicacion['id'])
+                publicacion['multimedia'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'])
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
         except ApplicationError as msg:
-            return jsonx({'status':'error', 'message': str(msg)})
+            return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 

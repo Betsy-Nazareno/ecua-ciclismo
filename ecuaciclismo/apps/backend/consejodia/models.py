@@ -105,6 +105,28 @@ class Reaccion(ModeloBase):
         return dic
 
     @classmethod
+    def get_reacciones_publicaciones(cls, publicacion_id, nombre_reaccion):
+        cursor = connection.cursor()
+        sql = '''
+                    SELECT reaccion.nombre, GROUP_CONCAT(reaccion_publicacion.user_id) AS usuarios
+                    FROM consejodia_reaccion AS reaccion
+                    LEFT JOIN `publicacion_detallereaccionpublicacion` AS reaccion_publicacion ON reaccion.id = reaccion_publicacion.reaccion_id
+                    WHERE reaccion_publicacion.publicacion_id = %s AND reaccion.nombre LIKE %s
+                    GROUP BY reaccion.nombre
+                '''
+        nombre_reaccion = '%' + nombre_reaccion + '%'
+        params = [publicacion_id, nombre_reaccion]
+        cursor.execute(sql, params)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
+    @classmethod
     def get_all_reacciones(cls):
         cursor = connection.cursor()
         sql = '''
