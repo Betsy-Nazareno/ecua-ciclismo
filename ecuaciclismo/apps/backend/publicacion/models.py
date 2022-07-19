@@ -49,7 +49,7 @@ class DetalleEtiquetaPublicacion(ModeloBase):
     def get_etiqueta_x_publicacion(cls, id):
         cursor = connection.cursor()
         sql = '''
-            SELECT etiqueta.nombre, etiqueta.token, etiqueta.descripcion
+            SELECT etiqueta.token
             FROM `publicacion_detalleetiquetapublicacion` AS etiqueta_publicacion
             LEFT JOIN `publicacion_etiquetapublicacion` AS etiqueta ON etiqueta_publicacion.etiqueta_id = etiqueta.id
             WHERE etiqueta_publicacion.publicacion_id = '''+str(id)
@@ -58,8 +58,8 @@ class DetalleEtiquetaPublicacion(ModeloBase):
         dic = []
         detalles = cursor.fetchall()
         for row in detalles:
-            diccionario = dict(zip([col[0] for col in cursor.description], row))
-            dic.append(diccionario)
+            # diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(row[0])
 
         cursor.close()
         # print(dic)
