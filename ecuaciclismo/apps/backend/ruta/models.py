@@ -36,16 +36,7 @@ class EtiquetaRuta(ModeloBase):
     descripcion = models.TextField()
 
 class Archivo(ModeloBase):
-    TIPO_AUDIOS = 'AUDIOS'
-    TIPO_FOTOS = 'FOTOS'
-    TIPO_ADJUNTOS = 'ADJUNTOS'
-
-    TIPO_CHOICES = (
-        (TIPO_AUDIOS, 'audios'),
-        (TIPO_FOTOS, 'fotos'),
-        (TIPO_ADJUNTOS, 'adjuntos'),
-    )
-    tipo = models.CharField(max_length=8, choices=TIPO_CHOICES)
+    tipo = models.CharField(max_length=15)
     link = models.TextField()
 
 class DetalleEtiquetaRuta(ModeloBase):
