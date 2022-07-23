@@ -98,15 +98,15 @@ class PublicacionViewSet(viewsets.ModelViewSet):
     def post_reaccion(self, request):
         try:
             data = request.data
-            reaccion_consejo = DetalleReaccionPublicacion()
-            consejo_dia = Publicacion.objects.get(token=data['token_publicacion'])
-            reaccion_consejo.consejo_dia = consejo_dia
+            reaccion_publicacion = DetalleReaccionPublicacion()
+            publicacion = Publicacion.objects.get(token=data['token_publicacion'])
+            reaccion_publicacion.publicacion = publicacion
             reaccion = Reaccion.objects.get(nombre=data['nombre_reaccion'])
-            reaccion_consejo.reaccion = reaccion
+            reaccion_publicacion.reaccion = reaccion
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            reaccion_consejo.user = token.user
-            reaccion_consejo.save()
+            reaccion_publicacion.user = token.user
+            reaccion_publicacion.save()
 
             return jsonx({'status': 'success', 'message': 'Se ha registrado la reacción con éxito.'})
         except ApplicationError as msg:
