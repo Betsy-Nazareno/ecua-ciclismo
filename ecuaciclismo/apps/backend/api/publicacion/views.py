@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from ecuaciclismo.apps.backend.api.publicacion.serializers import PublicacionSerializer
 from ecuaciclismo.apps.backend.consejodia.models import Reaccion
 from ecuaciclismo.apps.backend.publicacion.models import Publicacion, DetalleEtiquetaPublicacion, \
-    DetalleArchivoPublicacion
+    DetalleArchivoPublicacion, EtiquetaPublicacion, DetalleReaccionPublicacion
 from ecuaciclismo.apps.backend.ruta.models import Archivo
 from ecuaciclismo.helpers.jsonx import jsonx
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
@@ -46,9 +46,7 @@ class PublicacionViewSet(viewsets.ModelViewSet):
                         diccionario_reaccion[reaccion['nombre']] = dict_detalles
                 publicacion['reacciones'] = diccionario_reaccion
                 publicacion['etiquetas'] = DetalleEtiquetaPublicacion.get_etiqueta_x_publicacion(publicacion['id'])
-                publicacion['audios'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'], Archivo.TIPO_AUDIOS)
-                publicacion['fotos'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'], Archivo.TIPO_FOTOS)
-                publicacion['adjuntos'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'], Archivo.TIPO_ADJUNTOS)
+                publicacion['multimedia'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'])
 
             return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
         except ApplicationError as msg:
@@ -56,19 +54,79 @@ class PublicacionViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 
-    # @action(detail=False, url_path='new_consejo_dia', methods=['post'])
-    # def new_consejo_dia(self, request):
+    @action(detail=False, url_path='new_publicacion', methods=['post'])
+    def new_publicacion(self, request):
+        try:
+            data = request.data
+            publicacion = Publicacion()
+            publicacion.titulo = data['titulo']
+            publicacion.descripcion = data['descripcion']
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            publicacion.user = token.user
+            publicacion.save()
+
+
+            if data['etiquetas']:
+                for etiqueta in data['etiquetas']: #esto es un array de values
+                    detalle_etiqueta_publicacion = DetalleEtiquetaPublicacion()
+                    detalle_etiqueta_publicacion.publicacion = publicacion
+                    etiqueta_filtro = EtiquetaPublicacion.objects.get(value=etiqueta)
+                    detalle_etiqueta_publicacion.etiqueta = etiqueta_filtro
+                    detalle_etiqueta_publicacion.save()
+
+            if data['multimedia']:
+                for elemento in data['multimedia']:
+                    archivo = Archivo()
+                    archivo.link = elemento['link']
+                    archivo.tipo = elemento['tipo']
+                    archivo.save()
+                    detalle_archivo_publicacion = DetalleArchivoPublicacion()
+                    detalle_archivo_publicacion.archivo = archivo
+                    detalle_archivo_publicacion.publicacion = publicacion
+                    detalle_archivo_publicacion.save()
+
+
+            return jsonx({'status': 'success', 'message': 'Publicación guardada con éxito.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    # REACCIONES
+    @action(detail=False, url_path='post_reaccion', methods=['post'])
+    def post_reaccion(self, request):
+        try:
+            data = request.data
+            reaccion_consejo = DetalleReaccionPublicacion()
+            consejo_dia = Publicacion.objects.get(token=data['token_publicacion'])
+            reaccion_consejo.consejo_dia = consejo_dia
+            reaccion = Reaccion.objects.get(nombre=data['nombre_reaccion'])
+            reaccion_consejo.reaccion = reaccion
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            reaccion_consejo.user = token.user
+            reaccion_consejo.save()
+
+            return jsonx({'status': 'success', 'message': 'Se ha registrado la reacción con éxito.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    # @action(detail=False, url_path='delete_detalle_reaccion_consejo', methods=['delete'])
+    # def delete_detalle_reaccion_consejo(self, request):
     #     try:
     #         data = request.data
-    #         consejo_dia = ConsejoDia()
-    #         consejo_dia.informacion = data['informacion']
-    #         consejo_dia.imagen = data['imagen']
+    #         consejo_dia = ConsejoDia.objects.get(token=data['token_consejo'])
+    #         reaccion = Reaccion.objects.get(nombre=data['nombre_reaccion'])
     #         from rest_framework.authtoken.models import Token
     #         token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-    #         consejo_dia.user = token.user
-    #         consejo_dia.save()
+    #         reaccion_consejo = DetalleReaccionConsejo.objects.get(consejo_dia=consejo_dia, reaccion=reaccion,
+    #                                                               user=token.user)
+    #         reaccion_consejo.delete()
     #
-    #         return jsonx({'status': 'success', 'message': 'Consejo del día guardado con éxito.'})
+    #         return jsonx({'status': 'success', 'message': 'Se ha eliminado la reacción con éxito.'})
     #     except ApplicationError as msg:
     #         return jsonx({'status': 'error', 'message': str(msg)})
     #     except Exception as e:

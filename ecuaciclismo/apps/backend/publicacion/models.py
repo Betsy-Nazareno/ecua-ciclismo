@@ -9,7 +9,7 @@ from ecuaciclismo.helpers.models import ModeloBase
 
 class EtiquetaPublicacion(ModeloBase):
     nombre = models.TextField()
-    descripcion = models.TextField()
+    value = models.TextField()
 
 class Publicacion(ModeloBase):
     titulo = models.TextField()
@@ -49,7 +49,7 @@ class DetalleEtiquetaPublicacion(ModeloBase):
     def get_etiqueta_x_publicacion(cls, id):
         cursor = connection.cursor()
         sql = '''
-            SELECT etiqueta.token
+            SELECT etiqueta.nombre, etiqueta.value
             FROM `publicacion_detalleetiquetapublicacion` AS etiqueta_publicacion
             LEFT JOIN `publicacion_etiquetapublicacion` AS etiqueta ON etiqueta_publicacion.etiqueta_id = etiqueta.id
             WHERE etiqueta_publicacion.publicacion_id = '''+str(id)
@@ -58,8 +58,8 @@ class DetalleEtiquetaPublicacion(ModeloBase):
         dic = []
         detalles = cursor.fetchall()
         for row in detalles:
-            # diccionario = dict(zip([col[0] for col in cursor.description], row))
-            dic.append(row[0])
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
 
         cursor.close()
         # print(dic)
@@ -70,13 +70,13 @@ class DetalleArchivoPublicacion(ModeloBase):
     archivo = models.ForeignKey(Archivo, on_delete=models.PROTECT)
 
     @classmethod
-    def get_archivo_x_publicacion(cls, id, tipo):
+    def get_archivo_x_publicacion(cls, id):
         cursor = connection.cursor()
         sql = '''
-        SELECT archivo.link
+        SELECT archivo.link, archivo.tipo
         FROM publicacion_detallearchivopublicacion AS archivo_publicacion
         LEFT JOIN ruta_archivo AS archivo ON archivo_publicacion.archivo_id = archivo.id
-        WHERE archivo_publicacion.publicacion_id = ''' + str(id) + ''' AND archivo.tipo LIKE \'''' + tipo + '''\''''
+        WHERE archivo_publicacion.publicacion_id = ''' + str(id)
         cursor.execute(sql)
         dic = []
         detalles = cursor.fetchall()
