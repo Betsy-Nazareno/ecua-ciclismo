@@ -114,23 +114,23 @@ class PublicacionViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 
-    # @action(detail=False, url_path='delete_detalle_reaccion_consejo', methods=['delete'])
-    # def delete_detalle_reaccion_consejo(self, request):
-    #     try:
-    #         data = request.data
-    #         consejo_dia = ConsejoDia.objects.get(token=data['token_consejo'])
-    #         reaccion = Reaccion.objects.get(nombre=data['nombre_reaccion'])
-    #         from rest_framework.authtoken.models import Token
-    #         token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-    #         reaccion_consejo = DetalleReaccionConsejo.objects.get(consejo_dia=consejo_dia, reaccion=reaccion,
-    #                                                               user=token.user)
-    #         reaccion_consejo.delete()
-    #
-    #         return jsonx({'status': 'success', 'message': 'Se ha eliminado la reacción con éxito.'})
-    #     except ApplicationError as msg:
-    #         return jsonx({'status': 'error', 'message': str(msg)})
-    #     except Exception as e:
-    #         return jsonx({'status': 'error', 'message': str(e)})
+    @action(detail=False, url_path='delete_detalle_reaccion_publicacion', methods=['delete'])
+    def delete_detalle_reaccion_publicacion(self, request):
+        try:
+            data = request.data
+            publicacion = Publicacion.objects.get(token=data['token_publicacion'])
+            reaccion = Reaccion.objects.get(nombre=data['nombre_reaccion'])
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            reaccion_consejo = DetalleReaccionPublicacion.objects.get(publicacion=publicacion, reaccion=reaccion,
+                                                                  user=token.user)
+            reaccion_consejo.delete()
+
+            return jsonx({'status': 'success', 'message': 'Se ha eliminado la reacción con éxito.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
 
     # @action(detail=False, url_path='update_consejo_dia', methods=['post'])
     # def update_consejo_dia(self, request):
