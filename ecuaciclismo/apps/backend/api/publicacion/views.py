@@ -152,17 +152,26 @@ class PublicacionViewSet(viewsets.ModelViewSet):
     #     except Exception as e:
     #         return jsonx({'status': 'error', 'message': str(e)})
     #
-    # @action(detail=False, url_path='delete_consejo_dia', methods=['delete'])
-    # def delete_consejo_dia(self, request):
-    #     try:
-    #         data = request.data
-    #         if data['token'] is not None and data['token'] != '':
-    #             consejo_dia = ConsejoDia.objects.get(token=data['token'])
-    #             consejo_dia.delete()
-    #             return jsonx({'status': 'success', 'message': 'Consejo del día eliminado con éxito.'})
-    #         else:
-    #             return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
-    #     except ApplicationError as msg:
-    #         return jsonx({'status': 'error', 'message': str(msg)})
-    #     except Exception as e:
-    #         return jsonx({'status': 'error', 'message': str(e)})
+    @action(detail=False, url_path='delete_publicacion', methods=['delete'])
+    def delete_publicacion(self, request):
+        try:
+            data = request.data
+            if data['token'] is not None and data['token'] != '':
+                publicacion = Publicacion.objects.get(token=data['token'])
+                detalle_archivos = DetalleArchivoPublicacion.objects.filter(publicacion=publicacion)
+                for detalle_archivo_publicacion in detalle_archivos:
+                    detalle_archivo_publicacion.delete()
+                detalle_etiquetas = DetalleEtiquetaPublicacion.objects.filter(publicacion=publicacion)
+                for detalle_etiqueta_publicacion in detalle_etiquetas:
+                    detalle_etiqueta_publicacion.delete()
+                detalle_reacciones = DetalleReaccionPublicacion.objects.filter(publicacion=publicacion)
+                for detalle_reaccion_publicacion in detalle_reacciones:
+                    detalle_reaccion_publicacion.delete()
+                publicacion.delete()
+                return jsonx({'status': 'success', 'message': 'Publicación eliminada con éxito.'})
+            else:
+                return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
