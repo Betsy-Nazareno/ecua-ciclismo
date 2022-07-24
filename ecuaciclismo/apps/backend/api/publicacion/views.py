@@ -21,7 +21,7 @@ class PublicacionViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         return queryset
 
-    @action(detail=False, url_path='get_publicacion', methods=['get'])
+    @action(detail=False, url_path='get_publicacion', methods=['post'])
     def get_publicacion(self, request):
         try:
             dato = request.data
