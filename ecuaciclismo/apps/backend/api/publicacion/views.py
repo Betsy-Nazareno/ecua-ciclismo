@@ -222,8 +222,7 @@ class PublicacionViewSet(viewsets.ModelViewSet):
             return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
-    #
-    # publicaciones post el filtro, recomendaciones
+
     @action(detail=False, url_path='delete_publicacion', methods=['delete'])
     def delete_publicacion(self, request):
         try:
@@ -239,6 +238,9 @@ class PublicacionViewSet(viewsets.ModelViewSet):
                 detalle_reacciones = DetalleReaccionPublicacion.objects.filter(publicacion=publicacion)
                 for detalle_reaccion_publicacion in detalle_reacciones:
                     detalle_reaccion_publicacion.delete()
+                detalle_comentarios = ComentarioPublicacion.objects.filter(publicacion=publicacion)
+                for detalle_comentario in detalle_comentarios:
+                    detalle_comentario.delete()
                 publicacion.delete()
                 return jsonx({'status': 'success', 'message': 'Publicación eliminada con éxito.'})
             else:
