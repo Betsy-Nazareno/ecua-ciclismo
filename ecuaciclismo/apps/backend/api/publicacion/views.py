@@ -132,8 +132,8 @@ class PublicacionViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 
-    @action(detail=False, url_path='update_consejo_dia', methods=['post'])
-    def update_consejo_dia(self, request):
+    @action(detail=False, url_path='update_publicacion', methods=['post'])
+    def update_publicacion(self, request):
         try:
             data = request.data
 
@@ -145,6 +145,34 @@ class PublicacionViewSet(viewsets.ModelViewSet):
                 token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
                 publicacion.user = token.user
                 publicacion.save()
+
+                detalle_archivos = DetalleArchivoPublicacion.objects.filter(publicacion=publicacion)
+                for detalle_archivo_publicacion in detalle_archivos:
+                    archivo = Archivo.objects.get(id=detalle_archivo_publicacion.archivo.id)
+                    detalle_archivo_publicacion.delete()
+                    archivo.delete()
+                detalle_etiquetas = DetalleEtiquetaPublicacion.objects.filter(publicacion=publicacion)
+                for detalle_etiqueta_publicacion in detalle_etiquetas:
+                    detalle_etiqueta_publicacion.delete()
+
+                if data['etiquetas']:
+                    for etiqueta in data['etiquetas']:  # esto es un array de values
+                        detalle_etiqueta_publicacion = DetalleEtiquetaPublicacion()
+                        detalle_etiqueta_publicacion.publicacion = publicacion
+                        etiqueta_filtro = EtiquetaPublicacion.objects.get(value=etiqueta)
+                        detalle_etiqueta_publicacion.etiqueta = etiqueta_filtro
+                        detalle_etiqueta_publicacion.save()
+
+                if data['multimedia']:
+                    for elemento in data['multimedia']:
+                        archivo = Archivo()
+                        archivo.link = elemento['link']
+                        archivo.tipo = elemento['tipo']
+                        archivo.save()
+                        detalle_archivo_publicacion = DetalleArchivoPublicacion()
+                        detalle_archivo_publicacion.archivo = archivo
+                        detalle_archivo_publicacion.publicacion = publicacion
+                        detalle_archivo_publicacion.save()
 
 
 
