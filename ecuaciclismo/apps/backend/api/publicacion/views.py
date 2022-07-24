@@ -21,7 +21,7 @@ class PublicacionViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         return queryset
 
-    @action(detail=False, url_path='get_publicacion', methods=['post'])
+    @action(detail=False, url_path='get_publicacion', methods=['get'])
     def get_publicacion(self, request):
         try:
             dato = request.data
@@ -31,6 +31,8 @@ class PublicacionViewSet(viewsets.ModelViewSet):
             data = Publicacion.get_publicacion(token_publicacion=dato['token_publicacion'])
             reacciones = Reaccion.get_all_reacciones()
             for publicacion in data:
+                publicacion['fecha_creacion'] = str(publicacion['fecha_creacion'])
+                publicacion['ultimo_cambio'] = str(publicacion['ultimo_cambio'])
                 publicacion_get = Publicacion.objects.get(token=publicacion['token'])
                 diccionario_reaccion = {}
                 for reaccion in reacciones:
@@ -65,6 +67,8 @@ class PublicacionViewSet(viewsets.ModelViewSet):
             data = Publicacion.get_publicaciones()
             reacciones = Reaccion.get_all_reacciones()
             for publicacion in data:
+                publicacion['fecha_creacion'] = str(publicacion['fecha_creacion'])
+                publicacion['ultimo_cambio'] = str(publicacion['ultimo_cambio'])
                 publicacion_get = Publicacion.objects.get(token=publicacion['token'])
                 diccionario_reaccion = {}
                 for reaccion in reacciones:
