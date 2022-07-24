@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from ecuaciclismo.apps.backend.api.publicacion.serializers import PublicacionSerializer
 from ecuaciclismo.apps.backend.consejodia.models import Reaccion
 from ecuaciclismo.apps.backend.publicacion.models import Publicacion, DetalleEtiquetaPublicacion, \
-    DetalleArchivoPublicacion, EtiquetaPublicacion, DetalleReaccionPublicacion
+    DetalleArchivoPublicacion, EtiquetaPublicacion, DetalleReaccionPublicacion, ComentarioPublicacion
 from ecuaciclismo.apps.backend.ruta.models import Archivo
 from ecuaciclismo.helpers.jsonx import jsonx
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
@@ -20,6 +20,41 @@ class PublicacionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset
         return queryset
+
+    @action(detail=False, url_path='get_publicacion', methods=['post'])
+    def get_publicacion(self, request):
+        try:
+            dato = request.data
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            id_user = token.user.id
+            data = Publicacion.get_publicacion(token_publicacion=dato['token_publicacion'])
+            reacciones = Reaccion.get_all_reacciones()
+            for publicacion in data:
+                publicacion_get = Publicacion.objects.get(token=publicacion['token'])
+                diccionario_reaccion = {}
+                for reaccion in reacciones:
+                    dict_detalles = {}
+                    resultado = Reaccion.get_reacciones_publicaciones(publicacion_get.id, reaccion['nombre'])
+                    if len(resultado) > 0:
+                        listado_usuarios = list(resultado[0]['usuarios'].split(","))
+                        dict_detalles['usuarios'] = listado_usuarios
+                        dict_detalles['reaccion_usuario'] = str(id_user) in listado_usuarios
+                        diccionario_reaccion[reaccion['nombre']] = dict_detalles
+                    else:
+                        dict_detalles['usuarios'] = None
+                        dict_detalles['reaccion_usuario'] = False
+                        diccionario_reaccion[reaccion['nombre']] = dict_detalles
+                publicacion['reacciones'] = diccionario_reaccion
+                publicacion['etiquetas'] = DetalleEtiquetaPublicacion.get_etiqueta_x_publicacion(publicacion['id'])
+                publicacion['multimedia'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'])
+                publicacion['comentarios'] = ComentarioPublicacion.get_comentario_x_publicacion(publicacion['id'])
+
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
 
     @action(detail=False, url_path='get_publicaciones', methods=['get'])
     def get_publicaciones(self, request):
@@ -202,6 +237,46 @@ class PublicacionViewSet(viewsets.ModelViewSet):
                     detalle_reaccion_publicacion.delete()
                 publicacion.delete()
                 return jsonx({'status': 'success', 'message': 'Publicación eliminada con éxito.'})
+            else:
+                return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='new_comentario_publicacion', methods=['post'])
+    def new_comentario_publicacion(self, request):
+        try:
+            data = request.data
+
+            if data['token'] is not None and data['token'] != '':
+                publicacion = Publicacion.objects.get(token=data['token'])
+                from rest_framework.authtoken.models import Token
+                token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+                comentario = ComentarioPublicacion()
+                comentario.publicacion = publicacion
+                comentario.user = token.user
+                comentario.comentario = data['comentario']
+                comentario.save()
+
+                return jsonx({'status': 'success', 'message': 'Se añadio un comentario a la publicación de forma correcta.'})
+            else:
+                return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='delete_comentario_publicacion', methods=['delete'])
+    def detele_comentario_publicacion(self, request):
+        try:
+            data = request.data
+
+            if data['token'] is not None and data['token'] != '':
+                comentario_publicacion = ComentarioPublicacion.objects.get(token=data['token'])
+                comentario_publicacion.delete()
+                return jsonx(
+                    {'status': 'success', 'message': 'Se elimino un comentario de la publicación de forma correcta.'})
             else:
                 return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
         except ApplicationError as msg:

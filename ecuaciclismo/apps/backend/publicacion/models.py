@@ -37,9 +37,51 @@ class Publicacion(ModeloBase):
         #print(dic)
         return dic
 
+    @classmethod
+    def get_publicacion(cls, token_publicacion):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT publicacion.id, publicacion.fecha_creacion, publicacion.ultimo_cambio, titulo, descripcion, publicacion.token, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto
+                FROM publicacion_publicacion AS publicacion
+                LEFT JOIN `auth_user` AS usuario ON publicacion.user_id = usuario.id
+                LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON publicacion.user_id = detalle_usuario.usuario_id
+                WHERE publicacion.token = ''' + "\'" + str(token_publicacion) + "\'"
+
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        # print(dic)
+        return dic
+
 class ComentarioPublicacion(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     publicacion = models.ForeignKey(Publicacion, on_delete=models.PROTECT)
+    comentario = models.TextField(null=False)
+
+    @classmethod
+    def get_comentario_x_publicacion(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+            SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, comentario_publicacion.comentario, comentario_publicacion.token AS token_comentario 
+            FROM publicacion_comentariopublicacion AS comentario_publicacion 
+            LEFT JOIN auth_user AS usuario ON comentario_publicacion.user_id = usuario.id
+            LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON comentario_publicacion.user_id = detalle_usuario.usuario_id
+            WHERE publicacion_id = ''' + str(id)
+
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
 
 class DetalleEtiquetaPublicacion(ModeloBase):
     publicacion = models.ForeignKey(Publicacion, on_delete=models.PROTECT)
