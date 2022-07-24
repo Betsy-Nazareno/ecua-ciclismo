@@ -20,7 +20,7 @@ class Publicacion(ModeloBase):
     def get_publicaciones(cls):
         cursor = connection.cursor()
         sql = '''
-            SELECT publicacion.id, titulo, descripcion, publicacion.token, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto
+            SELECT publicacion.id, publicacion.fecha_creacion, publicacion.ultimo_cambio, titulo, descripcion, publicacion.token, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto
             FROM publicacion_publicacion AS publicacion
             LEFT JOIN `auth_user` AS usuario ON publicacion.user_id = usuario.id
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON publicacion.user_id = detalle_usuario.usuario_id
