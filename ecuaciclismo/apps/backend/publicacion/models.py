@@ -20,10 +20,11 @@ class Publicacion(ModeloBase):
     def get_publicaciones(cls):
         cursor = connection.cursor()
         sql = '''
-            SELECT publicacion.id,  CAST(publicacion.fecha_creacion AS DATE) AS fecha_creacion, CAST(publicacion.ultimo_cambio AS DATE) AS ultimo_cambio, titulo, descripcion, publicacion.token, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto
+            SELECT publicacion.id,  CAST(publicacion.fecha_creacion AS DATE) AS fecha_creacion, CAST(publicacion.ultimo_cambio AS DATE) AS ultimo_cambio, titulo, descripcion, publicacion.token, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario
             FROM publicacion_publicacion AS publicacion
             LEFT JOIN `auth_user` AS usuario ON publicacion.user_id = usuario.id
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON publicacion.user_id = detalle_usuario.usuario_id
+            LEFT JOIN `authtoken_token` AS token ON token.user_id = publicacion.user_id
         '''
 
         cursor.execute(sql)
@@ -41,10 +42,11 @@ class Publicacion(ModeloBase):
     def get_publicacion(cls, token_publicacion):
         cursor = connection.cursor()
         sql = '''
-                SELECT publicacion.id,  CAST(publicacion.fecha_creacion AS DATE) AS fecha_creacion, CAST(publicacion.ultimo_cambio AS DATE) AS ultimo_cambio, titulo, descripcion, publicacion.token, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto
+                SELECT publicacion.id,  CAST(publicacion.fecha_creacion AS DATE) AS fecha_creacion, CAST(publicacion.ultimo_cambio AS DATE) AS ultimo_cambio, titulo, descripcion, publicacion.token, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario
                 FROM publicacion_publicacion AS publicacion
                 LEFT JOIN `auth_user` AS usuario ON publicacion.user_id = usuario.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON publicacion.user_id = detalle_usuario.usuario_id
+                LEFT JOIN `authtoken_token` AS token ON token.user_id = publicacion.user_id
                 WHERE publicacion.token = ''' + "\'" + str(token_publicacion) + "\'"
 
         cursor.execute(sql)
@@ -67,10 +69,11 @@ class ComentarioPublicacion(ModeloBase):
     def get_comentario_x_publicacion(cls, id):
         cursor = connection.cursor()
         sql = '''
-            SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, comentario_publicacion.comentario, comentario_publicacion.token AS token_comentario 
+            SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, comentario_publicacion.comentario, comentario_publicacion.token AS token_comentario, token.key AS token_usuario
             FROM publicacion_comentariopublicacion AS comentario_publicacion 
             LEFT JOIN auth_user AS usuario ON comentario_publicacion.user_id = usuario.id
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON comentario_publicacion.user_id = detalle_usuario.usuario_id
+            LEFT JOIN `authtoken_token` AS token ON token.user_id = comentario_publicacion.user_id
             WHERE publicacion_id = ''' + str(id)
 
         cursor.execute(sql)
