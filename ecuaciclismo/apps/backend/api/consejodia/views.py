@@ -87,6 +87,8 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
             consejo_dia = ConsejoDia()
             consejo_dia.informacion = data['informacion']
             consejo_dia.imagen = data['imagen']
+            if request.data.get('path'):
+                consejo_dia.path = data['path']
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             consejo_dia.user = token.user
@@ -106,6 +108,8 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
                 consejo_dia = ConsejoDia.objects.get(token=data['token'])
                 consejo_dia.informacion = data['informacion']
                 consejo_dia.imagen = data['imagen']  # GESTIONAR CON API
+                if request.data.get('path'):
+                    consejo_dia.path = data['path']
                 from rest_framework.authtoken.models import Token
                 token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
                 consejo_dia.user = token.user
@@ -172,6 +176,8 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
             novedad.descripcion = data['descripcion']
             novedad.descripcion_corta = data['descripcion_corta']
             novedad.imagen = data['imagen']
+            if request.data.get('path'):
+                novedad.path = data['path']
             if request.data.get('nombre'):
                 novedad.nombre = data['nombre']
             if request.data.get('celular'):
@@ -196,6 +202,8 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
                 novedad.descripcion = data['descripcion']
                 novedad.descripcion_corta = data['descripcion_corta']
                 novedad.imagen = data['imagen']
+                if request.data.get('path'):
+                    novedad.path = data['path']
                 if request.data.get('nombre'):
                     novedad.nombre = data['nombre']
                 if request.data.get('celular'):

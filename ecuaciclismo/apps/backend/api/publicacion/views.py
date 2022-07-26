@@ -119,6 +119,7 @@ class PublicacionViewSet(viewsets.ModelViewSet):
                     archivo = Archivo()
                     archivo.link = elemento['link']
                     archivo.tipo = elemento['tipo']
+                    archivo.path = elemento['path']
                     archivo.save()
                     detalle_archivo_publicacion = DetalleArchivoPublicacion()
                     detalle_archivo_publicacion.archivo = archivo
@@ -207,6 +208,7 @@ class PublicacionViewSet(viewsets.ModelViewSet):
                         archivo = Archivo()
                         archivo.link = elemento['link']
                         archivo.tipo = elemento['tipo']
+                        archivo.path = elemento['path']
                         archivo.save()
                         detalle_archivo_publicacion = DetalleArchivoPublicacion()
                         detalle_archivo_publicacion.archivo = archivo
@@ -266,6 +268,26 @@ class PublicacionViewSet(viewsets.ModelViewSet):
                 comentario.save()
 
                 return jsonx({'status': 'success', 'message': 'Se añadio un comentario a la publicación de forma correcta.'})
+            else:
+                return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='update_comentario_publicacion', methods=['post'])
+    def update_comentario_publicacion(self, request):
+        try:
+            data = request.data
+
+            if data['token'] is not None and data['token'] != '':
+                comentario_publicacion = ComentarioPublicacion.objects.get(token=data['token'])
+                comentario_publicacion.delete()
+                comentario_publicacion.comentario = data['comentario']
+                comentario_publicacion.save()
+
+                return jsonx(
+                    {'status': 'success', 'message': 'Se ha actualizado el comentario de forma correcta.'})
             else:
                 return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
         except ApplicationError as msg:

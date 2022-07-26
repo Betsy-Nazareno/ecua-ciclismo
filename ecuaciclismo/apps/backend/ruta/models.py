@@ -38,6 +38,7 @@ class EtiquetaRuta(ModeloBase):
 class Archivo(ModeloBase):
     tipo = models.CharField(max_length=15, null=False)
     link = models.TextField(null=False)
+    path = models.TextField(null=True)
 
 class DetalleEtiquetaRuta(ModeloBase):
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)

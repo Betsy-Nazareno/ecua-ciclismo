@@ -118,7 +118,7 @@ class DetalleArchivoPublicacion(ModeloBase):
     def get_archivo_x_publicacion(cls, id):
         cursor = connection.cursor()
         sql = '''
-        SELECT archivo.link, archivo.tipo
+        SELECT archivo.link, archivo.tipo, archivo.path
         FROM publicacion_detallearchivopublicacion AS archivo_publicacion
         LEFT JOIN ruta_archivo AS archivo ON archivo_publicacion.archivo_id = archivo.id
         WHERE archivo_publicacion.publicacion_id = ''' + str(id)
