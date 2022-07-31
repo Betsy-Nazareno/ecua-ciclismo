@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 from ecuaciclismo.apps.backend.api.consejodia.views import ConsejoDiaViewSet
 from ecuaciclismo.apps.backend.api.publicacion.views import PublicacionViewSet
+from ecuaciclismo.apps.backend.api.ruta.views import RutaViewSet
 from ecuaciclismo.apps.backend.api.usuario.views import UsuarioViewSet, DetalleUsuarioViewSet, \
     UsuarioRecuperarCredencialesViewSet
 
@@ -21,6 +22,7 @@ router.register(r'usuario', UsuarioViewSet)
 router.register(r'detalleusuario', DetalleUsuarioViewSet)
 router.register(r'consejodia', ConsejoDiaViewSet)
 router.register(r'publicacion', PublicacionViewSet)
+router.register(r'ruta', RutaViewSet)
 
 router.register(r'recuperar_credenciales', UsuarioRecuperarCredencialesViewSet)
 

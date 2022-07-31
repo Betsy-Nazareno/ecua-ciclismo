@@ -5,9 +5,13 @@ from rest_framework.authtoken.admin import User
 
 from ecuaciclismo.helpers.models import ModeloBase
 
-class Ubicacion(ModeloBase):
+class Coordenada(ModeloBase):
     latitud = models.TextField()
     longitud = models.TextField()
+
+class Ubicacion(ModeloBase):
+    coordenada_x = models.ForeignKey(Coordenada, related_name='x_coordenada', on_delete=models.PROTECT)
+    coordenada_y = models.ForeignKey(Coordenada, related_name='y_coordenada', on_delete=models.PROTECT)
 
 class Ruta(ModeloBase):
     nombre = models.TextField()
@@ -17,9 +21,10 @@ class Ruta(ModeloBase):
     lugar = models.TextField()
     fecha_inicio = models.DateTimeField()
     aprobado = models.BooleanField()
-    estimado_tiempo = models.IntegerField() #Verificar si va a guardar los numeros como minutos independientemente si lo ponen en hora
+    estimado_tiempo = models.IntegerField(null=True) #Verificar si va a guardar los numeros como minutos independientemente si lo ponen en hora
     #requisito = models.ForeignKey(Requisito,on_delete=models.PROTECT) #pensar conexion
     ubicacion = models.ForeignKey(Ubicacion, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
 class InscripcionRuta(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -33,7 +38,6 @@ class ComentarioRuta(ModeloBase):
 
 class EtiquetaRuta(ModeloBase):
     nombre = models.TextField()
-    descripcion = models.TextField()
 
 class Archivo(ModeloBase):
     tipo = models.CharField(max_length=15, null=False)
@@ -56,3 +60,11 @@ class RastreoRuta(ModeloBase):
     kilometros_acumulados = models.DecimalField(decimal_places=2, max_digits=10)
     tiempo_recorrido = models.IntegerField() #Tiempo en minutos guardar
     ubicacion = models.ForeignKey(Ubicacion, on_delete=models.PROTECT)
+
+class Requisito(ModeloBase):
+    nombre = models.TextField()
+
+class DetalleRequisito(ModeloBase):
+    requisito = models.ForeignKey(Requisito, on_delete=models.PROTECT)
+    ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
+
