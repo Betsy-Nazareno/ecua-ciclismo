@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, connection
 
 # Create your models here.
 from rest_framework.authtoken.admin import User
@@ -25,6 +25,22 @@ class Ruta(ModeloBase):
     #requisito = models.ForeignKey(Requisito,on_delete=models.PROTECT) #pensar conexion
     ubicacion = models.ForeignKey(Ubicacion, on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    @classmethod
+    def get_rutas(cls):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT token, nombre FROM ruta_requisito
+            '''
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
 
 class InscripcionRuta(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -63,6 +79,22 @@ class RastreoRuta(ModeloBase):
 
 class Requisito(ModeloBase):
     nombre = models.TextField()
+
+    @classmethod
+    def get_requisitos(cls):
+        cursor = connection.cursor()
+        sql = '''
+            SELECT token, nombre FROM ruta_requisito
+        '''
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
 
 class DetalleRequisito(ModeloBase):
     requisito = models.ForeignKey(Requisito, on_delete=models.PROTECT)
