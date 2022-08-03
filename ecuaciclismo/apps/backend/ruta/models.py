@@ -55,6 +55,22 @@ class ComentarioRuta(ModeloBase):
 class EtiquetaRuta(ModeloBase):
     nombre = models.TextField()
 
+    @classmethod
+    def get_tipos_rutas(cls):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT token, nombre FROM ruta_etiquetaruta
+            '''
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
 class Archivo(ModeloBase):
     tipo = models.CharField(max_length=15, null=False)
     link = models.TextField(null=False)
@@ -100,3 +116,25 @@ class DetalleRequisito(ModeloBase):
     requisito = models.ForeignKey(Requisito, on_delete=models.PROTECT)
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
 
+class Colaboracion(ModeloBase):
+    nombre = models.TextField()
+
+    @classmethod
+    def get_colaboraciones(cls):
+        cursor = connection.cursor()
+        sql = '''
+            SELECT token, nombre FROM ruta_colaboracion
+        '''
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
+class DetalleColaboracion(ModeloBase):
+    colaboracion = models.ForeignKey(Colaboracion, on_delete=models.PROTECT)
+    ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)

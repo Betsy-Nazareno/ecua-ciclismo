@@ -3,7 +3,7 @@ from rest_framework import viewsets
 
 from ecuaciclismo.apps.backend.api.ruta.serializers import RutaSerializer
 from ecuaciclismo.apps.backend.ruta.models import Ruta, Coordenada, Ubicacion, Requisito, DetalleRequisito, \
-    EtiquetaRuta, DetalleEtiquetaRuta, Archivo, DetalleArchivoRuta
+    EtiquetaRuta, DetalleEtiquetaRuta, Archivo, DetalleArchivoRuta, Colaboracion, DetalleColaboracion
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -58,6 +58,15 @@ class RutaViewSet(viewsets.ModelViewSet):
                         detalle_requisito.ruta = ruta
                         detalle_requisito.save()
 
+            if data.get('colaboraciones'):
+                for colaboracion_token in data['colaboraciones']:
+                    colaboracion_save = get_or_none(Colaboracion, token=colaboracion_token)
+                    if colaboracion_save is not None:
+                        detalle_colaboracion = DetalleColaboracion()
+                        detalle_colaboracion.colaboracion = colaboracion_save
+                        detalle_colaboracion.ruta = ruta
+                        detalle_colaboracion.save()
+
             if data.get('tipoRuta'):
                 for token_tipo_ruta in data['tipoRuta']:
                     etiqueta_ruta = get_or_none(EtiquetaRuta,token=token_tipo_ruta)
@@ -92,6 +101,26 @@ class RutaViewSet(viewsets.ModelViewSet):
     def get_requisitos(self, request):
         try:
             data = Requisito.get_requisitos()
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='get_colaboraciones', methods=['get'])
+    def get_colaboraciones(self, request):
+        try:
+            data = Colaboracion.get_colaboraciones()
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='get_tipos_rutas', methods=['get'])
+    def get_tipos_rutas(self, request):
+        try:
+            data = EtiquetaRuta.get_tipos_rutas()
             return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})

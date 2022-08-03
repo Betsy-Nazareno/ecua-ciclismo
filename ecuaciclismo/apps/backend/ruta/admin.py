@@ -1,8 +1,12 @@
 from django.contrib import admin
 from django import forms
 
-from ecuaciclismo.apps.backend.ruta.models import Requisito, EtiquetaRuta
+from ecuaciclismo.apps.backend.ruta.models import Requisito, EtiquetaRuta, Colaboracion
 
+class ColaboracionForm(forms.ModelForm):
+    class Meta:
+        model = Colaboracion
+        fields = ('nombre',)
 
 class RequisitoForm(forms.ModelForm):
     class Meta:
@@ -14,13 +18,27 @@ class EtiquetaRutaForm(forms.ModelForm):
         model = EtiquetaRuta
         fields = ('nombre',)
 
+class ColaboracionAdmin(admin.ModelAdmin):
+    modal = Colaboracion
+    form = ColaboracionForm
+    search_fields = ['nombre']
+    list_display = ('nombre',)
+    list_display_links = ('nombre',)
+    title = 'Colaboraciones ruta'
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+
+    def delete_model(self, request, obj):
+        obj.delete()
+
 class RequisitoAdmin(admin.ModelAdmin):
     modal = Requisito
     form = RequisitoForm
     search_fields = ['nombre']
     list_display = ('nombre',)
     list_display_links = ('nombre',)
-    title = 'Requisitos'
+    title = 'Requisitos ruta'
 
     def save_model(self, request, obj, form, change):
         obj.save()
@@ -42,5 +60,6 @@ class EtiquetaRutaAdmin(admin.ModelAdmin):
     def delete_model(self, request, obj):
         obj.delete()
 
+admin.site.register(Colaboracion, ColaboracionAdmin)
 admin.site.register(Requisito, RequisitoAdmin)
 admin.site.register(EtiquetaRuta, EtiquetaRutaAdmin)
