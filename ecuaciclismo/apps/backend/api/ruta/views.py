@@ -3,7 +3,7 @@ from rest_framework import viewsets
 
 from ecuaciclismo.apps.backend.api.ruta.serializers import RutaSerializer
 from ecuaciclismo.apps.backend.ruta.models import Ruta, Coordenada, Ubicacion, Requisito, DetalleRequisito, \
-    EtiquetaRuta, DetalleEtiquetaRuta, Archivo, DetalleArchivoRuta, Colaboracion, DetalleColaboracion
+    EtiquetaRuta, DetalleEtiquetaRuta, Archivo, DetalleArchivoRuta, Colaboracion, DetalleColaboracion, InscripcionRuta
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -152,4 +152,53 @@ class RutaViewSet(viewsets.ModelViewSet):
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='inscribirse_ruta', methods=['post'])
+    def inscribirse_ruta(self, request):
+        transaction.set_autocommit(False)
+        try:
+            data = request.data
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            if data.get('token'):
+                inscripcion = InscripcionRuta()
+                inscripcion.user = token.user
+                ruta = Ruta.objects.get(token=data["token"])
+                inscripcion_validate = get_or_none(InscripcionRuta,user=token.user, ruta=ruta)
+                if inscripcion_validate:
+                    return jsonx({'error': 'error', 'message': 'Ya este usuario esta registrado en esa ruta.'})
+                inscripcion.ruta = ruta
+                inscripcion.save()
+
+            transaction.commit()
+            return jsonx({'status': 'success', 'message': 'Inscripción guardada con éxito.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='cancelar_inscripcion', methods=['post'])
+    def cancelar_inscripcion(self, request):
+        transaction.set_autocommit(False)
+        try:
+            data = request.data
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            ruta = Ruta.objects.get(token=data["token"])
+            inscripcion = get_or_none(InscripcionRuta, user=token.user, ruta=ruta)
+            if inscripcion:
+                inscripcion.delete()
+            else:
+                return jsonx({'status': 'success', 'message': 'No esta registrado, no se puede eliminar.'})
+
+            transaction.commit()
+            return jsonx({'status': 'success', 'message': 'Inscripción eliminada con éxito.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
