@@ -27,11 +27,17 @@ class Ruta(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     @classmethod
-    def get_rutas(cls):
+    def get_rutas(cls,admin):
         cursor = connection.cursor()
         sql = '''
-                SELECT token, nombre FROM ruta_requisito
+                SELECT ruta.id, ruta.token,  CAST(ruta.fecha_creacion AS DATE) AS fecha_creacion, CAST(ruta.ultimo_cambio AS DATE) AS ultimo_cambio, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario
+                FROM ruta_ruta AS ruta
+                LEFT JOIN `auth_user` AS usuario ON ruta.user_id = usuario.id
+                LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON ruta.user_id = detalle_usuario.usuario_id
+                LEFT JOIN `authtoken_token` AS token ON token.user_id = ruta.user_id
             '''
+        if admin == 0:
+            sql = sql + " WHERE aprobado = 1"
         cursor.execute(sql)
         dic = []
         detalles = cursor.fetchall()
@@ -40,6 +46,7 @@ class Ruta(ModeloBase):
             dic.append(diccionario)
 
         cursor.close()
+        # print(dic)
         return dic
 
 class InscripcionRuta(ModeloBase):
@@ -80,9 +87,45 @@ class DetalleEtiquetaRuta(ModeloBase):
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
     etiqueta = models.ForeignKey(EtiquetaRuta, on_delete=models.PROTECT)
 
+    @classmethod
+    def get_tiporuta_x_ruta(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT etiqueta.token, etiqueta.nombre
+                FROM `ruta_detalleetiquetaruta` AS detalle_etiquetaruta
+                LEFT JOIN `ruta_etiquetaruta` AS etiqueta ON detalle_etiquetaruta.etiqueta_id = etiqueta.id
+                WHERE detalle_etiquetaruta.ruta_id = ''' + str(id)
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
 class DetalleArchivoRuta(ModeloBase):
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
     archivo = models.ForeignKey(Archivo, on_delete=models.PROTECT)
+
+    @classmethod
+    def get_archivo_x_ruta(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+            SELECT archivo.link, archivo.tipo, archivo.path
+            FROM ruta_detallearchivoruta AS archivo_ruta
+            LEFT JOIN ruta_archivo AS archivo ON archivo_ruta.archivo_id = archivo.id
+            WHERE archivo_ruta.ruta_id = ''' + str(id)
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
 
 #Segunda parte
 class RastreoRuta(ModeloBase):
@@ -116,6 +159,24 @@ class DetalleRequisito(ModeloBase):
     requisito = models.ForeignKey(Requisito, on_delete=models.PROTECT)
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
 
+    @classmethod
+    def get_requisito_x_ruta(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT requisito.token, requisito.nombre
+                FROM `ruta_detallerequisito` AS detalle_requisito
+                LEFT JOIN `ruta_requisito` AS requisito ON detalle_requisito.requisito_id = requisito.id
+                WHERE detalle_requisito.ruta_id = ''' + str(id)
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
 class Colaboracion(ModeloBase):
     nombre = models.TextField()
 
@@ -138,3 +199,21 @@ class Colaboracion(ModeloBase):
 class DetalleColaboracion(ModeloBase):
     colaboracion = models.ForeignKey(Colaboracion, on_delete=models.PROTECT)
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
+
+    @classmethod
+    def get_colaboracion_x_ruta(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+                    SELECT colaboracion.token, colaboracion.nombre
+                    FROM `ruta_detallecolaboracion` AS detalle_colaboracion
+                    LEFT JOIN `ruta_colaboracion` AS colaboracion ON detalle_colaboracion.colaboracion_id = colaboracion.id
+                    WHERE detalle_colaboracion.ruta_id = ''' + str(id)
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic

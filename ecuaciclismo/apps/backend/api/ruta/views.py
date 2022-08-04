@@ -127,33 +127,29 @@ class RutaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 
-    # @action(detail=False, url_path='get_rutas', methods=['get'])
-    # def get_rutas(self, request):
-    #     try:
-    #         data = Ruta.get_rutas()
-    #         reacciones = Reaccion.get_all_reacciones()
-    #         for publicacion in data:
-    #             publicacion['fecha_creacion'] = str(publicacion['fecha_creacion'])
-    #             publicacion['ultimo_cambio'] = str(publicacion['ultimo_cambio'])
-    #             publicacion_get = Publicacion.objects.get(token=publicacion['token'])
-    #             diccionario_reaccion = {}
-    #             for reaccion in reacciones:
-    #                 dict_detalles = {}
-    #                 resultado = Reaccion.get_reacciones_publicaciones(publicacion_get.id, reaccion['nombre'])
-    #                 if len(resultado) > 0:
-    #                     listado_usuarios = list(resultado[0]['usuarios'].split(","))
-    #                     dict_detalles['usuarios'] = listado_usuarios
-    #                     dict_detalles['reaccion_usuario'] = str(id_user) in listado_usuarios
-    #                     diccionario_reaccion[reaccion['nombre']] = dict_detalles
-    #                 else:
-    #                     dict_detalles['usuarios'] = None
-    #                     dict_detalles['reaccion_usuario'] = False
-    #                     diccionario_reaccion[reaccion['nombre']] = dict_detalles
-    #             publicacion['reacciones'] = diccionario_reaccion
-    #             publicacion['etiquetas'] = DetalleEtiquetaPublicacion.get_etiqueta_x_publicacion(publicacion['id'])
-    #             publicacion['multimedia'] = DetalleArchivoPublicacion.get_archivo_x_publicacion(publicacion['id'])
-    #         return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
-    #     except ApplicationError as msg:
-    #         return jsonx({'status': 'error', 'message': str(msg)})
-    #     except Exception as e:
-    #         return jsonx({'status': 'error', 'message': str(e)})
+    @action(detail=False, url_path='get_rutas', methods=['get'])
+    def get_rutas(self, request):
+        try:
+            data = []
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            if detalle_usuario.admin == 0:
+                data = Ruta.get_rutas(admin=0)
+            else:
+                data = Ruta.get_rutas(admin=1)
+
+            for ruta in data:
+                ruta['fecha_creacion'] = str(ruta['fecha_creacion'])
+                ruta['ultimo_cambio'] = str(ruta['ultimo_cambio'])
+                ruta['requisitos'] = DetalleRequisito.get_requisito_x_ruta(ruta['id'])
+                ruta['colaboraciones'] = DetalleColaboracion.get_colaboracion_x_ruta(ruta['id'])
+                ruta['tipoRuta'] = DetalleEtiquetaRuta.get_tiporuta_x_ruta(ruta['id'])
+                ruta['fotos'] = DetalleArchivoRuta.get_archivo_x_ruta(ruta['id'])
+
+
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
