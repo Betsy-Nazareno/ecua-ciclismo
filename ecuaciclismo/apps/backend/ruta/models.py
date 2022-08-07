@@ -20,17 +20,18 @@ class Ruta(ModeloBase):
     cupos_disponibles = models.IntegerField()
     lugar = models.TextField()
     fecha_inicio = models.DateTimeField()
+    fecha_fin = models.DateTimeField()
     aprobado = models.BooleanField()
-    estimado_tiempo = models.IntegerField(null=True) #Verificar si va a guardar los numeros como minutos independientemente si lo ponen en hora
-    #requisito = models.ForeignKey(Requisito,on_delete=models.PROTECT) #pensar conexion
     ubicacion = models.ForeignKey(Ubicacion, on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
+    cancelada = models.BooleanField(default=0)
+    motivo_cancelacion = models.TextField(null=True, default=None)
 
     @classmethod
     def get_rutas(cls,admin):
         cursor = connection.cursor()
         sql = '''
-                SELECT ruta.id, ruta.token,  CAST(ruta.fecha_creacion AS DATE) AS fecha_creacion, CAST(ruta.ultimo_cambio AS DATE) AS ultimo_cambio, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario
+                SELECT IF(ruta.fecha_fin <= NOW(), TRUE, FALSE) AS estado_finalizado, IF(NOW() >= ruta.fecha_inicio AND NOW() < ruta.fecha_fin, TRUE, FALSE) AS estado_en_curso, IF(ruta.fecha_inicio > NOW(), TRUE, FALSE) AS estado_no_iniciada, ruta.id, ruta.token,  CAST(ruta.fecha_creacion AS DATE) AS fecha_creacion, CAST(ruta.ultimo_cambio AS DATE) AS ultimo_cambio, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario, ruta.cancelada, ruta.motivo_cancelacion
                 FROM ruta_ruta AS ruta
                 LEFT JOIN `auth_user` AS usuario ON ruta.user_id = usuario.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON ruta.user_id = detalle_usuario.usuario_id
@@ -53,6 +54,26 @@ class InscripcionRuta(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
     # material_colaboracion = models.ForeignKey(MaterialColaboracion, on_delete=models.PROTECT) #pensar como implementar
+
+    @classmethod
+    def get_participantes(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+                    SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto
+                    FROM `ruta_inscripcionruta` AS inscripcion_ruta
+                    LEFT JOIN `auth_user` AS usuario ON inscripcion_ruta.user_id = usuario.id
+                    LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON inscripcion_ruta.user_id = detalle_usuario.usuario_id
+                    LEFT JOIN `authtoken_token` AS token ON token.user_id = inscripcion_ruta.user_id
+                    WHERE inscripcion_ruta.ruta_id = ''' + str(id)
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
 
 class ComentarioRuta(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
