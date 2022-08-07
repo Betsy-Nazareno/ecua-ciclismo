@@ -47,7 +47,26 @@ class Ruta(ModeloBase):
             dic.append(diccionario)
 
         cursor.close()
-        # print(dic)
+        return dic
+
+    @classmethod
+    def get_ruta(cls, token_ruta):
+        cursor = connection.cursor()
+        sql = '''
+                    SELECT IF(ruta.fecha_fin <= NOW(), TRUE, FALSE) AS estado_finalizado, IF(NOW() >= ruta.fecha_inicio AND NOW() < ruta.fecha_fin, TRUE, FALSE) AS estado_en_curso, IF(ruta.fecha_inicio > NOW(), TRUE, FALSE) AS estado_no_iniciada, ruta.id, ruta.token,  CAST(ruta.fecha_creacion AS DATE) AS fecha_creacion, CAST(ruta.ultimo_cambio AS DATE) AS ultimo_cambio, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario, ruta.cancelada, ruta.motivo_cancelacion
+                    FROM ruta_ruta AS ruta
+                    LEFT JOIN `auth_user` AS usuario ON ruta.user_id = usuario.id
+                    LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON ruta.user_id = detalle_usuario.usuario_id
+                    LEFT JOIN `authtoken_token` AS token ON token.user_id = ruta.user_id
+                    WHERE ruta.token = ''' + "\'" + str(token_ruta) + "\'"
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
         return dic
 
 class InscripcionRuta(ModeloBase):

@@ -128,6 +128,45 @@ class RutaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 
+    @action(detail=False, url_path='get_ruta', methods=['post'])
+    def get_ruta(self, request):
+        try:
+            data_busqueda = request.data
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            data = Ruta.get_ruta(token_ruta=data_busqueda['token_ruta'])
+
+            for ruta in data:
+                if ruta['estado_finalizado'] == True:
+                    diccionario = {'estado_finalizado': ruta['estado_finalizado']}
+                    ruta['estado'] = diccionario
+                if ruta['estado_en_curso'] == True:
+                    diccionario = {'estado_en_curso': ruta['estado_en_curso']}
+                    ruta['estado'] = diccionario
+                if ruta['estado_no_iniciada'] == True:
+                    diccionario = {'estado_no_iniciada': ruta['estado_no_iniciada']}
+                    ruta['estado'] = diccionario
+                ruta.pop('estado_finalizado')
+                ruta.pop('estado_en_curso')
+                ruta.pop('estado_no_iniciada')
+                ruta['fecha_creacion'] = str(ruta['fecha_creacion'])
+                ruta['ultimo_cambio'] = str(ruta['ultimo_cambio'])
+                ruta['requisitos'] = DetalleRequisito.get_requisito_x_ruta(ruta['id'])
+                ruta['colaboraciones'] = DetalleColaboracion.get_colaboracion_x_ruta(ruta['id'])
+                ruta['tipoRuta'] = DetalleEtiquetaRuta.get_tiporuta_x_ruta(ruta['id'])
+                ruta['fotos'] = DetalleArchivoRuta.get_archivo_x_ruta(ruta['id'])
+                ruta['participantes'] = InscripcionRuta.get_participantes(ruta['id'])
+                if get_or_none(InscripcionRuta, ruta_id=ruta['id'], user=token.user) is not None:
+                    ruta['inscrito'] = True
+                else:
+                    ruta['inscrito'] = False
+
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
     @action(detail=False, url_path='get_rutas', methods=['get'])
     def get_rutas(self, request):
         try:
@@ -238,4 +277,18 @@ class RutaViewSet(viewsets.ModelViewSet):
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
 
-    #RUTA APROBADA FALTA
+    @action(detail=False, url_path='aprobar_ruta', methods=['post'])
+    def aprobar_ruta(self, request):
+        try:
+            data = request.data
+            from rest_framework.authtoken.models import Token
+            ruta = Ruta.objects.get(token=data["token_ruta"])
+            ruta.aprobado = True
+            ruta.save()
+            return jsonx({'status': 'success', 'message': 'Se aprobó con éxito la ruta.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
