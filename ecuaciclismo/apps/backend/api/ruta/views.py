@@ -164,6 +164,23 @@ class RutaViewSet(viewsets.ModelViewSet):
                 ruta['tipoRuta'] = DetalleEtiquetaRuta.get_tiporuta_x_ruta(ruta['id'])
                 ruta['fotos'] = DetalleArchivoRuta.get_archivo_x_ruta(ruta['id'])
                 ruta['participantes'] = InscripcionRuta.get_participantes(ruta['id'])
+                ubicacion = get_or_none(Ubicacion, id=ruta['ubicacion_id'])
+                coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
+                coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
+                dicc = {
+                    'ubicacion':{
+                        "coordinateX": {
+                            "latitude": coordenada_x.latitud,
+                            "longitude": coordenada_x.longitud
+                        },
+                        "coordinateY": {
+                            "latitude": coordenada_y.latitud,
+                            "longitude": coordenada_y.longitud
+                        }
+                    }
+                }
+                ruta['ubicacion'] = dicc
+                ruta.pop('ubicacion_id')
                 if get_or_none(InscripcionRuta, ruta_id=ruta['id'], user=token.user) is not None:
                     ruta['inscrito'] = True
                 else:
@@ -215,6 +232,23 @@ class RutaViewSet(viewsets.ModelViewSet):
                 ruta['tipoRuta'] = DetalleEtiquetaRuta.get_tiporuta_x_ruta(ruta['id'])
                 ruta['fotos'] = DetalleArchivoRuta.get_archivo_x_ruta(ruta['id'])
                 ruta['participantes'] = InscripcionRuta.get_participantes(ruta['id'])
+                ubicacion = get_or_none(Ubicacion, id=ruta['ubicacion_id'])
+                coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
+                coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
+                dicc = {
+                    'ubicacion': {
+                        "coordinateX": {
+                            "latitude": coordenada_x.latitud,
+                            "longitude": coordenada_x.longitud
+                        },
+                        "coordinateY": {
+                            "latitude": coordenada_y.latitud,
+                            "longitude": coordenada_y.longitud
+                        }
+                    }
+                }
+                ruta['ubicacion'] = dicc
+                ruta.pop('ubicacion_id')
                 if get_or_none(InscripcionRuta,ruta_id=ruta['id'],user=token.user) is not None:
                     ruta['inscrito'] = True
                 else:
