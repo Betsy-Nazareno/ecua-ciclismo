@@ -168,15 +168,13 @@ class RutaViewSet(viewsets.ModelViewSet):
                 coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
                 coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
                 dicc = {
-                    'ubicacion':{
-                        "coordinateX": {
-                            "latitude": coordenada_x.latitud,
-                            "longitude": coordenada_x.longitud
-                        },
-                        "coordinateY": {
-                            "latitude": coordenada_y.latitud,
-                            "longitude": coordenada_y.longitud
-                        }
+                    "coordinateX": {
+                        "latitude": float(coordenada_x.latitud),
+                        "longitude": float(coordenada_x.longitud)
+                    },
+                    "coordinateY": {
+                        "latitude": float(coordenada_y.latitud),
+                        "longitude": float(coordenada_y.longitud)
                     }
                 }
                 ruta['ubicacion'] = dicc
@@ -236,15 +234,13 @@ class RutaViewSet(viewsets.ModelViewSet):
                 coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
                 coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
                 dicc = {
-                    'ubicacion': {
-                        "coordinateX": {
-                            "latitude": coordenada_x.latitud,
-                            "longitude": coordenada_x.longitud
-                        },
-                        "coordinateY": {
-                            "latitude": coordenada_y.latitud,
-                            "longitude": coordenada_y.longitud
-                        }
+                    "coordinateX": {
+                        "latitude": float(coordenada_x.latitud),
+                        "longitude": float(coordenada_x.longitud)
+                    },
+                    "coordinateY": {
+                        "latitude": float(coordenada_y.latitud),
+                        "longitude": float(coordenada_y.longitud)
                     }
                 }
                 ruta['ubicacion'] = dicc
