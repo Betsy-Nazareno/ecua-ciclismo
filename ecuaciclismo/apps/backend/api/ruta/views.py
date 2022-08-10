@@ -498,3 +498,40 @@ class RutaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(e)
             return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='eliminar_ruta', methods=['post'])
+    def eliminar_ruta(self, request):
+        try:
+            data = request.data
+            from rest_framework.authtoken.models import Token
+            ruta = Ruta.objects.get(token=data["token_ruta"])
+
+            detalles_requisitos = DetalleRequisito.objects.filter(ruta=ruta)
+            for detalle_requisito in detalles_requisitos:
+                detalle_requisito.delete()
+
+            detalles_colaboracion = DetalleColaboracion.objects.filter(ruta=ruta)
+            for detalle_requisito in detalles_colaboracion:
+                detalle_requisito.delete()
+
+            detalles_etiquetaruta = DetalleEtiquetaRuta.objects.filter(ruta=ruta)
+            for detalle_etiquetaruta in detalles_etiquetaruta:
+                detalle_etiquetaruta.delete()
+
+            detalles_archivoruta = DetalleArchivoRuta.objects.filter(ruta=ruta)
+            for detalle_archivoruta in detalles_archivoruta:
+                detalle_archivoruta.delete()
+
+            detalles_inscripcionruta = InscripcionRuta.objects.filter(ruta=ruta)
+            for detalle_inscripcionruta in detalles_inscripcionruta:
+                detalle_inscripcionruta.delete()
+
+            #FALTA ELIMINAR COORDINADA Y EL RASTREO DE RUTA, EL ARCHIVO IGUAL
+
+            ruta.delete()
+            return jsonx({'status': 'success', 'message': 'Se ha eliminado con éxito la ruta.'})
+
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
