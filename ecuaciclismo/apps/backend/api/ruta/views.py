@@ -148,7 +148,7 @@ class RutaViewSet(viewsets.ModelViewSet):
                 elif ruta['estado_finalizado'] == True:
                     diccionario = {'estado_finalizado': ruta['estado_finalizado'], 'prioridad': 5}
                     ruta['estado'] = diccionario
-                elif ruta['cupos_disponibles']:
+                elif ruta['cupos_disponibles'] is not None:
                     if ruta['cupos_disponibles'] <= 0:
                         diccionario = {'estado_sin_cupos': 1, 'prioridad': 3}
                         ruta['estado'] = diccionario
@@ -225,7 +225,7 @@ class RutaViewSet(viewsets.ModelViewSet):
                 elif ruta['estado_finalizado'] == True:
                     diccionario = {'estado_finalizado': ruta['estado_finalizado'], 'prioridad': 5}
                     ruta['estado'] = diccionario
-                elif ruta['cupos_disponibles']:
+                elif ruta['cupos_disponibles'] is not None:
                     if ruta['cupos_disponibles'] <= 0:
                         diccionario = {'estado_sin_cupos': 1, 'prioridad': 3}
                         ruta['estado'] = diccionario
@@ -292,7 +292,7 @@ class RutaViewSet(viewsets.ModelViewSet):
                 inscripcion = InscripcionRuta()
                 inscripcion.user = token.user
                 ruta = Ruta.objects.get(token=data["token"])
-                if ruta.cupos_disponibles:
+                if ruta.cupos_disponibles is not None:
                     if ruta.cupos_disponibles == 0:
                         return jsonx({'status': 'error', 'message': 'No hay cupos disponibles en esta ruta.'})
                     ruta.cupos_disponibles = ruta.cupos_disponibles - 1
@@ -336,7 +336,7 @@ class RutaViewSet(viewsets.ModelViewSet):
                     detalle.delete()
             else:
                 return jsonx({'status': 'success', 'message': 'No esta registrado, no se puede eliminar.'})
-            if ruta.cupos_disponibles:
+            if ruta.cupos_disponibles is not None:
                 ruta.cupos_disponibles = ruta.cupos_disponibles + 1
                 ruta.save()
 
