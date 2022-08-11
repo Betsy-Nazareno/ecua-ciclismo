@@ -45,7 +45,7 @@ class RutaViewSet(viewsets.ModelViewSet):
                 ruta.aprobado = 1
             ruta.user = token.user
             coordenadax = Coordenada.objects.create(latitud=data['ubicacion']['coordinateX']['latitude'],longitud=data['ubicacion']['coordinateX']['longitude'])
-            coordenaday = Coordenada.objects.create(latitud=data['ubicacion']['coordinateX']['latitude'],longitud=data['ubicacion']['coordinateX']['longitude'])
+            coordenaday = Coordenada.objects.create(latitud=data['ubicacion']['coordinateY']['latitude'],longitud=data['ubicacion']['coordinateY']['longitude'])
             ubicacion = Ubicacion.objects.create(coordenada_x=coordenadax, coordenada_y=coordenaday)
             ruta.ubicacion = ubicacion
             ruta.save()
@@ -534,4 +534,99 @@ class RutaViewSet(viewsets.ModelViewSet):
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='editar_ruta', methods=['post'])
+    def editar_ruta(self, request):
+        transaction.set_autocommit(False)
+        try:
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            if detalle_usuario.admin == 0:
+                return jsonx({'status': 'error', 'message': 'Solo pueden editar rutas los administradores.'})
+
+            data = request.data
+            ruta = Ruta.objects.get(token=data["token_ruta"])
+
+            detalles_requisitos = DetalleRequisito.objects.filter(ruta=ruta)
+            for detalle_requisito in detalles_requisitos:
+                detalle_requisito.delete()
+
+            detalles_colaboracion = DetalleColaboracion.objects.filter(ruta=ruta)
+            for detalle_requisito in detalles_colaboracion:
+                detalle_requisito.delete()
+
+            detalles_etiquetaruta = DetalleEtiquetaRuta.objects.filter(ruta=ruta)
+            for detalle_etiquetaruta in detalles_etiquetaruta:
+                detalle_etiquetaruta.delete()
+
+            detalles_archivoruta = DetalleArchivoRuta.objects.filter(ruta=ruta)
+            for detalle_archivoruta in detalles_archivoruta:
+                detalle_archivoruta.delete()
+
+            #Eliminar ubicacion
+
+            ruta.nombre = data['nombre']
+            ruta.descripcion = data['descripcion']
+            ruta.estado = 'Disponible'
+            ruta.cupos_disponibles = data['cupos_disponibles']
+            ruta.lugar = data['lugar']
+            ruta.fecha_inicio = data['fecha_inicio']
+            ruta.fecha_fin = data['fecha_fin']
+            ruta.user = token.user
+            coordenadax = Coordenada.objects.create(latitud=data['ubicacion']['coordinateX']['latitude'],
+                                                    longitud=data['ubicacion']['coordinateX']['longitude'])
+            coordenaday = Coordenada.objects.create(latitud=data['ubicacion']['coordinateY']['latitude'],
+                                                    longitud=data['ubicacion']['coordinateY']['longitude'])
+            ubicacion = Ubicacion.objects.create(coordenada_x=coordenadax, coordenada_y=coordenaday)
+            ruta.ubicacion = ubicacion
+            ruta.save()
+
+            if data.get('requisitos'):
+                for requisito_token in data['requisitos']:
+                    requisito_save = get_or_none(Requisito, token=requisito_token)
+                    if requisito_save is not None:
+                        detalle_requisito = DetalleRequisito()
+                        detalle_requisito.requisito = requisito_save
+                        detalle_requisito.ruta = ruta
+                        detalle_requisito.save()
+
+            if data.get('colaboraciones'):
+                for colaboracion_token in data['colaboraciones']:
+                    colaboracion_save = get_or_none(Colaboracion, token=colaboracion_token)
+                    if colaboracion_save is not None:
+                        detalle_colaboracion = DetalleColaboracion()
+                        detalle_colaboracion.colaboracion = colaboracion_save
+                        detalle_colaboracion.ruta = ruta
+                        detalle_colaboracion.save()
+
+            if data.get('tipoRuta'):
+                for token_tipo_ruta in data['tipoRuta']:
+                    etiqueta_ruta = get_or_none(EtiquetaRuta, token=token_tipo_ruta)
+                    if etiqueta_ruta is not None:
+                        detalle_etiqueta_ruta = DetalleEtiquetaRuta()
+                        detalle_etiqueta_ruta.ruta = ruta
+                        detalle_etiqueta_ruta.etiqueta = etiqueta_ruta
+                        detalle_etiqueta_ruta.save()
+
+            if data.get('fotos'):
+                for elemento in data['fotos']:
+                    archivo = Archivo()
+                    archivo.link = elemento['link']
+                    archivo.tipo = 'imagen'
+                    archivo.path = elemento['path']
+                    archivo.save()
+                    detalle_archivo_ruta = DetalleArchivoRuta()
+                    detalle_archivo_ruta.archivo = archivo
+                    detalle_archivo_ruta.ruta = ruta
+                    detalle_archivo_ruta.save()
+
+            transaction.commit()
+            return jsonx({'status': 'success', 'message': 'Ruta editada con éxito.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
