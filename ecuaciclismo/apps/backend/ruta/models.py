@@ -17,7 +17,7 @@ class Ruta(ModeloBase):
     nombre = models.TextField()
     descripcion = models.TextField()
     estado = models.TextField()
-    cupos_disponibles = models.IntegerField()
+    cupos_disponibles = models.IntegerField(null=True)
     lugar = models.TextField()
     fecha_inicio = models.DateTimeField()
     fecha_fin = models.DateTimeField()
@@ -80,7 +80,7 @@ class InscripcionRuta(ModeloBase):
     def get_participantes(cls, id):
         cursor = connection.cursor()
         sql = '''
-                    SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto
+                    SELECT usuario.id, usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto
                     FROM `ruta_inscripcionruta` AS inscripcion_ruta
                     LEFT JOIN `auth_user` AS usuario ON inscripcion_ruta.user_id = usuario.id
                     LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON inscripcion_ruta.user_id = detalle_usuario.usuario_id
@@ -259,3 +259,8 @@ class DetalleColaboracion(ModeloBase):
 
         cursor.close()
         return dic
+
+class DetalleColaboracionInscripcion(ModeloBase):
+    colaboracion = models.ForeignKey(Colaboracion, on_delete=models.PROTECT)
+    ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)

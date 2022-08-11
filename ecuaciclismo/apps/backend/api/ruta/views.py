@@ -3,7 +3,8 @@ from rest_framework import viewsets
 
 from ecuaciclismo.apps.backend.api.ruta.serializers import RutaSerializer
 from ecuaciclismo.apps.backend.ruta.models import Ruta, Coordenada, Ubicacion, Requisito, DetalleRequisito, \
-    EtiquetaRuta, DetalleEtiquetaRuta, Archivo, DetalleArchivoRuta, Colaboracion, DetalleColaboracion, InscripcionRuta
+    EtiquetaRuta, DetalleEtiquetaRuta, Archivo, DetalleArchivoRuta, Colaboracion, DetalleColaboracion, InscripcionRuta, \
+    DetalleColaboracionInscripcion
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -32,7 +33,8 @@ class RutaViewSet(viewsets.ModelViewSet):
             ruta.nombre = data['nombre']
             ruta.descripcion = data['descripcion']
             ruta.estado = 'Disponible'
-            ruta.cupos_disponibles = data['cupos_disponibles']
+            if data.get('cupos_disponibles'):
+                ruta.cupos_disponibles = data['cupos_disponibles']
             ruta.lugar = data['lugar']
             ruta.fecha_inicio = data['fecha_inicio']
             ruta.fecha_fin = data['fecha_fin']
@@ -146,9 +148,13 @@ class RutaViewSet(viewsets.ModelViewSet):
                 elif ruta['estado_finalizado'] == True:
                     diccionario = {'estado_finalizado': ruta['estado_finalizado'], 'prioridad': 5}
                     ruta['estado'] = diccionario
-                elif ruta['cupos_disponibles'] <= 0:
-                    diccionario = {'estado_sin_cupos': 1, 'prioridad': 3}
-                    ruta['estado'] = diccionario
+                elif ruta['cupos_disponibles']:
+                    if ruta['cupos_disponibles'] <= 0:
+                        diccionario = {'estado_sin_cupos': 1, 'prioridad': 3}
+                        ruta['estado'] = diccionario
+                    elif ruta['estado_no_iniciada'] == True:
+                        diccionario = {'estado_no_iniciada': ruta['estado_no_iniciada'], 'prioridad': 2}
+                        ruta['estado'] = diccionario
                 elif ruta['estado_no_iniciada'] == True:
                     diccionario = {'estado_no_iniciada': ruta['estado_no_iniciada'], 'prioridad': 2}
                     ruta['estado'] = diccionario
@@ -164,6 +170,13 @@ class RutaViewSet(viewsets.ModelViewSet):
                 ruta['tipoRuta'] = DetalleEtiquetaRuta.get_tiporuta_x_ruta(ruta['id'])
                 ruta['fotos'] = DetalleArchivoRuta.get_archivo_x_ruta(ruta['id'])
                 ruta['participantes'] = InscripcionRuta.get_participantes(ruta['id'])
+                for participante in ruta['participantes']:
+                    detalles = DetalleColaboracionInscripcion.objects.filter(user_id=participante['id'], ruta_id=ruta['id'])
+                    colaboraciones_user = []
+                    for detalle in detalles:
+                        colaboracion = get_or_none(Colaboracion, id=detalle.colaboracion_id)
+                        colaboraciones_user.append(colaboracion.nombre)
+                    participante['colaboraciones'] = colaboraciones_user
                 ubicacion = get_or_none(Ubicacion, id=ruta['ubicacion_id'])
                 coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
                 coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
@@ -212,11 +225,15 @@ class RutaViewSet(viewsets.ModelViewSet):
                 elif ruta['estado_finalizado'] == True:
                     diccionario = {'estado_finalizado': ruta['estado_finalizado'], 'prioridad': 5}
                     ruta['estado'] = diccionario
-                elif ruta['cupos_disponibles'] <= 0:
-                    diccionario = {'estado_sin_cupos': 1, 'prioridad': 3}
-                    ruta['estado'] = diccionario
+                elif ruta['cupos_disponibles']:
+                    if ruta['cupos_disponibles'] <= 0:
+                        diccionario = {'estado_sin_cupos': 1, 'prioridad': 3}
+                        ruta['estado'] = diccionario
+                    elif ruta['estado_no_iniciada'] == True:
+                        diccionario = {'estado_no_iniciada': ruta['estado_no_iniciada'], 'prioridad': 2}
+                        ruta['estado'] = diccionario
                 elif ruta['estado_no_iniciada'] == True:
-                    diccionario = {'estado_no_iniciada':ruta['estado_no_iniciada'], 'prioridad': 2}
+                    diccionario = {'estado_no_iniciada': ruta['estado_no_iniciada'], 'prioridad': 2}
                     ruta['estado'] = diccionario
                 ruta.pop('estado_finalizado')
                 ruta.pop('estado_en_curso')
@@ -230,6 +247,13 @@ class RutaViewSet(viewsets.ModelViewSet):
                 ruta['tipoRuta'] = DetalleEtiquetaRuta.get_tiporuta_x_ruta(ruta['id'])
                 ruta['fotos'] = DetalleArchivoRuta.get_archivo_x_ruta(ruta['id'])
                 ruta['participantes'] = InscripcionRuta.get_participantes(ruta['id'])
+                for participante in ruta['participantes']:
+                    detalles = DetalleColaboracionInscripcion.objects.filter(user_id=participante['id'], ruta_id=ruta['id'])
+                    colaboraciones_user = []
+                    for detalle in detalles:
+                        colaboracion = get_or_none(Colaboracion, id=detalle.colaboracion_id)
+                        colaboraciones_user.append(colaboracion.nombre)
+                    participante['colaboraciones'] = colaboraciones_user
                 ubicacion = get_or_none(Ubicacion, id=ruta['ubicacion_id'])
                 coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
                 coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
@@ -268,16 +292,25 @@ class RutaViewSet(viewsets.ModelViewSet):
                 inscripcion = InscripcionRuta()
                 inscripcion.user = token.user
                 ruta = Ruta.objects.get(token=data["token"])
-                if ruta.cupos_disponibles == 0:
-                    return jsonx({'status': 'error', 'message': 'No hay cupos disponibles en esta ruta.'})
+                if ruta.cupos_disponibles:
+                    if ruta.cupos_disponibles == 0:
+                        return jsonx({'status': 'error', 'message': 'No hay cupos disponibles en esta ruta.'})
+                    ruta.cupos_disponibles = ruta.cupos_disponibles - 1
+                    ruta.save()
                 inscripcion_validate = get_or_none(InscripcionRuta,user=token.user, ruta=ruta)
                 if inscripcion_validate:
                     return jsonx({'status': 'error', 'message': 'Ya este usuario esta registrado en esa ruta.'})
                 inscripcion.ruta = ruta
                 inscripcion.save()
-                ruta.cupos_disponibles = ruta.cupos_disponibles - 1
-                ruta.save()
-
+                if data.get('colaboraciones'):
+                    for colaboracion_token in data['colaboraciones']:
+                        colaboracion_save = get_or_none(Colaboracion, token=colaboracion_token)
+                        if colaboracion_save is not None:
+                            detalle_colaboracion = DetalleColaboracionInscripcion()
+                            detalle_colaboracion.colaboracion = colaboracion_save
+                            detalle_colaboracion.ruta = ruta
+                            detalle_colaboracion.user = token.user
+                            detalle_colaboracion.save()
             transaction.commit()
             return jsonx({'status': 'success', 'message': 'Inscripción guardada con éxito.'})
         except ApplicationError as msg:
@@ -298,10 +331,14 @@ class RutaViewSet(viewsets.ModelViewSet):
             inscripcion = get_or_none(InscripcionRuta, user=token.user, ruta=ruta)
             if inscripcion:
                 inscripcion.delete()
+                detalles = DetalleColaboracionInscripcion.objects.filter(user=token.user, ruta=ruta)
+                for detalle in detalles:
+                    detalle.delete()
             else:
                 return jsonx({'status': 'success', 'message': 'No esta registrado, no se puede eliminar.'})
-            ruta.cupos_disponibles = ruta.cupos_disponibles + 1
-            ruta.save()
+            if ruta.cupos_disponibles:
+                ruta.cupos_disponibles = ruta.cupos_disponibles + 1
+                ruta.save()
 
             transaction.commit()
             return jsonx({'status': 'success', 'message': 'Inscripción eliminada con éxito.'})
@@ -570,7 +607,8 @@ class RutaViewSet(viewsets.ModelViewSet):
             ruta.nombre = data['nombre']
             ruta.descripcion = data['descripcion']
             ruta.estado = 'Disponible'
-            ruta.cupos_disponibles = data['cupos_disponibles']
+            if data.get('cupos_disponibles'):
+                ruta.cupos_disponibles = data['cupos_disponibles']
             ruta.lugar = data['lugar']
             ruta.fecha_inicio = data['fecha_inicio']
             ruta.fecha_fin = data['fecha_fin']
