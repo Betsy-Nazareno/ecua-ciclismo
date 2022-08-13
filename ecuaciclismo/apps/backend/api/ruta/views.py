@@ -142,6 +142,9 @@ class RutaViewSet(viewsets.ModelViewSet):
                 if ruta['cancelada'] == 1:
                     diccionario = {'estado_cancelado': 1, 'prioridad': 4}
                     ruta['estado'] = diccionario
+                elif ruta['finalizado'] == True:
+                    diccionario = {'estado_finalizado': ruta['estado_finalizado'], 'prioridad': 5}
+                    ruta['estado'] = diccionario
                 elif ruta['estado_en_curso'] == True:
                     diccionario = {'estado_en_curso': ruta['estado_en_curso'], 'prioridad': 1}
                     ruta['estado'] = diccionario
@@ -218,6 +221,9 @@ class RutaViewSet(viewsets.ModelViewSet):
             for ruta in data:
                 if ruta['cancelada'] == 1:
                     diccionario = {'estado_cancelado': 1, 'prioridad': 4}
+                    ruta['estado'] = diccionario
+                elif ruta['finalizado'] == True:
+                    diccionario = {'estado_finalizado': ruta['estado_finalizado'], 'prioridad': 5}
                     ruta['estado'] = diccionario
                 elif ruta['estado_en_curso'] == True:
                     diccionario = {'estado_en_curso': ruta['estado_en_curso'], 'prioridad': 1}
@@ -662,6 +668,26 @@ class RutaViewSet(viewsets.ModelViewSet):
 
             transaction.commit()
             return jsonx({'status': 'success', 'message': 'Ruta editada con éxito.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='finalizar_ruta', methods=['post'])
+    def finalizar_ruta(self, request):
+        try:
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            if detalle_usuario.admin == 0:
+                return jsonx({'status': 'error', 'message': 'Solo pueden finalizar las rutas los administradores.'})
+            data = request.data
+            ruta = Ruta.objects.get(token=data["token_ruta"])
+            ruta.finalizado = True
+            ruta.save()
+            return jsonx({'status': 'success', 'message': 'Ruta finalizada con éxito.'})
         except ApplicationError as msg:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(msg)})

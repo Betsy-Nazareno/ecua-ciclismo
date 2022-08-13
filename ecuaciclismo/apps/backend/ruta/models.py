@@ -26,13 +26,14 @@ class Ruta(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     cancelada = models.BooleanField(default=0)
     motivo_cancelacion = models.TextField(null=True, default=None)
+    finalizado = models.BooleanField(default=0)
 
     @classmethod
     def get_rutas(cls,admin):
         cursor = connection.cursor()
         cursor.execute("SET time_zone = '-5:00';")
         sql = '''
-                SELECT ruta.ubicacion_id, ruta.cupos_disponibles, IF(ruta.fecha_fin <= NOW(), TRUE, FALSE) AS estado_finalizado, IF(NOW() >= ruta.fecha_inicio AND NOW() < ruta.fecha_fin, TRUE, FALSE) AS estado_en_curso, IF(ruta.fecha_inicio > NOW(), TRUE, FALSE) AS estado_no_iniciada, ruta.id, ruta.token,  ruta.fecha_creacion, ruta.ultimo_cambio, ruta.fecha_inicio, ruta.fecha_fin, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario, ruta.aprobado, ruta.cancelada, ruta.motivo_cancelacion
+                SELECT ruta.finalizado, ruta.ubicacion_id, ruta.cupos_disponibles, IF(ruta.fecha_fin <= NOW(), TRUE, FALSE) AS estado_finalizado, IF(NOW() >= ruta.fecha_inicio AND NOW() < ruta.fecha_fin, TRUE, FALSE) AS estado_en_curso, IF(ruta.fecha_inicio > NOW(), TRUE, FALSE) AS estado_no_iniciada, ruta.id, ruta.token,  ruta.fecha_creacion, ruta.ultimo_cambio, ruta.fecha_inicio, ruta.fecha_fin, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario, ruta.aprobado, ruta.cancelada, ruta.motivo_cancelacion
                 FROM ruta_ruta AS ruta
                 LEFT JOIN `auth_user` AS usuario ON ruta.user_id = usuario.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON ruta.user_id = detalle_usuario.usuario_id
@@ -55,7 +56,7 @@ class Ruta(ModeloBase):
         cursor = connection.cursor()
         cursor.execute("SET time_zone = '-5:00';")
         sql = '''
-                    SELECT ruta.ubicacion_id, ruta.cupos_disponibles, IF(ruta.fecha_fin <= NOW(), TRUE, FALSE) AS estado_finalizado, IF(NOW() >= ruta.fecha_inicio AND NOW() < ruta.fecha_fin, TRUE, FALSE) AS estado_en_curso, IF(ruta.fecha_inicio > NOW(), TRUE, FALSE) AS estado_no_iniciada, ruta.id, ruta.token, ruta.fecha_creacion, ruta.ultimo_cambio, ruta.fecha_inicio, ruta.fecha_fin, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario, ruta.aprobado, ruta.cancelada, ruta.motivo_cancelacion
+                    SELECT ruta.finalizado, ruta.ubicacion_id, ruta.cupos_disponibles, IF(ruta.fecha_fin <= NOW(), TRUE, FALSE) AS estado_finalizado, IF(NOW() >= ruta.fecha_inicio AND NOW() < ruta.fecha_fin, TRUE, FALSE) AS estado_en_curso, IF(ruta.fecha_inicio > NOW(), TRUE, FALSE) AS estado_no_iniciada, ruta.id, ruta.token, ruta.fecha_creacion, ruta.ultimo_cambio, ruta.fecha_inicio, ruta.fecha_fin, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario, ruta.aprobado, ruta.cancelada, ruta.motivo_cancelacion
                     FROM ruta_ruta AS ruta
                     LEFT JOIN `auth_user` AS usuario ON ruta.user_id = usuario.id
                     LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON ruta.user_id = detalle_usuario.usuario_id
