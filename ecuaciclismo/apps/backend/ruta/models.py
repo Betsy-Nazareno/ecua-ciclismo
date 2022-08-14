@@ -75,18 +75,37 @@ class Ruta(ModeloBase):
 class InscripcionRuta(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
+    safe = models.BooleanField(null=True)
+    finalizado = models.BooleanField(default=0)
     # material_colaboracion = models.ForeignKey(MaterialColaboracion, on_delete=models.PROTECT) #pensar como implementar
 
     @classmethod
     def get_participantes(cls, id):
         cursor = connection.cursor()
         sql = '''
-                    SELECT usuario.id, usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto
+                    SELECT usuario.id, usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, inscripcion_ruta.safe
                     FROM `ruta_inscripcionruta` AS inscripcion_ruta
                     LEFT JOIN `auth_user` AS usuario ON inscripcion_ruta.user_id = usuario.id
                     LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON inscripcion_ruta.user_id = detalle_usuario.usuario_id
                     LEFT JOIN `authtoken_token` AS token ON token.user_id = inscripcion_ruta.user_id
                     WHERE inscripcion_ruta.ruta_id = ''' + str(id)
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
+    @classmethod
+    def get_not_response(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT ruta.nombre, ruta.token AS token_ruta FROM `ruta_inscripcionruta` AS inscripcion_ruta 
+                LEFT JOIN `ruta_ruta` AS ruta ON ruta.id = inscripcion_ruta.ruta_id
+                WHERE inscripcion_ruta.safe IS NULL AND (ruta.fecha_fin <= NOW() OR ruta.finalizado = 1) AND inscripcion_ruta.finalizado = 1 AND inscripcion_ruta.user_id = ''' + str(id)
         cursor.execute(sql)
         dic = []
         detalles = cursor.fetchall()

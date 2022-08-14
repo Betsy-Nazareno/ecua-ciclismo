@@ -694,3 +694,39 @@ class RutaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='safe_in_home', methods=['post'])
+    def safe_in_home(self, request):
+        transaction.set_autocommit(False)
+        try:
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            data = request.data
+            ruta = Ruta.objects.get(token=data["token_ruta"])
+            safe = data["safe"]
+            inscripcion_ruta = get_or_none(InscripcionRuta, ruta=ruta, user=token.user)
+            if inscripcion_ruta is None:
+                return jsonx({'status': 'success', 'message': 'No esta registrado este participante en esta ruta.'})
+            inscripcion_ruta.safe = safe
+            inscripcion_ruta.save()
+            transaction.commit()
+            return jsonx({'status': 'success', 'message': 'Seguro en casa.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='get_not_response', methods=['get'])
+    def get_not_response(self, request):
+        try:
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            data = InscripcionRuta.get_not_response(token.user.id)
+
+            return jsonx({'status': 'success', 'message': 'Listado de inscripciones devuelto con exito.', 'data':data})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
