@@ -271,3 +271,32 @@ class ConsejoDiaViewSet(viewsets.ModelViewSet):
             return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
+
+    #FIJADO
+    @action(detail=False, url_path='fijar_consejo', methods=['post'])
+    def fijar_consejo(self, request):
+        try:
+            data = request.data
+            consejo_dia = ConsejoDia.objects.get(token=data['token_consejo'])
+            consejo_dia.fijado = True
+            consejo_dia.save()
+
+            return jsonx({'status': 'success', 'message': 'Se fijo este consejo del día.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='remove_fijar_consejo', methods=['post'])
+    def remove_fijar_consejo(self, request):
+        try:
+            data = request.data
+            consejo_dia = ConsejoDia.objects.get(token=data['token_consejo'])
+            consejo_dia.fijado = False
+            consejo_dia.save()
+
+            return jsonx({'status': 'success', 'message': 'Se removio el fijado de este consejo del día.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})

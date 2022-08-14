@@ -102,6 +102,7 @@ class InscripcionRuta(ModeloBase):
     @classmethod
     def get_not_response(cls, id):
         cursor = connection.cursor()
+        cursor.execute("SET time_zone = '-5:00';")
         sql = '''
                 SELECT ruta.nombre, ruta.token AS token_ruta FROM `ruta_inscripcionruta` AS inscripcion_ruta 
                 LEFT JOIN `ruta_ruta` AS ruta ON ruta.id = inscripcion_ruta.ruta_id
