@@ -31,9 +31,9 @@ class Ruta(ModeloBase):
     @classmethod
     def get_rutas(cls,admin):
         cursor = connection.cursor()
-        #cursor.execute("SET time_zone = '-5:00';")
+        cursor.execute("SET time_zone = '-5:00';")
         sql = '''
-                SELECT ruta.finalizado, ruta.ubicacion_id, ruta.cupos_disponibles, IF(ruta.fecha_fin <= NOW() - INTERVAL 5 HOUR, TRUE, FALSE) AS estado_finalizado, IF(NOW() - INTERVAL 5 HOUR >= ruta.fecha_inicio AND NOW() - INTERVAL 5 HOUR < ruta.fecha_fin, TRUE, FALSE) AS estado_en_curso, IF(ruta.fecha_inicio > NOW() - INTERVAL 5 HOUR, TRUE, FALSE) AS estado_no_iniciada, ruta.id, ruta.token,  ruta.fecha_creacion, ruta.ultimo_cambio, ruta.fecha_inicio, ruta.fecha_fin, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario, ruta.aprobado, ruta.cancelada, ruta.motivo_cancelacion
+                SELECT ruta.finalizado, ruta.ubicacion_id, ruta.cupos_disponibles, IF(ruta.fecha_fin <= NOW(), TRUE, FALSE) AS estado_finalizado, IF(NOW() >= ruta.fecha_inicio AND NOW() < ruta.fecha_fin, TRUE, FALSE) AS estado_en_curso, IF(ruta.fecha_inicio > NOW(), TRUE, FALSE) AS estado_no_iniciada, ruta.id, ruta.token,  ruta.fecha_creacion, ruta.ultimo_cambio, ruta.fecha_inicio, ruta.fecha_fin, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario, ruta.aprobado, ruta.cancelada, ruta.motivo_cancelacion
                 FROM ruta_ruta AS ruta
                 LEFT JOIN `auth_user` AS usuario ON ruta.user_id = usuario.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON ruta.user_id = detalle_usuario.usuario_id
@@ -54,9 +54,9 @@ class Ruta(ModeloBase):
     @classmethod
     def get_ruta(cls, token_ruta):
         cursor = connection.cursor()
-        #cursor.execute("SET time_zone = '-5:00';")
+        cursor.execute("SET time_zone = '-5:00';")
         sql = '''
-                    SELECT ruta.finalizado, ruta.ubicacion_id, ruta.cupos_disponibles, IF(ruta.fecha_fin <= NOW() - INTERVAL 5 HOUR, TRUE, FALSE) AS estado_finalizado, IF(NOW() - INTERVAL 5 HOUR >= ruta.fecha_inicio AND NOW() - INTERVAL 5 HOUR < ruta.fecha_fin, TRUE, FALSE) AS estado_en_curso, IF(ruta.fecha_inicio > NOW() - INTERVAL 5 HOUR, TRUE, FALSE) AS estado_no_iniciada, ruta.id, ruta.token, ruta.fecha_creacion, ruta.ultimo_cambio, ruta.fecha_inicio, ruta.fecha_fin, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario, ruta.aprobado, ruta.cancelada, ruta.motivo_cancelacion
+                    SELECT ruta.finalizado, ruta.ubicacion_id, ruta.cupos_disponibles, IF(ruta.fecha_fin <= NOW(), TRUE, FALSE) AS estado_finalizado, IF(NOW() >= ruta.fecha_inicio AND NOW() < ruta.fecha_fin, TRUE, FALSE) AS estado_en_curso, IF(ruta.fecha_inicio > NOW(), TRUE, FALSE) AS estado_no_iniciada, ruta.id, ruta.token, ruta.fecha_creacion, ruta.ultimo_cambio, ruta.fecha_inicio, ruta.fecha_fin, ruta.nombre, ruta.descripcion, ruta.estado, ruta.lugar, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario, ruta.aprobado, ruta.cancelada, ruta.motivo_cancelacion
                     FROM ruta_ruta AS ruta
                     LEFT JOIN `auth_user` AS usuario ON ruta.user_id = usuario.id
                     LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON ruta.user_id = detalle_usuario.usuario_id
@@ -309,3 +309,21 @@ class DetallePuntoEncuentro(ModeloBase):
     ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
     grupo_encuentro = models.ForeignKey(GrupoEncuentro, on_delete=models.PROTECT)
     lugar = models.TextField()
+
+    @classmethod
+    def get_puntosencuentros(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT punto_encuentro.lugar, grupo_encuentro.nombre, grupo_encuentro.token
+                FROM ruta_detallepuntoencuentro AS punto_encuentro
+                LEFT JOIN ruta_grupoencuentro AS grupo_encuentro ON punto_encuentro.grupo_encuentro_id = grupo_encuentro.id
+                WHERE punto_encuentro.ruta_id = ''' + str(id)
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic

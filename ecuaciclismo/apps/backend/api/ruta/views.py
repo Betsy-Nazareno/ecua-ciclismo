@@ -1,10 +1,12 @@
 from django.db import transaction
 from rest_framework import viewsets
+from datetime import datetime
+from datetime import timedelta
 
 from ecuaciclismo.apps.backend.api.ruta.serializers import RutaSerializer
 from ecuaciclismo.apps.backend.ruta.models import Ruta, Coordenada, Ubicacion, Requisito, DetalleRequisito, \
     EtiquetaRuta, DetalleEtiquetaRuta, Archivo, DetalleArchivoRuta, Colaboracion, DetalleColaboracion, InscripcionRuta, \
-    DetalleColaboracionInscripcion, GrupoEncuentro
+    DetalleColaboracionInscripcion, GrupoEncuentro, DetallePuntoEncuentro
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -36,8 +38,12 @@ class RutaViewSet(viewsets.ModelViewSet):
             if data.get('cupos_disponibles'):
                 ruta.cupos_disponibles = data['cupos_disponibles']
             ruta.lugar = data['lugar']
-            ruta.fecha_inicio = data['fecha_inicio']
-            ruta.fecha_fin = data['fecha_fin']
+            datetime_str_inicio = data['fecha_inicio']
+            datetime_str_fin = data['fecha_fin']
+            fecha_inicio = datetime.strptime(datetime_str_inicio, '%Y-%m-%dT%H:%M:%S')
+            fecha_fin = datetime.strptime(datetime_str_fin, '%Y-%m-%dT%H:%M:%S')
+            ruta.fecha_inicio = fecha_inicio - timedelta(hours=5)
+            ruta.fecha_fin = fecha_fin - timedelta(hours=5)
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
@@ -90,6 +96,15 @@ class RutaViewSet(viewsets.ModelViewSet):
                     detalle_archivo_ruta.archivo = archivo
                     detalle_archivo_ruta.ruta = ruta
                     detalle_archivo_ruta.save()
+
+            if data.get('puntosencuentro'):
+                for elemento in data['puntosencuentro']:
+                    grupo_encuentro = get_or_none(GrupoEncuentro, token=elemento['token'])
+                    detalle_puntoencuentro = DetallePuntoEncuentro()
+                    detalle_puntoencuentro.grupo_encuentro = grupo_encuentro
+                    detalle_puntoencuentro.ruta = ruta
+                    detalle_puntoencuentro.lugar = elemento['lugar']
+                    detalle_puntoencuentro.save()
 
             transaction.commit()
             return jsonx({'status': 'success', 'message': 'Ruta guardado con éxito.'})
@@ -182,6 +197,7 @@ class RutaViewSet(viewsets.ModelViewSet):
                 ruta['colaboraciones'] = DetalleColaboracion.get_colaboracion_x_ruta(ruta['id'])
                 ruta['tipoRuta'] = DetalleEtiquetaRuta.get_tiporuta_x_ruta(ruta['id'])
                 ruta['fotos'] = DetalleArchivoRuta.get_archivo_x_ruta(ruta['id'])
+                ruta['puntosencuentros'] = DetallePuntoEncuentro.get_puntosencuentros(ruta['id'])
                 ruta['participantes'] = InscripcionRuta.get_participantes(ruta['id'])
                 for participante in ruta['participantes']:
                     detalles = DetalleColaboracionInscripcion.objects.filter(user_id=participante['id'], ruta_id=ruta['id'])
@@ -262,6 +278,7 @@ class RutaViewSet(viewsets.ModelViewSet):
                 ruta['colaboraciones'] = DetalleColaboracion.get_colaboracion_x_ruta(ruta['id'])
                 ruta['tipoRuta'] = DetalleEtiquetaRuta.get_tiporuta_x_ruta(ruta['id'])
                 ruta['fotos'] = DetalleArchivoRuta.get_archivo_x_ruta(ruta['id'])
+                ruta['puntosencuentros'] = DetallePuntoEncuentro.get_puntosencuentros(ruta['id'])
                 ruta['participantes'] = InscripcionRuta.get_participantes(ruta['id'])
                 for participante in ruta['participantes']:
                     detalles = DetalleColaboracionInscripcion.objects.filter(user_id=participante['id'], ruta_id=ruta['id'])
@@ -579,6 +596,10 @@ class RutaViewSet(viewsets.ModelViewSet):
             for detalle_inscripcionruta in detalles_inscripcionruta:
                 detalle_inscripcionruta.delete()
 
+            detalles_puntosencuentro = DetallePuntoEncuentro.objects.filter(ruta=ruta)
+            for detalle_puntoencuentro in detalles_puntosencuentro:
+                detalle_puntoencuentro.delete()
+
             #FALTA ELIMINAR COORDINADA Y EL RASTREO DE RUTA, EL ARCHIVO IGUAL
 
             ruta.delete()
@@ -618,6 +639,10 @@ class RutaViewSet(viewsets.ModelViewSet):
             for detalle_archivoruta in detalles_archivoruta:
                 detalle_archivoruta.delete()
 
+            detalles_puntosencuentro = DetallePuntoEncuentro.objects.filter(ruta=ruta)
+            for detalle_puntoencuentro in detalles_puntosencuentro:
+                detalle_puntoencuentro.delete()
+
             #Eliminar ubicacion
 
             ruta.nombre = data['nombre']
@@ -626,8 +651,12 @@ class RutaViewSet(viewsets.ModelViewSet):
             if data.get('cupos_disponibles'):
                 ruta.cupos_disponibles = data['cupos_disponibles']
             ruta.lugar = data['lugar']
-            ruta.fecha_inicio = data['fecha_inicio']
-            ruta.fecha_fin = data['fecha_fin']
+            datetime_str_inicio = data['fecha_inicio']
+            datetime_str_fin = data['fecha_fin']
+            fecha_inicio = datetime.strptime(datetime_str_inicio, '%Y-%m-%dT%H:%M:%S')
+            fecha_fin = datetime.strptime(datetime_str_fin, '%Y-%m-%dT%H:%M:%S')
+            ruta.fecha_inicio = fecha_inicio - timedelta(hours=5)
+            ruta.fecha_fin = fecha_fin - timedelta(hours=5)
             ruta.user = token.user
             coordenadax = Coordenada.objects.create(latitud=data['ubicacion']['coordinateX']['latitude'],
                                                     longitud=data['ubicacion']['coordinateX']['longitude'])
@@ -675,6 +704,15 @@ class RutaViewSet(viewsets.ModelViewSet):
                     detalle_archivo_ruta.archivo = archivo
                     detalle_archivo_ruta.ruta = ruta
                     detalle_archivo_ruta.save()
+
+            if data.get('puntosencuentro'):
+                for elemento in data['puntosencuentro']:
+                    grupo_encuentro = get_or_none(GrupoEncuentro, token=elemento['token'])
+                    detalle_puntoencuentro = DetallePuntoEncuentro()
+                    detalle_puntoencuentro.grupo_encuentro = grupo_encuentro
+                    detalle_puntoencuentro.ruta = ruta
+                    detalle_puntoencuentro.lugar = elemento['lugar']
+                    detalle_puntoencuentro.save()
 
             transaction.commit()
             return jsonx({'status': 'success', 'message': 'Ruta editada con éxito.'})
