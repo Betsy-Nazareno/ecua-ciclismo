@@ -4,7 +4,7 @@ from rest_framework import viewsets
 from ecuaciclismo.apps.backend.api.ruta.serializers import RutaSerializer
 from ecuaciclismo.apps.backend.ruta.models import Ruta, Coordenada, Ubicacion, Requisito, DetalleRequisito, \
     EtiquetaRuta, DetalleEtiquetaRuta, Archivo, DetalleArchivoRuta, Colaboracion, DetalleColaboracion, InscripcionRuta, \
-    DetalleColaboracionInscripcion
+    DetalleColaboracionInscripcion, GrupoEncuentro
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -98,6 +98,16 @@ class RutaViewSet(viewsets.ModelViewSet):
             return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
             transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='get_grupos_encuentro', methods=['get'])
+    def get_grupos_encuentro(self, request):
+        try:
+            data = GrupoEncuentro.get_grupos_encuentro()
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 
     @action(detail=False, url_path='get_requisitos', methods=['get'])
