@@ -16,10 +16,11 @@ class DetalleUsuario(ModeloBase):
     celular = models.CharField(max_length=10, null=True)
     fecha_nacimiento = models.DateField(null=True)
     genero = models.CharField(max_length=15, null=True)
-    nivel = models.IntegerField(default=0)
+    nivel = models.TextField(null=True)
     foto = models.TextField(null=True)
     admin = models.BooleanField(default=False)
     token_notificacion = models.TextField(null=True)
+    peso = models.FloatField(null=True)
 
     def __init__(self, *args, **kwargs):
         super(DetalleUsuario, self).__init__(*args, **kwargs)
@@ -42,7 +43,3 @@ class DetalleUsuario(ModeloBase):
 
         cursor.close()
         return dic
-
-class DetalleBicicleta(ModeloBase):
-    usuario = models.ForeignKey(User, on_delete=models.PROTECT)
-    bicicleta = models.ForeignKey(Bicicleta, on_delete=models.PROTECT)

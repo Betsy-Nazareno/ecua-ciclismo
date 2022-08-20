@@ -125,11 +125,6 @@ class InscripcionRuta(ModeloBase):
         cursor.close()
         return dic
 
-class ComentarioRuta(ModeloBase):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
-    comentario_texto = models.TextField()
-
 class EtiquetaRuta(ModeloBase):
     nombre = models.TextField()
 
@@ -197,15 +192,6 @@ class DetalleArchivoRuta(ModeloBase):
 
         cursor.close()
         return dic
-
-#Segunda parte
-class RastreoRuta(ModeloBase):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    ruta = models.ForeignKey(Ruta, on_delete=models.PROTECT)
-    kilometros_avanzados = models.DecimalField(decimal_places=2, max_digits=10)
-    kilometros_acumulados = models.DecimalField(decimal_places=2, max_digits=10)
-    tiempo_recorrido = models.IntegerField() #Tiempo en minutos guardar
-    ubicacion = models.ForeignKey(Ubicacion, on_delete=models.PROTECT)
 
 class Requisito(ModeloBase):
     nombre = models.TextField()
