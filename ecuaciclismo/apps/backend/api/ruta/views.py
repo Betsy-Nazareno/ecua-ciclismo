@@ -191,8 +191,8 @@ class RutaViewSet(viewsets.ModelViewSet):
                 ruta.pop('estado_no_iniciada')
                 ruta['fecha_creacion'] = str(ruta['fecha_creacion'])
                 ruta['ultimo_cambio'] = str(ruta['ultimo_cambio'])
-                ruta['fecha_inicio'] = str(ruta['fecha_inicio'])
-                ruta['fecha_fin'] = str(ruta['fecha_fin'])
+                ruta['fecha_inicio'] = ruta['fecha_inicio'].isoformat()
+                ruta['fecha_fin'] = ruta['fecha_fin'].isoformat()
                 ruta['requisitos'] = DetalleRequisito.get_requisito_x_ruta(ruta['id'])
                 ruta['colaboraciones'] = DetalleColaboracion.get_colaboracion_x_ruta(ruta['id'])
                 ruta['tipoRuta'] = DetalleEtiquetaRuta.get_tiporuta_x_ruta(ruta['id'])
@@ -272,8 +272,8 @@ class RutaViewSet(viewsets.ModelViewSet):
                 ruta.pop('estado_no_iniciada')
                 ruta['fecha_creacion'] = str(ruta['fecha_creacion'])
                 ruta['ultimo_cambio'] = str(ruta['ultimo_cambio'])
-                ruta['fecha_inicio'] = str(ruta['fecha_inicio'])
-                ruta['fecha_fin'] = str(ruta['fecha_fin'])
+                ruta['fecha_inicio'] = ruta['fecha_inicio'].isoformat()
+                ruta['fecha_fin'] = ruta['fecha_fin'].isoformat()
                 ruta['requisitos'] = DetalleRequisito.get_requisito_x_ruta(ruta['id'])
                 ruta['colaboraciones'] = DetalleColaboracion.get_colaboracion_x_ruta(ruta['id'])
                 ruta['tipoRuta'] = DetalleEtiquetaRuta.get_tiporuta_x_ruta(ruta['id'])
@@ -777,4 +777,59 @@ class RutaViewSet(viewsets.ModelViewSet):
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='finalizar_rastreo', methods=['post'])
+    def finalizar_rastreo(self, request):
+        transaction.set_autocommit(False)
+        try:
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            data = request.data
+            ruta = Ruta.objects.get(token=data["token_ruta"])
+            kilometros = data["kilometros"]
+            kilocalorias = data["kilocalorias"]
+            velocidad = data["velocidad"]
+            horas = data["horas"]
+            inscripcion_ruta = get_or_none(InscripcionRuta, ruta=ruta, user=token.user)
+            if inscripcion_ruta is None:
+                return jsonx({'status': 'success', 'message': 'No esta registrado este participante en esta ruta.'})
+            inscripcion_ruta.kilometros = kilometros
+            inscripcion_ruta.kilocalorias = kilocalorias
+            inscripcion_ruta.velocidad = velocidad
+            inscripcion_ruta.horas = horas
+            inscripcion_ruta.finalizado = True
+            inscripcion_ruta.save()
+            transaction.commit()
+            return jsonx({'status': 'success', 'message': 'Datos de rastreo guardado con éxito.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='adicional_rastreo', methods=['post'])
+    def adicional_rastreo(self, request):
+        transaction.set_autocommit(False)
+        try:
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            data = request.data
+            ruta = Ruta.objects.get(token=data["token_ruta"])
+            estrellas = data["estrellas"]
+            comentario = data["comentario"]
+            inscripcion_ruta = get_or_none(InscripcionRuta, ruta=ruta, user=token.user)
+            if inscripcion_ruta is None:
+                return jsonx({'status': 'success', 'message': 'No esta registrado este participante en esta ruta.'})
+            inscripcion_ruta.estrellas = estrellas
+            inscripcion_ruta.comentario = comentario
+            inscripcion_ruta.save()
+            transaction.commit()
+            return jsonx({'status': 'success', 'message': 'Datos adicionales de la inscripción.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
