@@ -21,6 +21,7 @@ class DetalleUsuario(ModeloBase):
     admin = models.BooleanField(default=False)
     token_notificacion = models.TextField(null=True)
     peso = models.FloatField(null=True)
+    bicicleta = models.OneToOneField(Bicicleta, on_delete=models.PROTECT, null=True)
 
     def __init__(self, *args, **kwargs):
         super(DetalleUsuario, self).__init__(*args, **kwargs)
