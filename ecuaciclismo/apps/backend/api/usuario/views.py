@@ -69,8 +69,6 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             detalle_usuario.usuario = user
             if request.data.get('foto'):
                 detalle_usuario.foto = data['foto']
-            if request.data.get('celular'):
-                detalle_usuario.celular = data['celular']
             if request.data.get('genero'):
                 detalle_usuario.genero = data['genero']
             if request.data.get('token_notificacion'):
@@ -123,6 +121,23 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
 
+    # @action(detail=False, url_path='get_detalle_usuario', methods=['get'])
+    # def get_detalle_usuario(self, request):
+    #     try:
+    #         data = DetalleUsuario.token_notificacion_users(admin='1')
+    #
+    #         return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+    #
+    #     except ApplicationError as msg:
+    #         transaction.rollback()
+    #         return jsonx({'status': 'error', 'message': str(msg)})
+    #     except ValidationError as msg:
+    #         transaction.rollback()
+    #         return jsonx({'status': 'error', 'message': list(msg)})
+    #     except Exception as e:
+    #         transaction.rollback()
+    #         return jsonx({'status': 'error', 'message': str(e)})
+
 
 class DetalleUsuarioViewSet(viewsets.ModelViewSet):
     serializer_class = DetalleUsuarioSerializer
@@ -158,7 +173,6 @@ class CustomAuthToken(ObtainAuthToken):
             'is_superuser': usuario.is_superuser,
             'admin': detalle_usuario.admin,
             'foto': detalle_usuario.foto,
-            'celular': detalle_usuario.celular,
             'genero': detalle_usuario.genero,
             'peso': detalle_usuario.peso,
             'token_notificacion': detalle_usuario.token_notificacion,
