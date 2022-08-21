@@ -128,11 +128,12 @@ class InscripcionRuta(ModeloBase):
     def get_informacion_ruta_finalizada(cls, ruta_id, user_id):
         cursor = connection.cursor()
         sql = '''
-                SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, inscripcion_ruta.comentario, inscripcion_ruta.estrellas, inscripcion_ruta.horas, inscripcion_ruta.kilocalorias, inscripcion_ruta.kilometros, inscripcion_ruta.velocidad   
+                SELECT ruta.nombre, usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, inscripcion_ruta.comentario, inscripcion_ruta.estrellas, inscripcion_ruta.horas, inscripcion_ruta.kilocalorias, inscripcion_ruta.kilometros, inscripcion_ruta.velocidad   
                 FROM `ruta_inscripcionruta` AS inscripcion_ruta
                 LEFT JOIN `auth_user` AS usuario ON inscripcion_ruta.user_id = usuario.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON inscripcion_ruta.user_id = detalle_usuario.usuario_id
                 LEFT JOIN `authtoken_token` AS token ON token.user_id = inscripcion_ruta.user_id
+                LEFT JOIN `ruta_ruta` AS ruta ON ruta.id = inscripcion_ruta.ruta_id
                 WHERE inscripcion_ruta.ruta_id = ''' + str(ruta_id) + ''' AND inscripcion_ruta.user_id = ''' + str(user_id)
         cursor.execute(sql)
         dic = []

@@ -12,7 +12,8 @@ class Bicicleta(ModeloBase):
 
 class DetalleUsuario(ModeloBase):
     usuario = models.OneToOneField(User, on_delete=models.PROTECT)
-    fecha_nacimiento = models.DateField(null=True)
+    #fecha_nacimiento = models.DateField(null=True)
+    edad = models.IntegerField(null=True)
     genero = models.CharField(max_length=15, null=True)
     nivel = models.TextField(null=True)
     foto = models.TextField(null=True)

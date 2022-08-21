@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 
 from ecuaciclismo.apps.backend.api.usuario.serializers import DetalleUsuarioSerializer, \
     UsuarioRecuperarClaveSerializer
-from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario
+from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario, Bicicleta
 from ecuaciclismo.base.models import RegistroCambiarClave
 from ecuaciclismo.helpers.jsonx import jsonx
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
@@ -137,6 +137,49 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     #     except Exception as e:
     #         transaction.rollback()
     #         return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='editar_usuario', methods=['post'])
+    def editar_usuario(self, request):
+        transaction.set_autocommit(False)
+        try:
+            data = request.data
+            from django.contrib.auth.models import User
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            user = token.user
+            user.username = data['usuario']
+            user.email = data['email']
+            user.first_name = data['nombre']
+            user.last_name = data['apellido']
+            user.save()
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            detalle_usuario.foto = data['foto']
+            detalle_usuario.genero = data['genero']
+            detalle_usuario.edad = data['edad']
+            detalle_usuario.nivel = data['nivel']
+            detalle_usuario.peso = data['peso']
+            if detalle_usuario.bicicleta is None:
+                bicicleta = Bicicleta()
+            else:
+                bicicleta = Bicicleta.objects.get(id=detalle_usuario.bicicleta_id)
+            bicicleta.marca = data['marca']
+            bicicleta.tipo = data['tipo']
+            bicicleta.codigo = data['codigo']
+            bicicleta.foto_bicicleta = data['foto_bicicleta']
+            bicicleta.save()
+            detalle_usuario.bicicleta = bicicleta
+            detalle_usuario.save()
+            transaction.commit()
+            return jsonx({'status': 'success', 'message': 'Se ha editado un usuario con éxito.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
 
 
 class DetalleUsuarioViewSet(viewsets.ModelViewSet):
