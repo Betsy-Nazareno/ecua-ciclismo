@@ -160,6 +160,8 @@ class CustomAuthToken(ObtainAuthToken):
             'foto': detalle_usuario.foto,
             'celular': detalle_usuario.celular,
             'genero': detalle_usuario.genero,
+            'peso': detalle_usuario.peso,
+            'token_notificacion': detalle_usuario.token_notificacion,
             # 'avatar': settings.URL_DJANGO_SERVER + reverse(servir_imagen_perfil, args=[user.detalleusuario.token_publico]),
             # 'socialMedia': False
         }
