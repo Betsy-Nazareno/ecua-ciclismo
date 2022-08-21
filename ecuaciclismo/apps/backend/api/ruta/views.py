@@ -42,8 +42,8 @@ class RutaViewSet(viewsets.ModelViewSet):
             datetime_str_fin = data['fecha_fin']
             fecha_inicio = datetime.strptime(datetime_str_inicio, '%Y-%m-%dT%H:%M:%S')
             fecha_fin = datetime.strptime(datetime_str_fin, '%Y-%m-%dT%H:%M:%S')
-            ruta.fecha_inicio = fecha_inicio - timedelta(hours=5)
-            ruta.fecha_fin = fecha_fin - timedelta(hours=5)
+            ruta.fecha_inicio = fecha_inicio
+            ruta.fecha_fin = fecha_fin
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
@@ -655,8 +655,8 @@ class RutaViewSet(viewsets.ModelViewSet):
             datetime_str_fin = data['fecha_fin']
             fecha_inicio = datetime.strptime(datetime_str_inicio, '%Y-%m-%dT%H:%M:%S')
             fecha_fin = datetime.strptime(datetime_str_fin, '%Y-%m-%dT%H:%M:%S')
-            ruta.fecha_inicio = fecha_inicio - timedelta(hours=5)
-            ruta.fecha_fin = fecha_fin - timedelta(hours=5)
+            ruta.fecha_inicio = fecha_inicio
+            ruta.fecha_fin = fecha_fin
             ruta.user = token.user
             coordenadax = Coordenada.objects.create(latitud=data['ubicacion']['coordinateX']['latitude'],
                                                     longitud=data['ubicacion']['coordinateX']['longitude'])
