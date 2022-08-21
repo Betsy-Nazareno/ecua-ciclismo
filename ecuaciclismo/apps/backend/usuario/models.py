@@ -1,15 +1,14 @@
 from django.contrib.auth.models import User
 from django.db import models, connection
 
+from ecuaciclismo.apps.backend.ruta.models import EtiquetaRuta
 from ecuaciclismo.helpers.models import ModeloBase
 
 class Bicicleta(ModeloBase):
-    marca = models.CharField(max_length=20)
-    modelo = models.CharField(max_length=50)
-    anio = models.IntegerField(null=True)
-    estado = models.CharField(max_length=50)
-    tipo = models.CharField(max_length=20)
-    foto_bicicleta = models.TextField()
+    marca = models.CharField(max_length=20, null=True)
+    tipo = models.CharField(max_length=20, null=True)
+    codigo = models.TextField(null=True)
+    foto_bicicleta = models.TextField(null=True)
 
 class DetalleUsuario(ModeloBase):
     usuario = models.OneToOneField(User, on_delete=models.PROTECT)
@@ -44,3 +43,7 @@ class DetalleUsuario(ModeloBase):
 
         cursor.close()
         return dic
+
+class DetalleEtiquetaRutaUsuario(ModeloBase):
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    etiqueta = models.ForeignKey(EtiquetaRuta, on_delete=models.PROTECT)
