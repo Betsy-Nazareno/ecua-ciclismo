@@ -145,6 +145,24 @@ class InscripcionRuta(ModeloBase):
         cursor.close()
         return dic
 
+    @classmethod
+    def get_ruta_inscripcion(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+            SELECT ruta.token FROM `ruta_inscripcionruta` AS inscripcion_ruta
+            LEFT JOIN `ruta_ruta` AS ruta ON ruta.id = inscripcion_ruta.ruta_id
+            WHERE inscripcion_ruta.finalizado = 1 AND inscripcion_ruta.user_id = ''' + str(id)
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
+
 class EtiquetaRuta(ModeloBase):
     nombre = models.TextField()
 

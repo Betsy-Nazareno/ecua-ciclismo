@@ -17,7 +17,8 @@ from rest_framework.views import APIView
 
 from ecuaciclismo.apps.backend.api.usuario.serializers import DetalleUsuarioSerializer, \
     UsuarioRecuperarClaveSerializer
-from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario, Bicicleta
+from ecuaciclismo.apps.backend.ruta.models import InscripcionRuta
+from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario, Bicicleta, DetalleEtiquetaRutaUsuario
 from ecuaciclismo.base.models import RegistroCambiarClave
 from ecuaciclismo.helpers.jsonx import jsonx
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
@@ -171,6 +172,27 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             detalle_usuario.save()
             transaction.commit()
             return jsonx({'status': 'success', 'message': 'Se ha editado un usuario con éxito.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='get_detalle_usuario', methods=['get'])
+    def get_detalle_usuario(self, request):
+        try:
+            from django.contrib.auth.models import User
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            datos = DetalleUsuario.get_all_informacion(id=token.user.id)
+            for data in datos:
+                data['etiquetas'] = DetalleEtiquetaRutaUsuario.get_etiqueta_usuario(id=token.user.id)
+                data['token_rutas'] = InscripcionRuta.get_ruta_inscripcion(id=token.user.id)
+            return jsonx({'status': 'success', 'message': 'Información del usuario completa.', 'data': datos})
         except ApplicationError as msg:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(msg)})
