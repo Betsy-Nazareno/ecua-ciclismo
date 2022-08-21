@@ -833,3 +833,22 @@ class RutaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='get_informacion_individual_ruta', methods=['post'])
+    def get_informacion_individual_ruta(self, request):
+        try:
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            data = request.data
+            ruta = Ruta.objects.get(token=data["token_ruta"])
+            inscripcion_ruta = get_or_none(InscripcionRuta, ruta=ruta, user=token.user)
+            if inscripcion_ruta is None:
+                return jsonx({'status': 'success', 'message': 'No esta registrado este participante en esta ruta.'})
+            informacion_individual = InscripcionRuta.get_informacion_ruta_finalizada(ruta_id=ruta.id, user_id=token.user.id)
+            return jsonx({'status': 'success', 'message': 'Información adicional individual.', 'data': informacion_individual})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
