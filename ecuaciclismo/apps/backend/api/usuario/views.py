@@ -208,7 +208,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
                 for ruta in data['rutas']:
                     detallearchivo = DetalleArchivoRuta.objects.filter(ruta_id=ruta['id']).first()
                     archivo = Archivo.objects.get(id=detallearchivo.archivo_id)
-                    ruta["path"] = archivo.path
+                    ruta["link"] = archivo.link
                     ruta.pop("id")
             return jsonx({'status': 'success', 'message': 'Información del usuario completa.', 'data': datos})
         except ApplicationError as msg:
