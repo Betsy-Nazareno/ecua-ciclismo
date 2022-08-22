@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 
 from ecuaciclismo.apps.backend.api.usuario.serializers import DetalleUsuarioSerializer, \
     UsuarioRecuperarClaveSerializer
-from ecuaciclismo.apps.backend.ruta.models import InscripcionRuta, DetalleArchivoRuta, Archivo
+from ecuaciclismo.apps.backend.ruta.models import InscripcionRuta, DetalleArchivoRuta, Archivo, EtiquetaRuta
 from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario, Bicicleta, DetalleEtiquetaRutaUsuario
 from ecuaciclismo.base.models import RegistroCambiarClave
 from ecuaciclismo.helpers.jsonx import jsonx
@@ -170,6 +170,19 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             bicicleta.save()
             detalle_usuario.bicicleta = bicicleta
             detalle_usuario.save()
+
+            detalles_etiquetarutausuario = DetalleEtiquetaRutaUsuario.objects.filter(user=user)
+            for detalle_etiquetarutausuario in detalles_etiquetarutausuario:
+                detalle_etiquetarutausuario.delete()
+
+            if data.get('rutas_interes'):
+                for token_tipo_ruta in data['rutas_interes']:
+                    etiqueta_ruta = get_or_none(EtiquetaRuta, token=token_tipo_ruta)
+                    if etiqueta_ruta is not None:
+                        detalle_etiqueta_ruta = DetalleEtiquetaRutaUsuario()
+                        detalle_etiqueta_ruta.user = token.user
+                        detalle_etiqueta_ruta.etiqueta = etiqueta_ruta
+                        detalle_etiqueta_ruta.save()
             transaction.commit()
             return jsonx({'status': 'success', 'message': 'Se ha editado un usuario con éxito.'})
         except ApplicationError as msg:
