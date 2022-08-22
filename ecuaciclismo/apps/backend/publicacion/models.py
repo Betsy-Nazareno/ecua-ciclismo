@@ -42,7 +42,7 @@ class Publicacion(ModeloBase):
     def get_publicacion(cls, token_publicacion):
         cursor = connection.cursor()
         sql = '''
-                SELECT publicacion.id,  CAST(publicacion.fecha_creacion AS DATE) AS fecha_creacion, CAST(publicacion.ultimo_cambio AS DATE) AS ultimo_cambio, titulo, descripcion, publicacion.token, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario
+                SELECT detalle_usuario.token_notificacion, publicacion.id,  CAST(publicacion.fecha_creacion AS DATE) AS fecha_creacion, CAST(publicacion.ultimo_cambio AS DATE) AS ultimo_cambio, titulo, descripcion, publicacion.token, usuario.username, usuario.email, usuario.first_name, usuario.last_name, detalle_usuario.foto, token.key AS token_usuario
                 FROM publicacion_publicacion AS publicacion
                 LEFT JOIN `auth_user` AS usuario ON publicacion.user_id = usuario.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON publicacion.user_id = detalle_usuario.usuario_id
