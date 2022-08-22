@@ -221,6 +221,52 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
 
+    @action(detail=False, url_path='get_usuarios', methods=['get'])
+    def get_usuarios(self, request):
+        try:
+            from django.contrib.auth.models import User
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            if detalle_usuario.admin == 0:
+                return jsonx({'status': 'error', 'message': 'Solo puede acceder a los usuarios un administrador.'})
+            datos = DetalleUsuario.get_all_users()
+            return jsonx({'status': 'success', 'message': 'Información del usuario completa.', 'data': datos})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='setear_admin', methods=['post'])
+    def setear_admin(self, request):
+        try:
+            data = request.data
+            from django.contrib.auth.models import User
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            if detalle_usuario.admin == 0:
+                return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
+            usuario = DetalleUsuario.objects.get(token=data['token_usuario'])
+            usuario.admin = data['admin']
+            usuario.save()
+            return jsonx({'status': 'success', 'message': 'Se ha modificado con éxito el usuario.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
+
 
 class DetalleUsuarioViewSet(viewsets.ModelViewSet):
     serializer_class = DetalleUsuarioSerializer

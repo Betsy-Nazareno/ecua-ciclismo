@@ -63,6 +63,23 @@ class DetalleUsuario(ModeloBase):
         cursor.close()
         return dic
 
+    @classmethod
+    def get_all_users(cls):
+        cursor = connection.cursor()
+        sql = '''
+        SELECT detalle_usuario.admin, detalle_usuario.token AS token_usuario, usuario.first_name, usuario.last_name, detalle_usuario.foto FROM `usuario_detalleusuario` AS detalle_usuario
+        LEFT JOIN `auth_user` AS usuario ON detalle_usuario.usuario_id = usuario.id'''
+
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
 class DetalleEtiquetaRutaUsuario(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     etiqueta = models.ForeignKey(EtiquetaRuta, on_delete=models.PROTECT)
