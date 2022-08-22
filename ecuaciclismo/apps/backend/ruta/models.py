@@ -149,7 +149,7 @@ class InscripcionRuta(ModeloBase):
     def get_ruta_inscripcion(cls, id):
         cursor = connection.cursor()
         sql = '''
-            SELECT ruta.id, ruta.token FROM `ruta_inscripcionruta` AS inscripcion_ruta
+            SELECT ruta.id, ruta.token, ruta.nombre FROM `ruta_inscripcionruta` AS inscripcion_ruta
             LEFT JOIN `ruta_ruta` AS ruta ON ruta.id = inscripcion_ruta.ruta_id
             WHERE inscripcion_ruta.finalizado = 1 AND inscripcion_ruta.user_id = ''' + str(id)
         cursor.execute(sql)
