@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 
 from ecuaciclismo.apps.backend.api.usuario.serializers import DetalleUsuarioSerializer, \
     UsuarioRecuperarClaveSerializer
-from ecuaciclismo.apps.backend.ruta.models import InscripcionRuta
+from ecuaciclismo.apps.backend.ruta.models import InscripcionRuta, DetalleArchivoRuta, Archivo
 from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario, Bicicleta, DetalleEtiquetaRutaUsuario
 from ecuaciclismo.base.models import RegistroCambiarClave
 from ecuaciclismo.helpers.jsonx import jsonx
@@ -191,7 +191,12 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             datos = DetalleUsuario.get_all_informacion(id=token.user.id)
             for data in datos:
                 data['etiquetas'] = DetalleEtiquetaRutaUsuario.get_etiqueta_usuario(id=token.user.id)
-                data['token_rutas'] = InscripcionRuta.get_ruta_inscripcion(id=token.user.id)
+                data['rutas'] = InscripcionRuta.get_ruta_inscripcion(id=token.user.id)
+                for ruta in data['rutas']:
+                    detallearchivo = DetalleArchivoRuta.objects.filter(ruta_id=ruta['id']).first()
+                    archivo = Archivo.objects.get(id=detallearchivo.archivo_id)
+                    ruta["path"] = archivo.path
+                    ruta.pop("id")
             return jsonx({'status': 'success', 'message': 'Información del usuario completa.', 'data': datos})
         except ApplicationError as msg:
             transaction.rollback()
