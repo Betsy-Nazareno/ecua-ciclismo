@@ -168,7 +168,7 @@ class RutaViewSet(viewsets.ModelViewSet):
                     diccionario = {'estado_cancelado': 1, 'prioridad': 4}
                     ruta['estado'] = diccionario
                 elif ruta['finalizado'] == True:
-                    diccionario = {'estado_finalizado': ruta['estado_finalizado'], 'prioridad': 5}
+                    diccionario = {'estado_finalizado': 1, 'prioridad': 5}
                     ruta['estado'] = diccionario
                 elif ruta['estado_en_curso'] == True:
                     diccionario = {'estado_en_curso': ruta['estado_en_curso'], 'prioridad': 1}
@@ -251,7 +251,7 @@ class RutaViewSet(viewsets.ModelViewSet):
                     diccionario = {'estado_cancelado': 1, 'prioridad': 4}
                     ruta['estado'] = diccionario
                 elif ruta['finalizado'] == True:
-                    diccionario = {'estado_finalizado': ruta['estado_finalizado'], 'prioridad': 5}
+                    diccionario = {'estado_finalizado': 1, 'prioridad': 5}
                     ruta['estado'] = diccionario
                 elif ruta['estado_en_curso'] == True:
                     diccionario = {'estado_en_curso': ruta['estado_en_curso'], 'prioridad': 1}

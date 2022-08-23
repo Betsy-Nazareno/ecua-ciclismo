@@ -227,9 +227,9 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             from django.contrib.auth.models import User
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
-            if detalle_usuario.admin == 0:
-                return jsonx({'status': 'error', 'message': 'Solo puede acceder a los usuarios un administrador.'})
+            #detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            #if detalle_usuario.admin == 0:
+            #    return jsonx({'status': 'error', 'message': 'Solo puede acceder a los usuarios un administrador.'})
             datos = DetalleUsuario.get_all_users()
             return jsonx({'status': 'success', 'message': 'Información del usuario completa.', 'data': datos})
         except ApplicationError as msg:
