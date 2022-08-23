@@ -90,7 +90,7 @@ class InscripcionRuta(ModeloBase):
     def get_participantes(cls, id):
         cursor = connection.cursor()
         sql = '''
-                    SELECT usuario.id, usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, inscripcion_ruta.safe
+                    SELECT usuario.id, usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, inscripcion_ruta.safe, inscripcion_ruta.estrellas, inscripcion_ruta.comentario
                     FROM `ruta_inscripcionruta` AS inscripcion_ruta
                     LEFT JOIN `auth_user` AS usuario ON inscripcion_ruta.user_id = usuario.id
                     LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON inscripcion_ruta.user_id = detalle_usuario.usuario_id
