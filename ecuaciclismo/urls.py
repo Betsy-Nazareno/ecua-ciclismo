@@ -25,6 +25,7 @@ from ecuaciclismo.apps.backend.api.api_router import router
 from ecuaciclismo.apps.backend.api.usuario.views import CustomAuthToken, Logout
 
 urlpatterns = [
+    path('politica/', views.current_datetime),
     path('admin/', admin.site.urls),
     path("update_server/", views.update, name="update"),
     # url(r'^(?P<application>[a-z1234567890/_-]+)/(?P<folder>media|erplib/media)/$', mediaurl, name='mediaurl'),

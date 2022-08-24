@@ -1,5 +1,6 @@
 import git
 from django.shortcuts import render
+from datetime import datetime
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import logging
@@ -24,3 +25,8 @@ def update(request):
         return HttpResponse("Updated code on PythonAnywhere")
     else:
         return HttpResponse("Couldn't update the code on PythonAnywhere")
+
+def current_datetime(request):
+    #now = datetime.now()
+    #html = "<html><body>It is now %s.</body></html>" % now
+    return render(request, "politica.html")
