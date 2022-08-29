@@ -195,13 +195,19 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
 
-    @action(detail=False, url_path='get_detalle_usuario', methods=['get'])
+    @action(detail=False, url_path='get_detalle_usuario', methods=['post'])
     def get_detalle_usuario(self, request):
         try:
+            data = request.data
             from django.contrib.auth.models import User
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            datos = DetalleUsuario.get_all_informacion(id=token.user.id)
+            id_user = get_or_none(DetalleUsuario, token=data['token_usuario'])
+            datos = DetalleUsuario.get_all_informacion(id_user.usuario_id)
+            detalle = get_or_none(DetalleUsuario, usuario=token.user)
+            if detalle.admin == 0:
+                return jsonx({'status': 'error', 'message': 'Debe ser administrador para recibir la data.'})
+
             for data in datos:
                 data['etiquetas'] = DetalleEtiquetaRutaUsuario.get_etiqueta_usuario(id=token.user.id)
                 data['rutas'] = InscripcionRuta.get_ruta_inscripcion(id=token.user.id)
