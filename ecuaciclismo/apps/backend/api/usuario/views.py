@@ -293,8 +293,9 @@ class CustomAuthToken(ObtainAuthToken):
         # except:
         #     return HttpResponse(status=400, content=json.dumps({"non_field_errors":["No puede iniciar sesión con las credenciales proporcionadas."]}), content_type="application/json")
         detalle_usuario = get_or_none(DetalleUsuario, usuario=usuario)
-        detalle_usuario.token_notificacion = request.data.get("user").get("token_notificacion")
-        detalle_usuario.save()
+        if (request.data.get("user").get("token_notificacion")):
+            detalle_usuario.token_notificacion = request.data.get("user").get("token_notificacion")
+            detalle_usuario.save()
         # user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=usuario)
         response = {
