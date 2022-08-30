@@ -845,10 +845,11 @@ class RutaViewSet(viewsets.ModelViewSet):
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             data = request.data
             ruta = Ruta.objects.get(token=data["token_ruta"])
-            inscripcion_ruta = get_or_none(InscripcionRuta, ruta=ruta, user=token.user)
+            detalle_usuario = get_or_none(DetalleUsuario, token=data["token_usuario"])
+            inscripcion_ruta = get_or_none(InscripcionRuta, ruta=ruta, user=detalle_usuario.usuario)
             if inscripcion_ruta is None:
                 return jsonx({'status': 'success', 'message': 'No esta registrado este participante en esta ruta.'})
-            informacion_individual = InscripcionRuta.get_informacion_ruta_finalizada(ruta_id=ruta.id, user_id=token.user.id)
+            informacion_individual = InscripcionRuta.get_informacion_ruta_finalizada(ruta_id=ruta.id, user_id=detalle_usuario.usuario.id)
             return jsonx({'status': 'success', 'message': 'Información adicional individual.', 'data': informacion_individual})
         except ApplicationError as msg:
             transaction.rollback()
