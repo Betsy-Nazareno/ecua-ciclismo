@@ -209,8 +209,8 @@ class UsuarioViewSet(viewsets.ModelViewSet):
                 return jsonx({'status': 'error', 'message': 'Debe ser administrador para recibir la data.'})
 
             for data in datos:
-                data['etiquetas'] = DetalleEtiquetaRutaUsuario.get_etiqueta_usuario(id=token.user.id)
-                data['rutas'] = InscripcionRuta.get_ruta_inscripcion(id=token.user.id)
+                data['etiquetas'] = DetalleEtiquetaRutaUsuario.get_etiqueta_usuario(id=id_user.id)
+                data['rutas'] = InscripcionRuta.get_ruta_inscripcion(id=id_user.id)
                 for ruta in data['rutas']:
                     detallearchivo = DetalleArchivoRuta.objects.filter(ruta_id=ruta['id']).first()
                     archivo = Archivo.objects.get(id=detallearchivo.archivo_id)
@@ -299,6 +299,7 @@ class CustomAuthToken(ObtainAuthToken):
             'token': token.key,
             # 'token_publico': user.detalleusuario.token_publico, #para no hacer visible el ID se usa token de DetalleUsuario
             # 'id': str(user.id),
+            'id_usuario': detalle_usuario.token,
             'username': usuario.username,
             'first_name': usuario.first_name,
             'last_name': usuario.last_name,

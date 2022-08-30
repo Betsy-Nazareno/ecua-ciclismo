@@ -48,7 +48,7 @@ class DetalleUsuario(ModeloBase):
     def get_all_informacion(cls, id):
         cursor = connection.cursor()
         sql = '''
-                SELECT bicicleta.marca, bicicleta.tipo, bicicleta.foto_bicicleta, bicicleta.codigo, detalle_usuario.genero, detalle_usuario.nivel, detalle_usuario.foto, detalle_usuario.peso, detalle_usuario.edad, detalle_usuario.token_notificacion, usuario.username, usuario.first_name, usuario.last_name, usuario.email FROM `usuario_detalleusuario` AS detalle_usuario
+                SELECT detalle_usuario.admin, bicicleta.marca, bicicleta.tipo, bicicleta.foto_bicicleta, bicicleta.codigo, detalle_usuario.genero, detalle_usuario.nivel, detalle_usuario.foto, detalle_usuario.peso, detalle_usuario.edad, detalle_usuario.token_notificacion, usuario.username, usuario.first_name, usuario.last_name, usuario.email FROM `usuario_detalleusuario` AS detalle_usuario
                 LEFT JOIN `auth_user` AS usuario ON detalle_usuario.usuario_id = usuario.id
                 LEFT JOIN `usuario_bicicleta` AS bicicleta ON bicicleta.id = detalle_usuario.bicicleta_id
                 WHERE detalle_usuario.usuario_id = ''' + str(id)
