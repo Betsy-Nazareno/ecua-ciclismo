@@ -207,8 +207,11 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             #print(id_user.id)
             datos = DetalleUsuario.get_all_informacion(id_user.usuario_id)
             detalle = get_or_none(DetalleUsuario, usuario=token.user)
-            if detalle.admin == 0:
-                return jsonx({'status': 'error', 'message': 'Debe ser administrador para recibir la data.'})
+            #print(token.user.id)
+            #print(id_user.usuario.id)
+            if token.user.id != id_user.usuario.id:
+                if detalle.admin == 0:
+                    return jsonx({'status': 'error', 'message': 'Debe ser administrador para recibir la data.'})
 
             for data in datos:
                 data['etiquetas'] = DetalleEtiquetaRutaUsuario.get_etiqueta_usuario(id=id_user.usuario.id)
