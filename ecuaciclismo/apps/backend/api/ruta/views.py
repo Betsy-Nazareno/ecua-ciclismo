@@ -37,6 +37,7 @@ class RutaViewSet(viewsets.ModelViewSet):
             ruta.estado = 'Disponible'
             if data.get('cupos_disponibles'):
                 ruta.cupos_disponibles = data['cupos_disponibles']
+                ruta.cupos_totales = data['cupos_disponibles']
             ruta.lugar = data['lugar']
             datetime_str_inicio = data['fecha_inicio']
             datetime_str_fin = data['fecha_fin']
@@ -654,6 +655,7 @@ class RutaViewSet(viewsets.ModelViewSet):
             ruta.estado = 'Disponible'
             if data.get('cupos_disponibles'):
                 ruta.cupos_disponibles = data['cupos_disponibles']
+                ruta.cupos_totales = data['cupos_disponibles']
             ruta.lugar = data['lugar']
             datetime_str_inicio = data['fecha_inicio']
             datetime_str_fin = data['fecha_fin']
