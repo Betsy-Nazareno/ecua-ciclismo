@@ -108,7 +108,7 @@ class RutaViewSet(viewsets.ModelViewSet):
                     detalle_puntoencuentro.save()
 
             transaction.commit()
-            return jsonx({'status': 'success', 'message': 'Ruta guardado con éxito.'})
+            return jsonx({'status': 'success', 'message': 'Ruta guardado con éxito.', 'token': ruta.token})
         except ApplicationError as msg:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(msg)})
