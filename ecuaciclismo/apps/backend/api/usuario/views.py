@@ -315,6 +315,7 @@ class CustomAuthToken(ObtainAuthToken):
             # 'plan': Plan.obtener_plan(request.data['plan'] if request.data.get('plan') != None else None),
             'is_staff': usuario.is_staff,
             'is_superuser': usuario.is_superuser,
+            'is_active': usuario.is_active,
             'admin': detalle_usuario.admin,
             'foto': detalle_usuario.foto,
             'genero': detalle_usuario.genero,
