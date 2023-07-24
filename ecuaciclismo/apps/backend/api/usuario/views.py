@@ -18,7 +18,7 @@ from rest_framework.views import APIView
 from ecuaciclismo.apps.backend.api.usuario.serializers import DetalleUsuarioSerializer, \
     UsuarioRecuperarClaveSerializer
 from ecuaciclismo.apps.backend.ruta.models import InscripcionRuta, DetalleArchivoRuta, Archivo, EtiquetaRuta
-from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario, Bicicleta, DetalleEtiquetaRutaUsuario
+from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario, Bicicleta, DetalleEtiquetaRutaUsuario, ContactoSeguro,GrupoContactoSeguro
 from ecuaciclismo.base.models import RegistroCambiarClave
 from ecuaciclismo.helpers.jsonx import jsonx
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
@@ -158,6 +158,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             detalle_usuario.genero = data['genero']
             detalle_usuario.edad = data['edad']
             detalle_usuario.nivel = data['nivel']
+            detalle_usuario.telefono= data['telefono']
             detalle_usuario.peso = data['peso']
             if detalle_usuario.bicicleta is None:
                 bicicleta = Bicicleta()
@@ -276,7 +277,79 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         except Exception as e:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
+    @action(detail=False, url_path='agregar_contacto_seguro', methods=['post'])
+    def agregar_contacto_seguro(self, request):
+        transaction.set_autocommit(False)
+        try:
+            data = request.data
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            from django.contrib.auth.models import User
+            contacto_seguro = ContactoSeguro()
+            if int(request.data['isUser'])==1:
+                dataUser= DetalleUsuario.get_all_informacion(data['user_id'])
+                contacto_seguro.user= User.objects.get(id=data['user_id'])
+                contacto_seguro.nombre=dataUser[0]['first_name']+ ' '+ dataUser[0]['last_name']
+                contacto_seguro.celular=dataUser[0]['telefono']
+                contacto_seguro.isUser=1
 
+            else:
+                contacto_seguro.isUser=0
+                contacto_seguro.nombre=data['nombre']
+                contacto_seguro.celular=data['celular']
+            contacto_seguro.save()
+            grupo_contacto_seguro = GrupoContactoSeguro()
+            grupo_contacto_seguro.user=User.objects.get(id=token.user_id)
+            grupo_contacto_seguro.contacto_seguro=contacto_seguro
+            grupo_contacto_seguro.save()
+            transaction.commit()
+            return jsonx({'status': 'success', 'message': 'Se ha agregado un nuevo contacto seguro'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+    
+    @action(detail=False, url_path='delete_contacto_seguro', methods=['delete'], permission_classes=[AllowAny])
+    def delete_contacto_seguro(self, request):
+        try:
+            data = request.data
+            tokenUsuario = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            usuario=User.objects.get(id=tokenUsuario.user_id)
+            contactoPorEliminar= get_or_none(ContactoSeguro, token=data['token_contacto'])
+            contactoPorEliminar.delete()
+            #grupo_contacto_seguro=GrupoContactoSeguro.objects.get(user=usuario, contacto_seguro=contactoPorEliminar)
+            #grupo_contacto_seguro.delete()
+            return jsonx({'status': 'success', 'message': 'Se ha eliminado el contacto seguro'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except (User.DoesNotExist, ContactoSeguro.DoesNotExist, GrupoContactoSeguro.DoesNotExist):
+            return jsonx({'status': 'error', 'message': 'El usuario o el contacto seguro no existen o no están asociados.'})
+        except ValidationError as msg:
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='get_contactos_seguros', methods=['get'])
+    def get_contactos_seguros(self, request):
+        try:
+            from django.contrib.auth.models import User
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            datos = GrupoContactoSeguro.get_contactos_seguros_usuario(token.user_id)
+            return jsonx({'status': 'success', 'message': 'Información del usuario completa.', 'data': datos})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
 
 
 class DetalleUsuarioViewSet(viewsets.ModelViewSet):
@@ -319,6 +392,7 @@ class CustomAuthToken(ObtainAuthToken):
             'admin': detalle_usuario.admin,
             'foto': detalle_usuario.foto,
             'genero': detalle_usuario.genero,
+            'telefono': detalle_usuario.telefono,
             'peso': detalle_usuario.peso,
             'edad': detalle_usuario.edad,
             'nivel': detalle_usuario.nivel,
@@ -418,3 +492,5 @@ class UsuarioRecuperarCredencialesViewSet(viewsets.ModelViewSet):
         token_publico = request.data.get('token')
         respuesta = RegistroCambiarClave.verificarToken(token_publico=token_publico)
         return jsonx({'status': 'success', 'mensaje': 'ok', 'data': respuesta})
+
+    

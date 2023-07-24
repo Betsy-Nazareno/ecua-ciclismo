@@ -24,7 +24,7 @@ class DetalleUsuario(ModeloBase):
     # Nuevos atributos agregados:
     tipo = models.CharField(max_length=20, null=True)
     isPropietary = models.BooleanField(default=False)
-
+    telefono = models.CharField(max_length=15, null=True)
     def __init__(self, *args, **kwargs):
         super(DetalleUsuario, self).__init__(*args, **kwargs)
 
@@ -51,7 +51,7 @@ class DetalleUsuario(ModeloBase):
     def get_all_informacion(cls, id):
         cursor = connection.cursor()
         sql = '''
-                SELECT detalle_usuario.admin, bicicleta.marca, bicicleta.tipo, bicicleta.foto_bicicleta, bicicleta.codigo, detalle_usuario.genero, detalle_usuario.nivel, detalle_usuario.foto, detalle_usuario.peso, detalle_usuario.edad, detalle_usuario.token_notificacion,detalle_usuario.isPropietary, detalle_usuario.tipo, usuario.username, usuario.first_name, usuario.last_name, usuario.email FROM `usuario_detalleusuario` AS detalle_usuario
+                SELECT detalle_usuario.admin, bicicleta.marca, bicicleta.tipo, bicicleta.foto_bicicleta, bicicleta.codigo, detalle_usuario.genero, detalle_usuario.nivel, detalle_usuario.foto, detalle_usuario.peso, detalle_usuario.edad, detalle_usuario.telefono, detalle_usuario.token_notificacion,detalle_usuario.isPropietary, detalle_usuario.tipo, usuario.username, usuario.first_name, usuario.last_name, usuario.email FROM `usuario_detalleusuario` AS detalle_usuario
                 LEFT JOIN `auth_user` AS usuario ON detalle_usuario.usuario_id = usuario.id
                 LEFT JOIN `usuario_bicicleta` AS bicicleta ON bicicleta.id = detalle_usuario.bicicleta_id
                 WHERE detalle_usuario.usuario_id = ''' + str(id)
@@ -106,11 +106,28 @@ class DetalleEtiquetaRutaUsuario(ModeloBase):
         return dic
         
 class ContactoSeguro(ModeloBase):
- 	user = models.ForeignKey(User, on_delete=models.PROTECT)
- 	celular = models.CharField(max_length=50)
+ 	user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+ 	celular = models.CharField(max_length=15, null=True)
  	nombre = models.CharField(max_length=100)
  	isUser = models.BooleanField()
 
+
 class GrupoContactoSeguro(ModeloBase):
-	user = models.ForeignKey(User, on_delete=models.PROTECT)
-	contacto_seguro = models.ForeignKey(ContactoSeguro, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    contacto_seguro = models.ForeignKey(ContactoSeguro, on_delete=models.CASCADE)
+    @classmethod
+    def get_contactos_seguros_usuario(cls, id_usuario):
+        cursor = connection.cursor()
+        sql = '''
+            SELECT cs.id, cs.nombre, cs.celular, cs.token
+            FROM usuario_grupocontactoseguro AS gcs
+            INNER JOIN usuario_contactoseguro AS cs ON gcs.contacto_seguro_id = cs.id
+            WHERE gcs.user_id =''' + str(id_usuario)
+
+        cursor.execute(sql)
+        column_names = [col[0] for col in cursor.description]
+        contactos_seguros = []
+        for row in cursor.fetchall():
+            contacto_seguro = dict(zip(column_names, row))
+            contactos_seguros.append(contacto_seguro)
+        return contactos_seguros
