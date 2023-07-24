@@ -21,6 +21,9 @@ class DetalleUsuario(ModeloBase):
     token_notificacion = models.TextField(null=True)
     peso = models.FloatField(null=True)
     bicicleta = models.OneToOneField(Bicicleta, on_delete=models.PROTECT, null=True)
+    # Nuevos atributos agregados:
+    tipo = models.CharField(max_length=20, null=True)
+    isPropietary = models.BooleanField(default=False)
 
     def __init__(self, *args, **kwargs):
         super(DetalleUsuario, self).__init__(*args, **kwargs)
@@ -48,7 +51,7 @@ class DetalleUsuario(ModeloBase):
     def get_all_informacion(cls, id):
         cursor = connection.cursor()
         sql = '''
-                SELECT detalle_usuario.admin, bicicleta.marca, bicicleta.tipo, bicicleta.foto_bicicleta, bicicleta.codigo, detalle_usuario.genero, detalle_usuario.nivel, detalle_usuario.foto, detalle_usuario.peso, detalle_usuario.edad, detalle_usuario.token_notificacion, usuario.username, usuario.first_name, usuario.last_name, usuario.email FROM `usuario_detalleusuario` AS detalle_usuario
+                SELECT detalle_usuario.admin, bicicleta.marca, bicicleta.tipo, bicicleta.foto_bicicleta, bicicleta.codigo, detalle_usuario.genero, detalle_usuario.nivel, detalle_usuario.foto, detalle_usuario.peso, detalle_usuario.edad, detalle_usuario.token_notificacion,detalle_usuario.isPropietary, detalle_usuario.tipo, usuario.username, usuario.first_name, usuario.last_name, usuario.email FROM `usuario_detalleusuario` AS detalle_usuario
                 LEFT JOIN `auth_user` AS usuario ON detalle_usuario.usuario_id = usuario.id
                 LEFT JOIN `usuario_bicicleta` AS bicicleta ON bicicleta.id = detalle_usuario.bicicleta_id
                 WHERE detalle_usuario.usuario_id = ''' + str(id)
@@ -67,7 +70,7 @@ class DetalleUsuario(ModeloBase):
     def get_all_users(cls):
         cursor = connection.cursor()
         sql = '''
-        SELECT detalle_usuario.admin, detalle_usuario.token AS token_usuario, usuario.first_name, usuario.last_name, detalle_usuario.foto FROM `usuario_detalleusuario` AS detalle_usuario
+        SELECT detalle_usuario.admin, detalle_usuario.token AS token_usuario,detalle_usuario.isPropietary, detalle_usuario.tipo, usuario.first_name, usuario.last_name, detalle_usuario.foto FROM `usuario_detalleusuario` AS detalle_usuario
         LEFT JOIN `auth_user` AS usuario ON detalle_usuario.usuario_id = usuario.id'''
 
         cursor.execute(sql)
@@ -101,3 +104,13 @@ class DetalleEtiquetaRutaUsuario(ModeloBase):
 
         cursor.close()
         return dic
+        
+class ContactoSeguro(ModeloBase):
+ 	user = models.ForeignKey(User, on_delete=models.PROTECT)
+ 	celular = models.CharField(max_length=50)
+ 	nombre = models.CharField(max_length=100)
+ 	isUser = models.BooleanField()
+
+class GrupoContactoSeguro(ModeloBase):
+	user = models.ForeignKey(User, on_delete=models.PROTECT)
+	contacto_seguro = models.ForeignKey(ContactoSeguro, on_delete=models.CASCADE)
