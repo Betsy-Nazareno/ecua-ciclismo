@@ -41,11 +41,11 @@ class Alerta(ModeloBase):
         sql = '''
             SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo, detalle_usuario.foto
             FROM alerta_alerta AS alerta
-            LEFT JOIN `auth_user` AS usuario
-            LEFT JOIN `usuario_detalleusuario` AS detalle_usuario
-            INNER JOIN alerta_participacionalerta AS participacion
-            ON alerta.id = participacion.alerta_id
-            WHERE alerta.user_id ='''+ str(user_id)
+            LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
+            LEFT JOIN usuario_detalleusuario AS detalle_usuario ON alerta.user_id = detalle_usuario.usuario_id
+            INNER JOIN alerta_participacionalerta AS participacion ON alerta.id = participacion.alerta_id
+            WHERE alerta.user_id = ''' + str(user_id)
+
         cursor.execute(sql)
         dic = []
         detalles = cursor.fetchall()
@@ -63,9 +63,9 @@ class Alerta(ModeloBase):
         sql = '''
             SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo, detalle_usuario.foto
             FROM alerta_alerta AS alerta
-            LEFT JOIN `auth_user` AS usuario
-            LEFT JOIN `usuario_detalleusuario` AS detalle_usuario
-            LEFT JOIN alerta_participacionalerta AS participacion ON alerta.id = participacion.alerta_id
+            LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
+            LEFT JOIN usuario_detalleusuario AS detalle_usuario ON alerta.user_id = detalle_usuario.usuario_id
+            INNER JOIN alerta_participacionalerta AS participacion ON alerta.id = participacion.alerta_id
             WHERE participacion.user_id ='''+ str(user_id)
         cursor.execute(sql)
         dic = []

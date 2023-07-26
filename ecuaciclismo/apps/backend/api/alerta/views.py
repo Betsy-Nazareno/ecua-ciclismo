@@ -111,16 +111,47 @@ class AlertaViewSet(viewsets.ModelViewSet):
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
 
-    @action(detail=False, url_path='new_etiqueta', methods=['post'])
-    def new_etiqueta(self, request):
+    
+    @action(detail=False, url_path='get_alertas_enviadas', methods=['get'])
+    def get_alertas_enviadas(self, request):
         try:
-            data = request.data
-            etiqueta= EtiquetaAlerta()
-            etiqueta.nombre=data['nombre']
-            etiqueta.value=data['value']
-            etiqueta.save()
-            return jsonx({'status': 'success', 'message': 'Etiqueta creada.'})
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            id_user = token.user_id
+            print(token.user_id)
+            data= Alerta.get_alertas_de_usuario(token.user_id)
+            print(data)
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path='get_alertas_recibidas', methods=['get'])
+    def get_alertas_recibidas(self, request):
+        try:
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            id_user = token.user_id
+            print(token.user_id)
+            data= Alerta.get_alertas_recibidas(token.user_id)
+            print(data)
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    # @action(detail=False, url_path='new_etiqueta', methods=['post'])
+    # def new_etiqueta(self, request):
+    #     try:
+    #         data = request.data
+    #         etiqueta= EtiquetaAlerta()
+    #         etiqueta.nombre=data['nombre']
+    #         etiqueta.value=data['value']
+    #         etiqueta.save()
+    #         return jsonx({'status': 'success', 'message': 'Etiqueta creada.'})
+    #     except ApplicationError as msg:
+    #         return jsonx({'status': 'error', 'message': str(msg)})
+    #     except Exception as e:
+    #         return jsonx({'status': 'error', 'message': str(e)})
