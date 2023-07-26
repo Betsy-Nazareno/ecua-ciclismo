@@ -117,10 +117,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
         try:
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            id_user = token.user_id
-            print(token.user_id)
             data= Alerta.get_alertas_de_usuario(token.user_id)
-            print(data)
             return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
@@ -132,10 +129,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
         try:
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            id_user = token.user_id
-            print(token.user_id)
             data= Alerta.get_alertas_recibidas(token.user_id)
-            print(data)
             return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
