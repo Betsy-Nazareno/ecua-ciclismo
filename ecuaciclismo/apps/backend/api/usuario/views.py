@@ -287,15 +287,26 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             contacto_seguro = ContactoSeguro()
             if int(request.data['isUser'])==1:
                 dataUser= DetalleUsuario.get_all_informacion(data['user_id'])
+                contacto_seguro_qs = ContactoSeguro.objects.filter(user=data['user_id'])
                 contacto_seguro.user= User.objects.get(id=data['user_id'])
+                print(contacto_seguro.user)
                 contacto_seguro.nombre=dataUser[0]['first_name']+ ' '+ dataUser[0]['last_name']
                 contacto_seguro.celular=dataUser[0]['telefono']
                 contacto_seguro.isUser=1
 
             else:
                 contacto_seguro.isUser=0
+                contacto_seguro_qs = ContactoSeguro.objects.filter(nombre=data['nombre'],celular=data['celular'], isUser=0)
                 contacto_seguro.nombre=data['nombre']
                 contacto_seguro.celular=data['celular']
+            
+            if contacto_seguro_qs.exists():
+                tk= contacto_seguro_qs.first().token
+                cs=get_or_none(ContactoSeguro, token=tk)
+                grupo_contacto_qs=GrupoContactoSeguro.objects.filter(user=token.user_id,contacto_seguro=cs)
+                if grupo_contacto_qs.exists():
+                    return jsonx({'status': 'error', 'message': 'El contacto seguro ya existe'})
+
             contacto_seguro.save()
             grupo_contacto_seguro = GrupoContactoSeguro()
             grupo_contacto_seguro.user=User.objects.get(id=token.user_id)
@@ -317,8 +328,6 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def delete_contacto_seguro(self, request):
         try:
             data = request.data
-            tokenUsuario = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            usuario=User.objects.get(id=tokenUsuario.user_id)
             contactoPorEliminar= get_or_none(ContactoSeguro, token=data['token_contacto'])
             contactoPorEliminar.delete()
             #grupo_contacto_seguro=GrupoContactoSeguro.objects.get(user=usuario, contacto_seguro=contactoPorEliminar)

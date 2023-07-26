@@ -28,8 +28,8 @@ class EtiquetaAlerta(ModeloBase):
 class Alerta(ModeloBase):
     descripcion = models.CharField(max_length=200)
     estado = models.CharField(max_length=100)
-    fecha_fin = models.CharField(max_length=100)
-    motivo_cancelacion = models.CharField(max_length=200)
+    fecha_fin = models.CharField(max_length=100,null=True)
+    motivo_cancelacion = models.CharField(max_length=200, null=True)
     ubicacion = models.ForeignKey(Ubicacion, on_delete=models.CASCADE)
     etiqueta = models.ForeignKey(EtiquetaAlerta, on_delete=models.CASCADE, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -45,7 +45,7 @@ class Alerta(ModeloBase):
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario
             INNER JOIN alerta_participacionalerta AS participacion
             ON alerta.id = participacion.alerta_id
-            WHERE user_id ='''+ str(user_id)
+            WHERE alerta.user_id ='''+ str(user_id)
         cursor.execute(sql)
         dic = []
         detalles = cursor.fetchall()
@@ -58,15 +58,14 @@ class Alerta(ModeloBase):
         return dic
 
     @classmethod
-    def get_alertas_enviadas_a_usuario(cls, user_id):
+    def get_alertas_recibidas(cls, user_id):
         cursor = connection.cursor()
         sql = '''
             SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo, detalle_usuario.foto
             FROM alerta_alerta AS alerta
             LEFT JOIN `auth_user` AS usuario
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario
-            INNER JOIN alerta_participacionalerta AS participacion
-            ON alerta.id = participacion.alerta_id
+            LEFT JOIN alerta_participacionalerta AS participacion ON alerta.id = participacion.alerta_id
             WHERE participacion.user_id ='''+ str(user_id)
         cursor.execute(sql)
         dic = []
@@ -178,7 +177,7 @@ class ParticipacionAlerta(ModeloBase):
         sql = '''
             SELECT participacion_alerta.id, participacion_alerta.user_id, participacion_alerta.isAsistencia
             FROM alerta_participacionalerta AS participacion_alerta
-            WHERE participacion_alerta.alerta_id ='''+ str(id)
+            WHERE participacion_alerta.alerta_id ='''+ str(alerta_id)
         cursor.execute(sql)
         dic = []
         detalles = cursor.fetchall()

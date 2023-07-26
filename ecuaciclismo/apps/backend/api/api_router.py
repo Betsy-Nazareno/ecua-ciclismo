@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from ecuaciclismo.apps.backend.api.alerta.views import AlertaViewSet
 
 from ecuaciclismo.apps.backend.api.consejodia.views import ConsejoDiaViewSet
 from ecuaciclismo.apps.backend.api.publicacion.views import PublicacionViewSet
@@ -23,7 +24,7 @@ router.register(r'detalleusuario', DetalleUsuarioViewSet)
 router.register(r'consejodia', ConsejoDiaViewSet)
 router.register(r'publicacion', PublicacionViewSet)
 router.register(r'ruta', RutaViewSet)
-
+router.register(r'alerta', AlertaViewSet)
 router.register(r'recuperar_credenciales', UsuarioRecuperarCredencialesViewSet)
 
 
