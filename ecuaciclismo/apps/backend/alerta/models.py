@@ -39,9 +39,10 @@ class Alerta(ModeloBase):
         cursor = connection.cursor()
         
         sql = '''
-            SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo, detalle_usuario.foto
+            SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo, detalle_usuario.foto, etiqueta.nombre, etiqueta.value
             FROM alerta_alerta AS alerta
             LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
+            LEFT JOIN `alerta_etiquetaalerta` as etiqueta ON alerta.etiqueta_id=etiqueta.id
             LEFT JOIN usuario_detalleusuario AS detalle_usuario ON alerta.user_id = detalle_usuario.usuario_id
             WHERE alerta.user_id = ''' + str(user_id)
 
@@ -53,16 +54,16 @@ class Alerta(ModeloBase):
             dic.append(diccionario)
 
         cursor.close()
-        #print(dic)
         return dic
 
     @classmethod
     def get_alertas_recibidas(cls, user_id):
         cursor = connection.cursor()
         sql = '''
-            SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo, detalle_usuario.foto
+            SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo, detalle_usuario.foto, etiqueta.nombre, etiqueta.value
             FROM alerta_alerta AS alerta
             LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
+            LEFT JOIN `alerta_etiquetaalerta` as etiqueta ON alerta.etiqueta_id=etiqueta.id
             LEFT JOIN usuario_detalleusuario AS detalle_usuario ON alerta.user_id = detalle_usuario.usuario_id
             INNER JOIN alerta_participacionalerta AS participacion ON alerta.id = participacion.alerta_id
             WHERE participacion.user_id ='''+ str(user_id)
@@ -72,18 +73,17 @@ class Alerta(ModeloBase):
         for row in detalles:
             diccionario = dict(zip([col[0] for col in cursor.description], row))
             dic.append(diccionario)
-
         cursor.close()
-        #print(dic)
         return dic
     
     @classmethod
     def get_alerta(cls, token_alerta):
         cursor = connection.cursor()
         sql = '''
-                SELECT alerta.id, alerta.etiqueta_id, alerta.fecha_creacion AS fecha_creacion, alerta.fecha_fin AS fecha_fin,alerta.descripcion, alerta.token, usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.tipo
+                SELECT alerta.id, alerta.etiqueta_id, alerta.fecha_creacion AS fecha_creacion, alerta.fecha_fin AS fecha_fin,alerta.descripcion, alerta.token, usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.tipo,etiqueta.nombre, etiqueta.value
                 FROM alerta_alerta AS alerta
                 LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
+                LEFT JOIN `alerta_etiquetaalerta` as etiqueta ON alerta.etiqueta_id=etiqueta.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON alerta.user_id = detalle_usuario.usuario_id
                 WHERE alerta.token ='''+ str(token_alerta)
 
