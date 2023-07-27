@@ -9,12 +9,12 @@ class EtiquetaAlerta(ModeloBase):
     value = models.CharField(max_length=100)
 
     @classmethod
-    def get_etiquetas_alerta(cls):
+    def get_etiqueta_alerta(cls,id):
         cursor = connection.cursor()
         sql = '''
             SELECT id, nombre, value
             FROM alerta_etiquetaalerta
-        '''
+            WHERE alerta_etiquetaalerta.id = '''+str(id)
         cursor.execute(sql)
         dic = []
         detalles = cursor.fetchall()
@@ -80,12 +80,12 @@ class Alerta(ModeloBase):
     def get_alerta(cls, token_alerta):
         cursor = connection.cursor()
         sql = '''
-                SELECT alerta.id, alerta.etiqueta_id, alerta.fecha_creacion AS fecha_creacion, alerta.fecha_fin AS fecha_fin,alerta.descripcion, alerta.token, usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.tipo,etiqueta.nombre, etiqueta.value
+                SELECT alerta.id, alerta.etiqueta_id, alerta.estado, alerta.fecha_creacion AS fecha_creacion, alerta.fecha_fin AS fecha_fin,alerta.descripcion, alerta.ubicacion_id, alerta.token, usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.tipo,etiqueta.nombre, etiqueta.value
                 FROM alerta_alerta AS alerta
                 LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
                 LEFT JOIN `alerta_etiquetaalerta` as etiqueta ON alerta.etiqueta_id=etiqueta.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON alerta.user_id = detalle_usuario.usuario_id
-                WHERE alerta.token ='''+ str(token_alerta)
+                WHERE alerta.token = '%s' ''' % token_alerta
 
         cursor.execute(sql)
         dic = []
@@ -123,14 +123,13 @@ class ArchivoAlerta(ModeloBase):
 class ComentarioAlerta(ModeloBase):
     comentario = models.TextField()
     alerta = models.ForeignKey(Alerta, on_delete=models.CASCADE)
-    padre= models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='respuestas')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     @classmethod
     def get_comentario_x_alerta(cls, id_alerta):
         cursor = connection.cursor()
         sql = '''
-            SELECT usuario.first_name, usuario.last_name, detalle_usuario.foto, comentario_alerta.comentario, comentario_alerta.token AS token_comentario, token.key AS token_usuario
+            SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, comentario_alerta.comentario, comentario_alerta.token AS token_comentario, token.key AS token_usuario
             FROM alerta_comentarioalerta AS comentario_alerta
             LEFT JOIN auth_user AS usuario ON comentario_alerta.user_id = usuario.id
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON comentario_alerta.user_id = detalle_usuario.usuario_id
@@ -147,23 +146,23 @@ class ComentarioAlerta(ModeloBase):
         cursor.close()
         return dic
 
-    @classmethod
-    def get_respuestas_comentario(cls, comentario_id):
-        cursor = connection.cursor()
-        sql = '''
-            SELECT id, comentario, user_id, padre_id
-            FROM alerta_comentarioalerta
-            WHERE padre_id ='''+str(comentario_id)
+    # @classmethod
+    # def get_respuestas_comentario(cls, comentario_id):
+    #     cursor = connection.cursor()
+    #     sql = '''
+    #         SELECT id, comentario, user_id, padre_id
+    #         FROM alerta_comentarioalerta
+    #         WHERE padre_id ='''+str(comentario_id)
 
-        cursor.execute(sql)
-        dic = []
-        detalles = cursor.fetchall()
-        for row in detalles:
-            diccionario = dict(zip([col[0] for col in cursor.description], row))
-            dic.append(diccionario)
+    #     cursor.execute(sql)
+    #     dic = []
+    #     detalles = cursor.fetchall()
+    #     for row in detalles:
+    #         diccionario = dict(zip([col[0] for col in cursor.description], row))
+    #         dic.append(diccionario)
 
-        cursor.close()
-        return dic
+    #     cursor.close()
+    #     return dic
 
 class ParticipacionAlerta(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -190,13 +189,15 @@ class ParticipacionAlerta(ModeloBase):
     @classmethod
     def get_asistentes(cls, alerta_id):
         cursor = connection.cursor()
-        sql = f'''
-            SELECT usuario.first_name, usuario.last_name, detalle_usuario.foto
-            FROM alerta_participacionalerta AS participacion
-            LEFT JOIN usuario_detalleusuario AS detalle_usuario ON participacion.user_id = detalle_usuario.usuario_id
-            INNER JOIN auth_user AS usuario ON participacion.user_id = usuario.id
-            WHERE participacion.alerta_id = {alerta_id} AND participacion.isAsistencia = 1'''
-        cursor.execute(sql)
+        sql = '''
+        SELECT usuario.first_name, usuario.last_name, detalle_usuario.foto
+        FROM alerta_participacionalerta AS participacion
+        LEFT JOIN usuario_detalleusuario AS detalle_usuario ON participacion.user_id = detalle_usuario.usuario_id
+        INNER JOIN auth_user AS usuario ON participacion.user_id = usuario.id
+        WHERE participacion.alerta_id = %s AND participacion.isAsistencia = 1
+        '''
+
+        cursor.execute(sql, (alerta_id,))
         asistentes = []
         resultados = cursor.fetchall()
         for row in resultados:

@@ -5,7 +5,7 @@ from datetime import timedelta
 from ecuaciclismo.apps.backend.api.alerta.AlertaSerializer import AlertaSerializer
 from ecuaciclismo.apps.backend.ruta.models import Ruta, Coordenada, Ubicacion, DetalleRequisito, \
     Colaboracion,Archivo
-from ecuaciclismo.apps.backend.alerta.models import Alerta, DetalleColaboracion,EtiquetaAlerta, ArchivoAlerta, ParticipacionAlerta
+from ecuaciclismo.apps.backend.alerta.models import Alerta, ComentarioAlerta, DetalleColaboracion,EtiquetaAlerta, ArchivoAlerta, ParticipacionAlerta
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -31,11 +31,15 @@ class AlertaViewSet(viewsets.ModelViewSet):
         try:
             data = request.data
             alerta = Alerta()
-            alerta.descripcion = data['descripcion']
             alerta.estado = 'En curso'
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             alerta.user =token.user
+    
             alerta.etiqueta=get_or_none(EtiquetaAlerta, nombre=data['etiqueta'])
+            if not data.get('descripcion'):
+                alerta.descripcion=(get_or_none(EtiquetaAlerta, nombre=data['etiqueta']).value)
+            else:
+                alerta.descripcion = data['descripcion']
             coordenadax = Coordenada.objects.create(latitud=data['ubicacion']['coordinateX']['latitude'],longitud=data['ubicacion']['coordinateX']['longitude'])
             coordenaday = Coordenada.objects.create(latitud=data['ubicacion']['coordinateY']['latitude'],longitud=data['ubicacion']['coordinateY']['longitude'])
             ubicacion = Ubicacion.objects.create(coordenada_x=coordenadax, coordenada_y=coordenaday)
@@ -118,6 +122,9 @@ class AlertaViewSet(viewsets.ModelViewSet):
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             data= Alerta.get_alertas_de_usuario(token.user_id)
+            for alerta in data:
+                alerta['fecha_creacion'] = alerta['fecha_creacion'].isoformat()
+
             return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
@@ -130,11 +137,77 @@ class AlertaViewSet(viewsets.ModelViewSet):
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             data= Alerta.get_alertas_recibidas(token.user_id)
+            for alerta in data:
+                alerta['fecha_creacion'] = alerta['fecha_creacion'].isoformat()
+
             return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
+
+
+    @action(detail=False, url_path='get_alerta', methods=['post'])
+    def get_alerta(self, request):
+        try:
+            dato = request.data
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            id_user = token.user.id
+            dataAlerta = Alerta.get_alerta(dato['token_alerta'])
+            print(dataAlerta)
+            for alerta in dataAlerta:
+                alerta['fecha_creacion'] = str(alerta['fecha_creacion']).isoformat()
+                alerta['fecha_fin'] = str(alerta['fecha_fin'])
+                alerta['tipo'] = alerta['nombre']
+                alerta['multimedia'] = ArchivoAlerta.get_archivo_x_alerta(alerta['id'])
+                alerta['comentarios'] = ComentarioAlerta.get_comentario_x_alerta(alerta['id'])
+                alerta['asistentes']= ParticipacionAlerta.get_asistentes(alerta_id=['id'])
+                ubicacion = get_or_none(Ubicacion, id=alerta['ubicacion_id'])
+                coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
+                coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
+                dicc = {
+                    "coordinateX": {
+                        "latitude": float(coordenada_x.latitud),
+                        "longitude": float(coordenada_x.longitud)
+                    },
+                    "coordinateY": {
+                        "latitude": float(coordenada_y.latitud),
+                        "longitude": float(coordenada_y.longitud)
+                    }
+                }
+                alerta['ubicacion'] = dicc
+                alerta.pop('ubicacion_id')
+                alerta.pop('nombre')
+                alerta.pop('etiqueta_id')
+            return jsonx({'status': 'success', 'message': 'Información obtenida', 'alerta': alerta})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+    @action(detail=False, url_path='new_comentario_alerta', methods=['post'])
+    def new_comentario_alerta(self, request):
+        try:
+            data = request.data
+
+            if data['token'] is not None and data['token'] != '':
+                Alerta = Alerta.objects.get(token=data['token_alerta'])
+                token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+                comentario = ComentarioAlerta()
+                comentario.alerta = Alerta
+                comentario.user = token.user
+                comentario.comentario = data['comentario']
+                comentario.save()
+
+                return jsonx({'status': 'success', 'message': 'Se añadio un comentario a la alerta.'})
+            else:
+                return jsonx({'status': 'success', 'message': 'El campo token es nulo o vacío.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
+    
 
     # @action(detail=False, url_path='new_etiqueta', methods=['post'])
     # def new_etiqueta(self, request):
