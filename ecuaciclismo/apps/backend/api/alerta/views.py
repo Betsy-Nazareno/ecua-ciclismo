@@ -155,9 +155,8 @@ class AlertaViewSet(viewsets.ModelViewSet):
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             id_user = token.user.id
             dataAlerta = Alerta.get_alerta(dato['token_alerta'])
-            print(dataAlerta)
             for alerta in dataAlerta:
-                alerta['fecha_creacion'] = str(alerta['fecha_creacion']).isoformat()
+                alerta['fecha_creacion'] = alerta['fecha_creacion'].isoformat()
                 alerta['fecha_fin'] = str(alerta['fecha_fin'])
                 alerta['tipo'] = alerta['nombre']
                 alerta['multimedia'] = ArchivoAlerta.get_archivo_x_alerta(alerta['id'])
@@ -190,11 +189,11 @@ class AlertaViewSet(viewsets.ModelViewSet):
         try:
             data = request.data
 
-            if data['token'] is not None and data['token'] != '':
-                Alerta = Alerta.objects.get(token=data['token_alerta'])
+            if data['token_alerta'] is not None and data['token_alerta'] != '':
+                alerta = Alerta.objects.get(token=data['token_alerta'])
                 token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
                 comentario = ComentarioAlerta()
-                comentario.alerta = Alerta
+                comentario.alerta = alerta
                 comentario.user = token.user
                 comentario.comentario = data['comentario']
                 comentario.save()
