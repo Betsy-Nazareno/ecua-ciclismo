@@ -129,7 +129,7 @@ class ComentarioAlerta(ModeloBase):
     def get_comentario_x_alerta(cls, id_alerta):
         cursor = connection.cursor()
         sql = '''
-            SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, comentario_alerta.comentario, comentario_alerta.token AS token_comentario, token.key AS token_usuario
+            SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, comentario_alerta.comentario, comentario_alerta.token AS token_comentario, token.key AS token_usuario, comentario_alerta.fecha_creacion
             FROM alerta_comentarioalerta AS comentario_alerta
             LEFT JOIN auth_user AS usuario ON comentario_alerta.user_id = usuario.id
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON comentario_alerta.user_id = detalle_usuario.usuario_id

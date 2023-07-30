@@ -132,6 +132,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             data= Alerta.get_alertas_de_usuario(token.user_id)
             for alerta in data:
+                alerta['fecha_creacion'] = alerta['fecha_creacion']- timedelta(hours=5)
                 alerta['fecha_creacion'] = alerta['fecha_creacion'].isoformat()
 
             return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
@@ -147,6 +148,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             data= Alerta.get_alertas_recibidas(token.user_id)
             for alerta in data:
+                alerta['fecha_creacion'] = alerta['fecha_creacion']- timedelta(hours=5)
                 alerta['fecha_creacion'] = alerta['fecha_creacion'].isoformat()
 
             return jsonx({'status': 'success', 'message': 'Información obtenida', 'data': data})
@@ -165,11 +167,15 @@ class AlertaViewSet(viewsets.ModelViewSet):
             id_user = token.user.id
             dataAlerta = Alerta.get_alerta(dato['token_alerta'])
             for alerta in dataAlerta:
+                alerta['fecha_creacion'] = alerta['fecha_creacion']- timedelta(hours=5)
                 alerta['fecha_creacion'] = alerta['fecha_creacion'].isoformat()
                 alerta['fecha_fin'] = str(alerta['fecha_fin'])
                 alerta['tipo'] = alerta['nombre']
                 alerta['multimedia'] = ArchivoAlerta.get_archivo_x_alerta(alerta['id'])
                 alerta['comentarios'] = ComentarioAlerta.get_comentario_x_alerta(alerta['id'])
+                for comentario in alerta['comentarios']:
+                    comentario['fecha_creacion'] = comentario['fecha_creacion']- timedelta(hours=5)
+                    comentario['fecha_creacion'] = comentario['fecha_creacion'].isoformat()
                 alerta['participantes']= ParticipacionAlerta.get_asistentes(alerta['id'])
                 alerta['colaboraciones'] = DetalleColaboracion.get_colaboracion_x_alerta(alerta['id'])
                 
