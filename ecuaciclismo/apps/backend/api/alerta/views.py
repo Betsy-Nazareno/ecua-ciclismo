@@ -28,6 +28,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
     @action(detail=False, url_path='new_alerta', methods=['post'])
     def new_alerta(self, request):
         transaction.set_autocommit(False)
+        token_usuario=[]
         try:
             data = request.data
             alerta = Alerta()
@@ -73,6 +74,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
                 usuarios=DetalleUsuario.get_all_users()
                 locales=[user_data for user_data in usuarios if user_data['isPropietary'] == 1]
                 for user_data in locales:
+                    token_usuario.append(user_data['token_notificacion'])
                     usuario = User.objects.get(id=user_data['usuario_id'])
                     participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia=0)
                     if created:
@@ -80,11 +82,14 @@ class AlertaViewSet(viewsets.ModelViewSet):
 
                 for tipoUsuario in data['visibilidad']:
                     if tipoUsuario=="Contactos seguros":
+                        
                         contactos=GrupoContactoSeguro.get_contactos_seguros_usuario(alerta.user_id)
                         for contacto in contactos:
                             cs=get_or_none(ContactoSeguro, token=contacto['token'])
                             if cs.isUser==1:
                                 usuario=User.objects.get(id=cs.user_id)
+                                usuarioDetalle=get_or_none(DetalleUsuario, usuario_id=usuario.id)
+                                token_usuario.append(usuarioDetalle.token_notificacion)
                                 participacionAlerta=ParticipacionAlerta()
                                 participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia = 0)
                                 if created:
@@ -94,6 +99,8 @@ class AlertaViewSet(viewsets.ModelViewSet):
                         usuarios_verificados = [user_data for user_data in usuarios if user_data['tipo'] == "Verificado"]
                         for user_data in usuarios_verificados:
                             usuario = User.objects.get(id=user_data['usuario_id'])
+                            usuarioDetalle=get_or_none(DetalleUsuario, usuario_id=usuario.id)
+                            token_usuario.append(usuarioDetalle.token_notificacion)
                             participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia=0)
                             if created:
                                 participacionAlerta.save()
@@ -102,12 +109,14 @@ class AlertaViewSet(viewsets.ModelViewSet):
                         usuarios_miembros = [user_data for user_data in usuarios if user_data['tipo'] == "Miembro"]
                         for user_data in usuarios_miembros:
                             usuario = User.objects.get(id=user_data['usuario_id'])
+                            usuarioDetalle=get_or_none(DetalleUsuario, usuario_id=usuario.id)
+                            token_usuario.append(usuarioDetalle.token_notificacion)
                             participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia=0)
                             if created:
                                 participacionAlerta.save()
             
             transaction.commit()
-            return jsonx({'status': 'success', 'message': 'Alerta creada con éxito.', 'token': alerta.token})
+            return jsonx({'status': 'success', 'message': 'Alerta creada con éxito.', 'data':token_usuario})
         except ApplicationError as msg:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(msg)})
@@ -162,6 +171,8 @@ class AlertaViewSet(viewsets.ModelViewSet):
                 alerta['multimedia'] = ArchivoAlerta.get_archivo_x_alerta(alerta['id'])
                 alerta['comentarios'] = ComentarioAlerta.get_comentario_x_alerta(alerta['id'])
                 alerta['asistentes']= ParticipacionAlerta.get_asistentes(alerta_id=['id'])
+                alerta['colaboraciones'] = DetalleColaboracion.get_colaboracion_x_alerta(alerta['id'])
+                
                 ubicacion = get_or_none(Ubicacion, id=alerta['ubicacion_id'])
                 coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
                 coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
