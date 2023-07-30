@@ -170,7 +170,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
                 alerta['tipo'] = alerta['nombre']
                 alerta['multimedia'] = ArchivoAlerta.get_archivo_x_alerta(alerta['id'])
                 alerta['comentarios'] = ComentarioAlerta.get_comentario_x_alerta(alerta['id'])
-                alerta['asistentes']= ParticipacionAlerta.get_asistentes(alerta_id=['id'])
+                alerta['asistentes']= ParticipacionAlerta.get_asistentes(alerta['id'])
                 alerta['colaboraciones'] = DetalleColaboracion.get_colaboracion_x_alerta(alerta['id'])
                 
                 ubicacion = get_or_none(Ubicacion, id=alerta['ubicacion_id'])
