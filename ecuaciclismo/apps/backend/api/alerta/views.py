@@ -124,7 +124,18 @@ class AlertaViewSet(viewsets.ModelViewSet):
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
 
-    
+    @action(detail=False, url_path='update_alerta', methods=['post'])
+    def update_alerta(self, request):
+        try:
+            data = request.data
+            alerta = Alerta.objects.get(token=data['token_alerta'])
+            Alerta.update_estado(alerta.id, data['estado'], data['motivo_cancelacion'])
+            return jsonx({'status': 'success', 'message': 'Alerta actualizada con éxito.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+
     @action(detail=False, url_path='get_alertas_enviadas', methods=['get'])
     def get_alertas_enviadas(self, request):
         try:

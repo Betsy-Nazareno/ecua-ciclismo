@@ -98,6 +98,19 @@ class Alerta(ModeloBase):
         # print(dic)
         return dic
 
+    @classmethod
+    def update_estado(cls, alerta_id, estado, motivo):
+        if motivo.strip():
+            sql = "UPDATE alerta_alerta SET estado = %s, motivo_cancelacion = %s WHERE id = %s;"
+            params = [estado, motivo.strip(), alerta_id]
+        else:
+            sql = "UPDATE alerta_alerta SET estado = %s WHERE id = %s;"
+            params = [estado, alerta_id]
+
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params)
+
+
 class ArchivoAlerta(ModeloBase):
     archivo = models.ForeignKey(Archivo, on_delete=models.CASCADE)
     alerta = models.ForeignKey(Alerta, on_delete=models.CASCADE)
@@ -145,7 +158,7 @@ class ComentarioAlerta(ModeloBase):
 
         cursor.close()
         return dic
-
+    
     # @classmethod
     # def get_respuestas_comentario(cls, comentario_id):
     #     cursor = connection.cursor()
