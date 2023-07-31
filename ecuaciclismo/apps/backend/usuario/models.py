@@ -119,7 +119,7 @@ class GrupoContactoSeguro(ModeloBase):
     def get_contactos_seguros_usuario(cls, id_usuario):
         cursor = connection.cursor()
         sql = '''
-            SELECT cs.id, cs.nombre, cs.celular, cs.token, detalle.foto, detalle.tipo
+            SELECT cs.id, cs.nombre, cs.celular, cs.isUser, cs.token, detalle.foto, detalle.tipo, detalle.usuario_id, detalle.admin, detalle.isPropietary
             FROM usuario_grupocontactoseguro AS gcs
             INNER JOIN usuario_contactoseguro AS cs ON gcs.contacto_seguro_id = cs.id
             LEFT JOIN usuario_detalleusuario AS detalle ON cs.user_id = detalle.usuario_id
