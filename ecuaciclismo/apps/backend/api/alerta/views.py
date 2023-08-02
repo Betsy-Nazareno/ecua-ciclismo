@@ -74,7 +74,8 @@ class AlertaViewSet(viewsets.ModelViewSet):
                 usuarios=DetalleUsuario.get_all_users()
                 locales=[user_data for user_data in usuarios if user_data['isPropietary'] == 1]
                 for user_data in locales:
-                    token_usuario.append(user_data['token_notificacion'])
+                    if usuarioDetalle.silenciar_notificaciones == 0:
+                                token_usuario.append(usuarioDetalle.token_notificacion)
                     usuario = User.objects.get(id=user_data['usuario_id'])
                     participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia=0)
                     if created:
@@ -89,7 +90,8 @@ class AlertaViewSet(viewsets.ModelViewSet):
                             if cs.isUser==1:
                                 usuario=User.objects.get(id=cs.user_id)
                                 usuarioDetalle=get_or_none(DetalleUsuario, usuario_id=usuario.id)
-                                token_usuario.append(usuarioDetalle.token_notificacion)
+                                if usuarioDetalle.silenciar_notificaciones == 0:
+                                    token_usuario.append(usuarioDetalle.token_notificacion)
                                 participacionAlerta=ParticipacionAlerta()
                                 participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia = 0)
                                 if created:
@@ -100,7 +102,9 @@ class AlertaViewSet(viewsets.ModelViewSet):
                         for user_data in usuarios_verificados:
                             usuario = User.objects.get(id=user_data['usuario_id'])
                             usuarioDetalle=get_or_none(DetalleUsuario, usuario_id=usuario.id)
-                            token_usuario.append(usuarioDetalle.token_notificacion)
+                            
+                            if usuarioDetalle.silenciar_notificaciones == 0:
+                                token_usuario.append(usuarioDetalle.token_notificacion)
                             participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia=0)
                             if created:
                                 participacionAlerta.save()
@@ -110,7 +114,8 @@ class AlertaViewSet(viewsets.ModelViewSet):
                         for user_data in usuarios_miembros:
                             usuario = User.objects.get(id=user_data['usuario_id'])
                             usuarioDetalle=get_or_none(DetalleUsuario, usuario_id=usuario.id)
-                            token_usuario.append(usuarioDetalle.token_notificacion)
+                            if usuarioDetalle.silenciar_notificaciones == 0:
+                                token_usuario.append(usuarioDetalle.token_notificacion)
                             participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia=0)
                             if created:
                                 participacionAlerta.save()
@@ -122,6 +127,20 @@ class AlertaViewSet(viewsets.ModelViewSet):
             return jsonx({'status': 'error', 'message': str(msg)})
         except Exception as e:
             transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+    @action(detail=False, url_path='confirmar_asistencia', methods=['post'])
+    def confirmar_asistencia(self, request):
+        try:
+            data = request.data
+            alerta = Alerta.objects.get(token=data['token_alerta'])
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            participacionAlerta = ParticipacionAlerta.objects.get(user=token.user, alerta=alerta)
+            participacionAlerta.isAsistencia = 1
+            participacionAlerta.save()
+            return jsonx({'status': 'success', 'message': 'Se confirmo la asistencia a la alerta.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})
 
     @action(detail=False, url_path='update_alerta', methods=['post'])

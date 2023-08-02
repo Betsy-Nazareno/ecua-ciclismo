@@ -24,6 +24,7 @@ class DetalleUsuario(ModeloBase):
     # Nuevos atributos agregados:
     tipo = models.CharField(max_length=20, null=True, default="No verificado")
     isPropietary = models.BooleanField(default=False)
+    silenciar_notificaciones = models.BooleanField(default=False)
     telefono = models.CharField(max_length=15, null=True)
     def __init__(self, *args, **kwargs):
         super(DetalleUsuario, self).__init__(*args, **kwargs)

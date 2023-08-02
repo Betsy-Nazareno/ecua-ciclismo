@@ -39,7 +39,7 @@ class Alerta(ModeloBase):
         cursor = connection.cursor()
         
         sql = '''
-            SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo, detalle_usuario.foto, etiqueta.nombre, etiqueta.value
+            SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo as tipoUser, detalle_usuario.foto, etiqueta.nombre, etiqueta.value
             FROM alerta_alerta AS alerta
             LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
             LEFT JOIN `alerta_etiquetaalerta` as etiqueta ON alerta.etiqueta_id=etiqueta.id
@@ -60,7 +60,7 @@ class Alerta(ModeloBase):
     def get_alertas_recibidas(cls, user_id):
         cursor = connection.cursor()
         sql = '''
-            SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo, detalle_usuario.foto, etiqueta.nombre, etiqueta.value
+            SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo as tipoUser, detalle_usuario.foto, etiqueta.nombre, etiqueta.value
             FROM alerta_alerta AS alerta
             LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
             LEFT JOIN `alerta_etiquetaalerta` as etiqueta ON alerta.etiqueta_id=etiqueta.id
@@ -80,7 +80,7 @@ class Alerta(ModeloBase):
     def get_alerta(cls, token_alerta):
         cursor = connection.cursor()
         sql = '''
-                SELECT alerta.id, alerta.etiqueta_id, alerta.motivo_cancelacion, alerta.estado, alerta.fecha_creacion AS fecha_creacion, alerta.fecha_fin AS fecha_fin,alerta.descripcion, alerta.ubicacion_id, alerta.token, usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.tipo,etiqueta.nombre, etiqueta.value
+                SELECT alerta.id, alerta.etiqueta_id, alerta.motivo_cancelacion, alerta.estado, alerta.fecha_creacion AS fecha_creacion, alerta.fecha_fin AS fecha_fin,alerta.descripcion, alerta.ubicacion_id, alerta.token, usuario.first_name, usuario.last_name, detalle_usuario.foto,  detalle_usuario.tipo as tipoUser,etiqueta.nombre, etiqueta.value
                 FROM alerta_alerta AS alerta
                 LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
                 LEFT JOIN `alerta_etiquetaalerta` as etiqueta ON alerta.etiqueta_id=etiqueta.id
@@ -142,7 +142,7 @@ class ComentarioAlerta(ModeloBase):
     def get_comentario_x_alerta(cls, id_alerta):
         cursor = connection.cursor()
         sql = '''
-            SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, comentario_alerta.comentario, comentario_alerta.token AS token_comentario, token.key AS token_usuario, comentario_alerta.fecha_creacion
+            SELECT usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto,detalle_usuario.tipo, comentario_alerta.comentario, comentario_alerta.token AS token_comentario, token.key AS token_usuario, comentario_alerta.fecha_creacion
             FROM alerta_comentarioalerta AS comentario_alerta
             LEFT JOIN auth_user AS usuario ON comentario_alerta.user_id = usuario.id
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON comentario_alerta.user_id = detalle_usuario.usuario_id
@@ -203,7 +203,7 @@ class ParticipacionAlerta(ModeloBase):
     def get_asistentes(cls, alerta_id):
         cursor = connection.cursor()
         sql = '''
-        SELECT usuario.first_name, usuario.last_name, detalle_usuario.foto
+        SELECT usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.tipo, usuario.username
         FROM alerta_participacionalerta AS participacion
         LEFT JOIN usuario_detalleusuario AS detalle_usuario ON participacion.user_id = detalle_usuario.usuario_id
         INNER JOIN auth_user AS usuario ON participacion.user_id = usuario.id
