@@ -80,9 +80,10 @@ class Alerta(ModeloBase):
     def get_alerta(cls, token_alerta):
         cursor = connection.cursor()
         sql = '''
-                SELECT alerta.id, alerta.etiqueta_id, alerta.motivo_cancelacion, alerta.estado, alerta.fecha_creacion AS fecha_creacion, alerta.fecha_fin AS fecha_fin,alerta.descripcion, alerta.ubicacion_id, alerta.token, usuario.first_name, usuario.last_name, detalle_usuario.foto,  detalle_usuario.tipo as tipoUser,etiqueta.nombre, etiqueta.value
+                SELECT alerta.id, alerta.etiqueta_id, alerta.motivo_cancelacion,token.key as token_usuario,alerta.estado, alerta.fecha_creacion AS fecha_creacion, alerta.fecha_fin AS fecha_fin,alerta.descripcion, alerta.ubicacion_id, alerta.token, usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.tipo as tipoUser,etiqueta.nombre, etiqueta.value
                 FROM alerta_alerta AS alerta
                 LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
+                LEFT JOIN `authtoken_token` AS token ON token.user_id = usuario.id
                 LEFT JOIN `alerta_etiquetaalerta` as etiqueta ON alerta.etiqueta_id=etiqueta.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON alerta.user_id = detalle_usuario.usuario_id
                 WHERE alerta.token = '%s' ''' % token_alerta
