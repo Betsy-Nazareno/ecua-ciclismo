@@ -39,9 +39,10 @@ class Alerta(ModeloBase):
         cursor = connection.cursor()
         
         sql = '''
-            SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo as tipoUser, detalle_usuario.foto, etiqueta.nombre, etiqueta.value
+            SELECT alerta.id, alerta.token, alerta.fecha_creacion, token.key as token_usuario,alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo as tipoUser, detalle_usuario.foto, etiqueta.nombre, etiqueta.value
             FROM alerta_alerta AS alerta
             LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
+            LEFT JOIN `authtoken_token` AS token ON token.user_id = usuario.id
             LEFT JOIN `alerta_etiquetaalerta` as etiqueta ON alerta.etiqueta_id=etiqueta.id
             LEFT JOIN usuario_detalleusuario AS detalle_usuario ON alerta.user_id = detalle_usuario.usuario_id
             WHERE alerta.user_id = ''' + str(user_id)
@@ -60,9 +61,10 @@ class Alerta(ModeloBase):
     def get_alertas_recibidas(cls, user_id):
         cursor = connection.cursor()
         sql = '''
-            SELECT alerta.id, alerta.token, alerta.fecha_creacion, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo as tipoUser, detalle_usuario.foto, etiqueta.nombre, etiqueta.value
+            SELECT alerta.id, alerta.token, alerta.fecha_creacion, token.key as token_usuario, alerta.descripcion, alerta.estado, usuario.first_name, usuario.last_name, detalle_usuario.tipo as tipoUser, detalle_usuario.foto, etiqueta.nombre, etiqueta.value
             FROM alerta_alerta AS alerta
             LEFT JOIN `auth_user` AS usuario ON alerta.user_id = usuario.id
+            LEFT JOIN `authtoken_token` AS token ON token.user_id = usuario.id
             LEFT JOIN `alerta_etiquetaalerta` as etiqueta ON alerta.etiqueta_id=etiqueta.id
             LEFT JOIN usuario_detalleusuario AS detalle_usuario ON alerta.user_id = detalle_usuario.usuario_id
             INNER JOIN alerta_participacionalerta AS participacion ON alerta.id = participacion.alerta_id
