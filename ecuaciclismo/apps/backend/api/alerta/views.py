@@ -158,7 +158,6 @@ class AlertaViewSet(viewsets.ModelViewSet):
     @action(detail=False, url_path='get_alertas_enviadas', methods=['get'])
     def get_alertas_enviadas(self, request):
         try:
-            from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             data= Alerta.get_alertas_de_usuario(token.user_id)
             for alerta in data:
@@ -174,7 +173,6 @@ class AlertaViewSet(viewsets.ModelViewSet):
     @action(detail=False, url_path='get_alertas_recibidas', methods=['get'])
     def get_alertas_recibidas(self, request):
         try:
-            from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             data= Alerta.get_alertas_recibidas(token.user_id)
             for alerta in data:

@@ -24,20 +24,22 @@ class Lugar(ModeloBase):
                     lugar.nombre AS nombre,
                     lugar.descripcion AS descripcion,
                     lugar.imagen AS imagen,
-                    ubi.nombre AS ubicacion,
+                    lugar.ubicacion_id AS ubicacion,
                     CASE
-                        WHEN parqueadero.id IS NOT NULL THEN 'parqueadero'
-                        WHEN local.id IS NOT NULL THEN 'local'
-                        WHEN ciclovia.id IS NOT NULL THEN 'ciclovia'
+                        WHEN parqueadero.lugar_ptr_id IS NOT NULL THEN 'parqueadero'
+                        WHEN local.lugar_ptr_id IS NOT NULL THEN 'local'
+                        WHEN ciclovia.lugar_ptr_id IS NOT NULL THEN 'ciclovia'
                         ELSE ''
                     END AS tipo,
-                    local.isVerificado AS local_verificado
-                FROM lugar 
-                LEFT JOIN parqueadero  ON lugar.id = parqueadero.lugar_ptr_id
-                LEFT JOIN local  ON lugar.id = local.lugar_ptr_id
-                LEFT JOIN ciclovia  ON lugar.id = ciclovia.lugar_ptr_id
-                INNER JOIN ruta_ubicacion ubi ON lugar.ubicacion_id = ubi.id
-                WHERE lugar.isActived =""")+str(activo)
+                    local.isVerificado AS local_seguro,
+                    lugar.direccion AS direccion,
+                    lugar.token AS token
+                FROM lugar_lugar as lugar 
+                LEFT JOIN lugar_parqueadero as parqueadero  ON lugar.id = parqueadero.lugar_ptr_id
+                LEFT JOIN lugar_local as local  ON lugar.id = local.lugar_ptr_id
+                LEFT JOIN lugar_ciclovia as ciclovia  ON lugar.id = ciclovia.lugar_ptr_id
+                WHERE lugar.isActived = %s 
+            """, [activo])
             result = cursor.fetchall()
 
         lugares = []
@@ -48,7 +50,9 @@ class Lugar(ModeloBase):
                 'imagen': row[2],
                 'ubicacion': row[3],
                 'tipo': row[4],
-                'local_verificado': row[5] if row[4] == 'local' else None,
+                'local_seguro': row[5] if row[4] == 'local' else None,
+                'direccion': row[6],
+                'token': row[7],
             }
             lugares.append(lugar_info)
 
@@ -64,16 +68,17 @@ class Lugar(ModeloBase):
                     lugar.descripcion AS descripcion,
                     lugar.imagen AS foto,
                     lugar.direccion AS direccion,
+                    lugar.ubicacion_id AS ubicacion,
                     CASE
-                        WHEN parqueadero.id IS NOT NULL THEN 'parqueadero'
-                        WHEN local.id IS NOT NULL THEN 'local'
-                        WHEN ciclovia.id IS NOT NULL THEN 'ciclovia'
+                        WHEN parqueadero.lugar_ptr_id IS NOT NULL THEN 'parqueadero'
+                        WHEN local.lugar_ptr_id IS NOT NULL THEN 'local'
+                        WHEN ciclovia.lugar_ptr_id IS NOT NULL THEN 'ciclovia'
                         ELSE ''
                     END AS tipo
-                FROM lugar 
-                LEFT JOIN parqueadero  ON lugar.id = parqueadero.lugar_ptr_id
-                LEFT JOIN local  ON lugar.id = local.lugar_ptr_id
-                LEFT JOIN ciclovia  ON lugar.id = ciclovia.lugar_ptr_id
+                FROM lugar_lugar as lugar
+                LEFT JOIN lugar_parqueadero as parqueadero  ON lugar.id = parqueadero.lugar_ptr_id
+                LEFT JOIN lugar_local as local  ON lugar.id = local.lugar_ptr_id
+                LEFT JOIN lugar_ciclovia as ciclovia  ON lugar.id = ciclovia.lugar_ptr_id
                 WHERE lugar.id = %s
             """, [lugar_id])
             row = cursor.fetchone()
@@ -85,7 +90,8 @@ class Lugar(ModeloBase):
                 'descripcion': row[2],
                 'foto': row[3],
                 'direccion': row[4],
-                'tipo': row[5],
+                'ubicacion': row[5],
+                'tipo': row[6],
             }
             return lugar_info
         else:
@@ -95,6 +101,29 @@ class Lugar(ModeloBase):
 class Parqueadero(Lugar):
     capacidad = models.IntegerField()
     tarifa = models.IntegerField()
+
+    @classmethod
+    def getParqueaderoById(self, lugar_id):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    parqueadero.capacidad AS capacidad,
+                    parqueadero.tarifa AS tarifa
+                FROM lugar_parqueadero as parqueadero
+                WHERE parqueadero.lugar_ptr_id = %s
+            """, [lugar_id])
+            row = cursor.fetchone()
+
+        if row:
+            capacidad = row[0]
+            tarifa = row[1]
+
+            return {
+                'capacidad': capacidad,
+                'tarifa': tarifa,
+            }
+        else:
+            return None
 
 class Local(Lugar):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
@@ -117,9 +146,9 @@ class Local(Lugar):
                     local.hora_inicio AS hora_inicio,
                     local.hora_fin AS hora_fin,
                     local.isVerificado AS is_verificado
-                FROM local
+                FROM lugar_local as local
                 INNER JOIN auth_user ON local.user_id = auth_user.id
-                WHERE local.id = %s
+                WHERE local.lugar_ptr_id = %s
             """, [lugar_id])
             row = cursor.fetchone()
 
@@ -139,13 +168,33 @@ class Local(Lugar):
                 'celular': celular,
                 'hora_inicio': hora_inicio,
                 'hora_fin': hora_fin,
-                'is_verificado': is_verificado,
+                'local_seguro': is_verificado,
             }
         else:
             return None
 
 class Ciclovia(Lugar):
     longitud = models.FloatField()
+    @classmethod
+    def getCicloviaById(self, lugar_id):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    ciclovia.longitud AS longitud
+                FROM lugar_ciclovia as ciclovia
+                WHERE ciclovia.lugar_ptr_id = %s
+            """, [lugar_id])
+            row = cursor.fetchone()
+
+        if row:
+            longitud = row[0]
+
+            return {
+                'longitud': longitud,
+            }
+        else:
+            return None
+        
 
 class Reseña(ModeloBase):
     contenido = models.TextField()
@@ -162,8 +211,8 @@ class Reseña(ModeloBase):
                 SELECT
                     AVG(puntuacion_atencion) AS promedio_atencion,
                     AVG(puntuacion_limpieza) AS promedio_limpieza,
-                    AVG(puntuacion_seguridad) AS promedio_seguridad
-                FROM reseña
+                    AVG(puntuacion_from django.db import transactionseguridad) AS promedio_seguridad
+                FROM lugar_reseña as reseña
                 WHERE lugar_id = %s
             """, [lugar_id])
             row = cursor.fetchone()
@@ -186,7 +235,7 @@ class Reseña(ModeloBase):
         cursor=connection.cursor()
         sql='''
             SELECT usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.tipo, reseña.contenido, reseña.fecha_creacion
-            FROM reseña
+            FROM lugar_reseña as reseña
             LEFT JOIN auth_user AS usuario ON reseña.user_id = usuario.id
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON reseña.user_id = detalle_usuario.usuario_id
             LEFT JOIN `authtoken_token` AS token ON token.user_id = reseña.user_id

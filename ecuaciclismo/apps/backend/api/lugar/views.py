@@ -42,11 +42,13 @@ class LugarViewSet(viewsets.ModelViewSet):
                 lugar = Local()
                 if data['isVerificado']==1:
                     lugar.user=token.user
+                    
                     lugar.servicio=get_or_none(Servicio, nombre=data['servicio'])
                     lugar.celular=data['celular']
                     lugar.hora_fin=datetime.strptime(data['hora_fin'], '%H:%M:%S').time()   
                     lugar.hora_inicio=datetime.strptime(data['hora_inicio'], '%H:%M:%S').time()
                     lugar.isBeneficios = data['isBeneficios']
+                    lugar.isVerificado = data['isVerificado']
 
             
             elif tipo_lugar == 'parqueadero':
@@ -79,7 +81,83 @@ class LugarViewSet(viewsets.ModelViewSet):
         except Exception as e:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
+    @action(detail=False, url_path ='get_lugares', methods=['get'])
+    def get_lugares(self, request):
+        try:
+            lugares = Lugar.get_lugares(1)
+            for lugar in lugares:
+                ubicacion = get_or_none(Ubicacion, id=lugar['ubicacion'])
+                coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
+                coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
+                dicc = {
+                    "coordinateX": {
+                        "latitude": float(coordenada_x.latitud),
+                        "longitude": float(coordenada_x.longitud)
+                    },
+                    "coordinateY": {
+                        "latitude": float(coordenada_y.latitud),
+                        "longitude": float(coordenada_y.longitud)
+                    }
+                }
+                lugar['ubicacion'] = dicc
+
+            return jsonx({'status': 'success', 'lugares': lugares})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
         
+    @action(detail=False, url_path ='get_lugar', methods=['post'])
+    def get_lugar(self, request):
+        try:
+            dato= request.data
+            lugar=get_or_none(Lugar, token=dato['token_lugar'])
+            dataLugar = Lugar.getLugarById(lugar.id)
+            
+            print(dataLugar)
+            ubicacion = get_or_none(Ubicacion, id=dataLugar['ubicacion'])
+            coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
+            coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
+            dicc = {
+                "coordinateX": {
+                    "latitude": float(coordenada_x.latitud),
+                    "longitude": float(coordenada_x.longitud)
+                },
+                "coordinateY": {
+                    "latitude": float(coordenada_y.latitud),
+                    "longitude": float(coordenada_y.longitud)
+                }
+            }
+            dataLugar['ubicacion'] = dicc
+            if dataLugar['tipo'] == 'local':
+                local=Local.getLocalById(lugar.id)
+                print(local)
+                if local['local_seguro']==1:
+                    dataLugar['servicio']=get_or_none(Servicio, id=local['servicio']).nombre
+                    dataLugar['celular']=local['celular']
+                    dataLugar['hora_inicio']=local['hora_inicio'].strftime('%H:%M:%S')
+                    dataLugar['hora_fin']=local['hora_fin'].strftime('%H:%M:%S')
+                    dataLugar['hora_inicio']=str(dataLugar['hora_inicio'])
+                    dataLugar['hora_fin']=str(dataLugar['hora_fin'])
+                    dataLugar['isBeneficios']=local['isBeneficios']
+                    dataLugar['local_seguro']=local['local_seguro']
+                    dataLugar['nombre_propietario']=local['nombre_propietario']
+                    dataLugar['apellido_propietario']=local['apellido_propietario']
+            elif dataLugar['tipo'] == 'parqueadero':
+                parqueadero=Parqueadero.getParqueaderoById(lugar.id)
+                dataLugar['capacidad']=parqueadero['capacidad']
+                dataLugar['tarifa']=parqueadero['tarifa']
+            elif dataLugar['tipo'] == 'ciclovia':
+                ciclovia=Ciclovia.getCicloviaById(lugar.id)
+                dataLugar['longitud']=ciclovia['longitud']
+            return jsonx({'status': 'success', 'lugar': dataLugar})
+        
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
     @action(detail=False, url_path ='new_servicio', methods=['post'])
     def new_servicio(self, request):
         transaction.set_autocommit(False)
