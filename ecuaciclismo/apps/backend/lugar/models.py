@@ -127,7 +127,7 @@ class Parqueadero(Lugar):
 
 class Local(Lugar):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)    
+    servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, null=True)    
     celular = models.CharField(max_length=100)
     hora_inicio = models.TimeField()
     hora_fin = models.TimeField()
