@@ -145,7 +145,8 @@ class Local(Lugar):
                     local.celular AS celular,
                     local.hora_inicio AS hora_inicio,
                     local.hora_fin AS hora_fin,
-                    local.isVerificado AS is_verificado
+                    local.isVerificado AS is_verificado,
+                    local.isBeneficios AS isBeneficios
                 FROM lugar_local as local
                 INNER JOIN auth_user ON local.user_id = auth_user.id
                 WHERE local.lugar_ptr_id = %s
@@ -160,6 +161,7 @@ class Local(Lugar):
             hora_inicio = row[4]
             hora_fin = row[5]
             is_verificado = row[6]
+            isBeneficios = row[7]
 
             return {
                 'nombre_propietario': nombre_propietario,
@@ -169,6 +171,7 @@ class Local(Lugar):
                 'hora_inicio': hora_inicio,
                 'hora_fin': hora_fin,
                 'local_seguro': is_verificado,
+                'isBeneficios': isBeneficios,
             }
         else:
             return None

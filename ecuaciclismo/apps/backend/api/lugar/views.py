@@ -132,7 +132,6 @@ class LugarViewSet(viewsets.ModelViewSet):
             dataLugar['ubicacion'] = dicc
             if dataLugar['tipo'] == 'local':
                 local=Local.getLocalById(lugar.id)
-                print(local)
                 if local['local_seguro']==1:
                     dataLugar['servicio']=get_or_none(Servicio, id=local['id_servicio']).nombre
                     dataLugar['celular']=local['celular']
