@@ -115,7 +115,6 @@ class LugarViewSet(viewsets.ModelViewSet):
             lugar=get_or_none(Lugar, token=dato['token_lugar'])
             dataLugar = Lugar.getLugarById(lugar.id)
             
-            print(dataLugar)
             ubicacion = get_or_none(Ubicacion, id=dataLugar['ubicacion'])
             coordenada_x = get_or_none(Coordenada, id=ubicacion.coordenada_x_id)
             coordenada_y = get_or_none(Coordenada, id=ubicacion.coordenada_y_id)
@@ -131,8 +130,10 @@ class LugarViewSet(viewsets.ModelViewSet):
             }
             dataLugar['ubicacion'] = dicc
             if dataLugar['tipo'] == 'local':
-                local=Local.getLocalById(lugar.id)
-                if local['local_seguro']==1:
+                lugarLocal=get_or_none(Local, lugar_ptr_id=lugar.id)
+                
+                if lugarLocal.isVerificado==1:
+                    local=Local.getLocalById(lugar.id)
                     dataLugar['servicio']=get_or_none(Servicio, id=local['id_servicio']).nombre
                     dataLugar['celular']=local['celular']
                     dataLugar['hora_inicio']=local['hora_inicio'].strftime('%H:%M:%S')

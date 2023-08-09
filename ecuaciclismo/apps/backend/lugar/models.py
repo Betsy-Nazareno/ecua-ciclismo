@@ -152,9 +152,8 @@ class Local(Lugar):
                 WHERE local.lugar_ptr_id = %s
             """, [lugar_id])
             row = cursor.fetchone()
-
         if row:
-            nombre_propietario = row[0]
+            nombre_propietario = row[0] 
             apellido_propietario = row[1]
             id_servicio = row[2]
             celular = row[3]
