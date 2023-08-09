@@ -134,7 +134,7 @@ class LugarViewSet(viewsets.ModelViewSet):
                 local=Local.getLocalById(lugar.id)
                 print(local)
                 if local['local_seguro']==1:
-                    dataLugar['servicio']=get_or_none(Servicio, id=local['servicio']).nombre
+                    dataLugar['servicio']=get_or_none(Servicio, id=local['id_servicio']).nombre
                     dataLugar['celular']=local['celular']
                     dataLugar['hora_inicio']=local['hora_inicio'].strftime('%H:%M:%S')
                     dataLugar['hora_fin']=local['hora_fin'].strftime('%H:%M:%S')

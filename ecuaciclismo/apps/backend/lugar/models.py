@@ -66,7 +66,7 @@ class Lugar(ModeloBase):
                     lugar.id AS id,
                     lugar.nombre AS nombre,
                     lugar.descripcion AS descripcion,
-                    lugar.imagen AS foto,
+                    lugar.imagen AS imagen,
                     lugar.direccion AS direccion,
                     lugar.ubicacion_id AS ubicacion,
                     CASE
@@ -88,7 +88,7 @@ class Lugar(ModeloBase):
                 'id': row[0],
                 'nombre': row[1],
                 'descripcion': row[2],
-                'foto': row[3],
+                'imagen': row[3],
                 'direccion': row[4],
                 'ubicacion': row[5],
                 'tipo': row[6],
