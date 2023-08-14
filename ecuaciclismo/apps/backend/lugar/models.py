@@ -35,7 +35,7 @@ class Lugar(ModeloBase):
                     local.isVerificado AS local_seguro,
                     lugar.direccion AS direccion,
                     lugar.token AS token,
-                    lugar.ciudad AS ciudad,          
+                    lugar.ciudad AS ciudad          
                 FROM lugar_lugar as lugar 
                 LEFT JOIN lugar_parqueadero as parqueadero  ON lugar.id = parqueadero.lugar_ptr_id
                 LEFT JOIN lugar_local as local  ON lugar.id = local.lugar_ptr_id
