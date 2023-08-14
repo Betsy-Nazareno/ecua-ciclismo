@@ -2,19 +2,12 @@ from django.db import transaction
 from django.forms import ValidationError
 from rest_framework import viewsets
 from datetime import datetime
-from datetime import timedelta
 from ecuaciclismo.apps.backend.api.alerta.AlertaSerializer import AlertaSerializer
 from ecuaciclismo.apps.backend.api.lugar.LugarSerializer import LugarSerializer
-from ecuaciclismo.apps.backend.lugar.models import Ciclovia, Local, Lugar, Parqueadero, Servicio
-from ecuaciclismo.apps.backend.ruta.models import Ruta, Coordenada, Ubicacion, DetalleRequisito, \
-    Colaboracion,Archivo
-from ecuaciclismo.apps.backend.alerta.models import Alerta, ComentarioAlerta, DetalleColaboracion,EtiquetaAlerta, ArchivoAlerta, ParticipacionAlerta
-from rest_framework import viewsets, status
+from ecuaciclismo.apps.backend.lugar.models import Ciclovia, Local, Lugar, Parqueadero, Servicio, Reseña
+from ecuaciclismo.apps.backend.ruta.models import  Coordenada, Ubicacion
+from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.contrib.auth.models import User
-from ecuaciclismo.apps.backend.usuario.models import ContactoSeguro, GrupoContactoSeguro, DetalleUsuario
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
 from rest_framework.authtoken.models import Token
 from ecuaciclismo.helpers.jsonx import jsonx
@@ -40,10 +33,11 @@ class LugarViewSet(viewsets.ModelViewSet):
             
             if tipo_lugar== 'local':
                 lugar = Local()
+                lugar.servicio=get_or_none(Servicio, nombre=data['servicio'])
                 if data['isVerificado']==1:
                     lugar.user=token.user
                     
-                    lugar.servicio=get_or_none(Servicio, nombre=data['servicio'])
+                    
                     lugar.celular=data['celular']
                     lugar.hora_fin=datetime.strptime(data['hora_fin'], '%H:%M:%S').time()   
                     lugar.hora_inicio=datetime.strptime(data['hora_inicio'], '%H:%M:%S').time()
@@ -129,12 +123,15 @@ class LugarViewSet(viewsets.ModelViewSet):
                 }
             }
             dataLugar['ubicacion'] = dicc
+            puntuacion=Reseña.getPuntuacionesByIdLugar(lugar.id)
+            dataLugar['promedio_seguridad']=puntuacion['promedio_seguridad']
+            dataLugar['promedio_limpieza']=puntuacion['promedio_limpieza']
+            dataLugar['promedio_atencion']=puntuacion['promedio_atencion']
             if dataLugar['tipo'] == 'local':
                 lugarLocal=get_or_none(Local, lugar_ptr_id=lugar.id)
-                
+                dataLugar['servicio']=lugarLocal.servicio.nombre
                 if lugarLocal.isVerificado==1:
                     local=Local.getLocalById(lugar.id)
-                    dataLugar['servicio']=get_or_none(Servicio, id=local['id_servicio']).nombre
                     dataLugar['celular']=local['celular']
                     dataLugar['hora_inicio']=local['hora_inicio'].strftime('%H:%M:%S')
                     dataLugar['hora_fin']=local['hora_fin'].strftime('%H:%M:%S')
@@ -177,5 +174,87 @@ class LugarViewSet(viewsets.ModelViewSet):
         except Exception as e:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
+
+    @action(detail=False, url_path ='get_reseñas', methods=['post'])
+    def get_reseñas(self, request):
+        try:
+            data = request.data
+            lugar = get_or_none(Lugar, token=data['token_lugar'])
+            reseñas = Reseña.getReseñasByIdLugar(lugar.id)
+            return jsonx({'status': 'success', 'reseñas': reseñas})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+        
+    @action(detail=False, url_path ='new_reseña', methods=['post'])
+    def new_reseña(self, request):
+        try: 
+            data= request.data
+            if data['token_lugar'] is not None and data['token_lugar'] != '':
+                lugar = get_or_none(Lugar, token=data['token_lugar'])
+                token= Token.objects.get(key=request.headers['Authorization'].split('Token ')[1]) 
+                reseña = Reseña()
+                reseña.contenido = data['contenido']
+                reseña.puntuacion_seguridad = data['puntuacion_seguridad']
+                if data.get('puntuacion_atencion') is not None and data.get('puntuacion_atencion') != '':
+                    reseña.puntuacion_atencion = data['puntuacion_atencion']
+                if data.get('puntuacion_limpieza') is not None and data.get('puntuacion_limpieza') != '':
+                    reseña.puntuacion_limpieza = data['puntuacion_limpieza']
+
+                reseña.lugar = lugar
+                reseña.user = token.user
+                reseña.save()
+
+                return jsonx({'status': 'success', 'message': 'Reseña creada con éxito.'})
+            else:
+                return jsonx({'status': 'error', 'message': 'El lugar no existe.'})
+        except ValidationError as e:
+            return jsonx({'status': 'error', 'message': e.message_dict})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+    
+    @action(detail=False, url_path ='delete_reseña', methods=['post'])
+    def delete_reseña(self, request):
+        try:
+            data= request.data
+            reseña = get_or_none(Reseña, token=data['token_reseña'])
+            reseña.delete()
+            return jsonx({'status': 'success', 'message': 'Reseña eliminada con éxito.'})
+        except ValidationError as e:
+            return jsonx({'status': 'error', 'message': e.message_dict})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+    
+    @action(detail=False, url_path ='edit_reseña', methods=['post'])
+    def edit_reseña(self, request):
+        try:
+            data= request.data
+            reseña = get_or_none(Reseña, token=data['token_reseña'])
+            reseña.contenido = data['contenido']
+            if data['puntuacion_seguridad'] is not None and data['puntuacion_seguridad'] != '':
+                reseña.puntuacion_seguridad = data['puntuacion_seguridad']
+            if data.get('puntuacion_atencion') is not None and data.get('puntuacion_atencion') != '':
+                reseña.puntuacion_atencion = data['puntuacion_atencion']
+            if data.get('puntuacion_limpieza') is not None and data.get('puntuacion_limpieza') != '':
+                reseña.puntuacion_limpieza = data['puntuacion_limpieza']
+                   
+                
+            reseña.save()
+
+            return jsonx({'status': 'success', 'message': 'Reseña editada con éxito.'})
+        except ValidationError as e:
+            return jsonx({'status': 'error', 'message': e.message_dict})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+        
+
+    
 
 

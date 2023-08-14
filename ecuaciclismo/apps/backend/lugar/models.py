@@ -13,6 +13,7 @@ class Lugar(ModeloBase):
     descripcion = models.CharField(max_length=200)
     direccion = models.CharField(max_length=100)
     imagen = models.TextField()
+    ciudad = models.CharField(max_length=100, null=True)
     ubicacion = models.ForeignKey(Ubicacion, on_delete=models.CASCADE)
     isActived = models.BooleanField(default=0)
 
@@ -33,7 +34,8 @@ class Lugar(ModeloBase):
                     END AS tipo,
                     local.isVerificado AS local_seguro,
                     lugar.direccion AS direccion,
-                    lugar.token AS token
+                    lugar.token AS token,
+                    lugar.ciudad AS ciudad,          
                 FROM lugar_lugar as lugar 
                 LEFT JOIN lugar_parqueadero as parqueadero  ON lugar.id = parqueadero.lugar_ptr_id
                 LEFT JOIN lugar_local as local  ON lugar.id = local.lugar_ptr_id
@@ -53,6 +55,7 @@ class Lugar(ModeloBase):
                 'local_seguro': row[5] if row[4] == 'local' else None,
                 'direccion': row[6],
                 'token': row[7],
+                'ciudad': row[8],
             }
             lugares.append(lugar_info)
 
@@ -74,7 +77,8 @@ class Lugar(ModeloBase):
                         WHEN local.lugar_ptr_id IS NOT NULL THEN 'local'
                         WHEN ciclovia.lugar_ptr_id IS NOT NULL THEN 'ciclovia'
                         ELSE ''
-                    END AS tipo
+                    END AS tipo,
+                    lugar.ciudad AS ciudad
                 FROM lugar_lugar as lugar
                 LEFT JOIN lugar_parqueadero as parqueadero  ON lugar.id = parqueadero.lugar_ptr_id
                 LEFT JOIN lugar_local as local  ON lugar.id = local.lugar_ptr_id
@@ -92,6 +96,7 @@ class Lugar(ModeloBase):
                 'direccion': row[4],
                 'ubicacion': row[5],
                 'tipo': row[6],
+                'ciudad': row[7],
             }
             return lugar_info
         else:
@@ -200,8 +205,8 @@ class Ciclovia(Lugar):
 
 class Reseña(ModeloBase):
     contenido = models.TextField()
-    puntuacion_atencion = models.IntegerField()
-    puntuacion_limpieza = models.IntegerField()
+    puntuacion_atencion = models.IntegerField(null=True)
+    puntuacion_limpieza = models.IntegerField(null=True)
     puntuacion_seguridad = models.IntegerField()
     lugar = models.ForeignKey(Lugar, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -236,7 +241,7 @@ class Reseña(ModeloBase):
     def getReseñasByIdLugar(self, lugar_id):
         cursor=connection.cursor()
         sql='''
-            SELECT usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.tipo, reseña.contenido, reseña.fecha_creacion
+            SELECT usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.tipo, reseña.contenido, reseña.fecha_creacion, reseña.token, reseña.puntuacion_atencion, reseña.puntuacion_limpieza, reseña.puntuacion_seguridad, token.key
             FROM lugar_reseña as reseña
             LEFT JOIN auth_user AS usuario ON reseña.user_id = usuario.id
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON reseña.user_id = detalle_usuario.usuario_id
