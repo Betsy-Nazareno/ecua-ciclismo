@@ -78,7 +78,8 @@ class Lugar(ModeloBase):
                         WHEN ciclovia.lugar_ptr_id IS NOT NULL THEN 'ciclovia'
                         ELSE ''
                     END AS tipo,
-                    lugar.ciudad AS ciudad
+                    lugar.ciudad AS ciudad,
+                    lugar.token AS token
                 FROM lugar_lugar as lugar
                 LEFT JOIN lugar_parqueadero as parqueadero  ON lugar.id = parqueadero.lugar_ptr_id
                 LEFT JOIN lugar_local as local  ON lugar.id = local.lugar_ptr_id
@@ -97,6 +98,7 @@ class Lugar(ModeloBase):
                 'ubicacion': row[5],
                 'tipo': row[6],
                 'ciudad': row[7],
+                'token': row[8],
             }
             return lugar_info
         else:
