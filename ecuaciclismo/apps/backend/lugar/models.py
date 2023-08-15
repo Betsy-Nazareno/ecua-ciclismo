@@ -218,7 +218,7 @@ class Reseña(ModeloBase):
                 SELECT
                     AVG(puntuacion_atencion) AS promedio_atencion,
                     AVG(puntuacion_limpieza) AS promedio_limpieza,
-                    AVG(puntuacion_from django.db import transactionseguridad) AS promedio_seguridad
+                    AVG(puntuacion_seguridad) AS promedio_seguridad
                 FROM lugar_reseña as reseña
                 WHERE lugar_id = %s
             """, [lugar_id])
