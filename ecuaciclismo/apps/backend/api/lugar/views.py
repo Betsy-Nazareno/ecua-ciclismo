@@ -2,7 +2,6 @@ from django.db import transaction
 from django.forms import ValidationError
 from rest_framework import viewsets
 from datetime import datetime
-from ecuaciclismo.apps.backend.api.alerta.AlertaSerializer import AlertaSerializer
 from ecuaciclismo.apps.backend.api.lugar.LugarSerializer import LugarSerializer
 from ecuaciclismo.apps.backend.lugar.models import Ciclovia, Local, Lugar, Parqueadero, Servicio, Reseña
 from ecuaciclismo.apps.backend.ruta.models import  Coordenada, Ubicacion
@@ -36,8 +35,7 @@ class LugarViewSet(viewsets.ModelViewSet):
                 lugar.servicio=get_or_none(Servicio, nombre=data['servicio'])
                 if data['isVerificado']==1:
                     lugar.user=token.user
-                    
-                    
+                    lugar.isParqueadero=data['parqueadero']
                     lugar.celular=data['celular']
                     lugar.hora_fin=datetime.strptime(data['hora_fin'], '%H:%M:%S').time()   
                     lugar.hora_inicio=datetime.strptime(data['hora_inicio'], '%H:%M:%S').time()
@@ -66,7 +64,7 @@ class LugarViewSet(viewsets.ModelViewSet):
             lugar.save()
 
             transaction.commit()
-            return jsonx({'status': 'success', 'message': 'Lugar creado con éxito.'})
+            return jsonx({'status': 'success', 'message': 'Lugar creado con éxito','token_lugar': lugar.token})
         except ValidationError as e:
             return jsonx({'status': 'error', 'message': e.message_dict})
         except ApplicationError as msg:
@@ -181,6 +179,11 @@ class LugarViewSet(viewsets.ModelViewSet):
             data = request.data
             lugar = get_or_none(Lugar, token=data['token_lugar'])
             reseñas = Reseña.getReseñasByIdLugar(lugar.id)
+            for reseña in reseñas:
+                fecha= reseña['fecha_creacion']
+                reseña['fecha_creacion']=fecha.strftime('%Y-%m-%d %H:%M:%S')
+                reseña['fecha_creacion']=str(reseña['fecha_creacion'])
+
             return jsonx({'status': 'success', 'reseñas': reseñas})
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})

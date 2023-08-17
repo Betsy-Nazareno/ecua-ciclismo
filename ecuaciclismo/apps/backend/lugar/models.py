@@ -140,7 +140,7 @@ class Local(Lugar):
     hora_fin = models.TimeField(null=True)
     isBeneficios = models.BooleanField(default=0)
     isVerificado = models.BooleanField(default=0)
-
+    isParqueadero= models.BooleanField(null=True)
     @classmethod
     def getLocalById(self, lugar_id):
         with connection.cursor() as cursor:
