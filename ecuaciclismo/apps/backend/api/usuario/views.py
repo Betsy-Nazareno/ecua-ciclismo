@@ -165,7 +165,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             else:
                 bicicleta = Bicicleta.objects.get(id=detalle_usuario.bicicleta_id)
             bicicleta.marca = data['marca']
-            bicicleta.tipo = data['tipo']
+            bicicleta.tipo = data['tipoBicicleta']
             bicicleta.codigo = data['codigo']
             bicicleta.foto_bicicleta = data['foto_bicicleta']
             bicicleta.save()
