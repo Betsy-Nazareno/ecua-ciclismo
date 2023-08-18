@@ -218,12 +218,12 @@ class UsuarioViewSet(viewsets.ModelViewSet):
                 data['etiquetas'] = DetalleEtiquetaRutaUsuario.get_etiqueta_usuario(id=id_user.usuario.id)
                 data['rutas'] = InscripcionRuta.get_ruta_inscripcion(id=id_user.usuario.id)
                 
-                print(data['rutas'])
-                for ruta in data['rutas']:
-                    detallearchivo = DetalleArchivoRuta.objects.filter(ruta_id=ruta['id']).first()
-                    archivo = Archivo.objects.get(id=detallearchivo.archivo_id)
-                    ruta["link"] = archivo.link
-                    ruta.pop("id")
+                if(data.get('rutas')):
+                    for ruta in data['rutas']:
+                        detallearchivo = DetalleArchivoRuta.objects.filter(ruta_id=ruta['id']).first()
+                        archivo = Archivo.objects.get(id=detallearchivo.archivo_id)
+                        ruta["link"] = archivo.link
+                        ruta.pop("id")
             return jsonx({'status': 'success', 'message': 'Información del usuario completa.', 'data': datos})
         except ApplicationError as msg:
             transaction.rollback()
