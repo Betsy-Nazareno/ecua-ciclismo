@@ -220,7 +220,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
                 
                 if(data.get('rutas')):
                     for ruta in data['rutas']:
-                        detallearchivo = DetalleArchivoRuta.objects.filter(ruta_id=ruta['id']).first()
+                        detallearchivo = DetalleArchivoRuta.objects.filter(ruta_id=ruta['ruta_id']).first()
                         if detallearchivo:
                             archivo = Archivo.objects.get(id=detallearchivo.archivo_id)
                             ruta["link"] = archivo.link
