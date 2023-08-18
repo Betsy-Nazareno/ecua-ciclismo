@@ -18,17 +18,19 @@ class SolicitudViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset
         return queryset
-    @action(detail=False, utl_path='new_solicitud_lugar', methods=['post'])
+    @action(detail=False, url_path='new_solicitud_lugar', methods=['post'])
     def new_solicitud_lugar(self, request):
         transaction.set_autocommit(False)
         try:
             data = request.data
             solicitud = Solicitud()
-            user= Token.objects.get(key=data['token']).user
-            solicitud.user = user
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            solicitud.user = token.user
             lugar=get_or_none(Lugar, token=data['token_lugar'])
             solicitud.lugar = lugar
-            solicitud.path_Pdf=data['path_Pdf']
+            if data['path_Pdf'].len() > 0:
+                solicitud.path_Pdf=data['path_Pdf']
+
             solicitud.estado = 'Pendiente'
             solicitud.save()
             transaction.commit()

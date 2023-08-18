@@ -7,6 +7,7 @@ from ecuaciclismo.apps.backend.api.consejodia.views import ConsejoDiaViewSet
 from ecuaciclismo.apps.backend.api.lugar.views import LugarViewSet
 from ecuaciclismo.apps.backend.api.publicacion.views import PublicacionViewSet
 from ecuaciclismo.apps.backend.api.ruta.views import RutaViewSet
+from ecuaciclismo.apps.backend.api.solicitud.views import SolicitudViewSet
 from ecuaciclismo.apps.backend.api.usuario.views import UsuarioViewSet, DetalleUsuarioViewSet, \
     UsuarioRecuperarCredencialesViewSet
 
@@ -27,7 +28,7 @@ router.register(r'publicacion', PublicacionViewSet)
 router.register(r'ruta', RutaViewSet)
 router.register(r'alerta', AlertaViewSet)
 router.register(r'lugar', LugarViewSet)
-#router.register(r'solicitud', SolicitudViewSet)
+router.register(r'solicitud', SolicitudViewSet)
 router.register(r'recuperar_credenciales', UsuarioRecuperarCredencialesViewSet)
 
 

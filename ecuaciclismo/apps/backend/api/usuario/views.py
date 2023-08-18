@@ -217,6 +217,8 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             for data in datos:
                 data['etiquetas'] = DetalleEtiquetaRutaUsuario.get_etiqueta_usuario(id=id_user.usuario.id)
                 data['rutas'] = InscripcionRuta.get_ruta_inscripcion(id=id_user.usuario.id)
+                
+                print(data['rutas'])
                 for ruta in data['rutas']:
                     detallearchivo = DetalleArchivoRuta.objects.filter(ruta_id=ruta['id']).first()
                     archivo = Archivo.objects.get(id=detallearchivo.archivo_id)
