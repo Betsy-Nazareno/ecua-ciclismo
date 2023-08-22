@@ -292,7 +292,6 @@ class UsuarioViewSet(viewsets.ModelViewSet):
                 dataUser= DetalleUsuario.get_all_informacion(data['user_id'])
                 contacto_seguro_qs = ContactoSeguro.objects.filter(user=data['user_id'])
                 contacto_seguro.user= User.objects.get(id=data['user_id'])
-                print(contacto_seguro.user)
                 contacto_seguro.nombre=dataUser[0]['first_name']+ ' '+ dataUser[0]['last_name']
                 contacto_seguro.celular=dataUser[0]['telefono']
                 contacto_seguro.isUser=1
@@ -395,6 +394,7 @@ class CustomAuthToken(ObtainAuthToken):
             'id_usuario': detalle_usuario.token,
             'username': usuario.username,
             'first_name': usuario.first_name,
+            'tipo': usuario.detalleusuario.tipo,
             'last_name': usuario.last_name,
             'email': usuario.email,
             # 'plan': Plan.obtener_plan(request.data['plan'] if request.data.get('plan') != None else None),
