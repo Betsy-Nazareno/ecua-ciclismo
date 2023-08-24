@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-from heyoo import WhatsApp
 
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
