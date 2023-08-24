@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, connection
 from django.contrib.auth.models import User
 from ecuaciclismo.apps.backend.lugar.models import Lugar
 
@@ -10,22 +10,95 @@ class Solicitud(ModeloBase):
     motivo_rechazo = models.CharField(max_length=200, blank=True, null=True)
     path_Pdf = models.TextField(null=True)
 
-class SolicitudRegistroMiembro(Solicitud):
-    cedula = models.CharField(max_length=50)
-    direccion = models.CharField(max_length=100)
-    ciudad = models.CharField(max_length=50)
-    ocupacion = models.CharField(max_length=50)
-    seguro_medico = models.CharField(max_length=100)
-    tipo_sangre = models.CharField(max_length=50)
-    contacto_emergencia = models.CharField(max_length=50)
-    comprobante = models.TextField(null=True)  # LongText en MySQL
-    foto_cedula = models.TextField()  # LongText en MySQL
+    @classmethod
+    def get_all(cls):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT user.first_name, user.last_name, detalle_usuario.foto, solicitud.token, solicitud.estado, solicitud.fecha_creacion,solicitud.path_Pdf, solicitud.id
+                FROM `solicitud_solicitudverificado` AS solicitudV
+                LEFT JOIN `solicitud_solicitud` AS solicitud ON solicitudV.solicitud_ptr_id = solicitud.id
+                LEFT JOIN `auth_user` AS user ON solicitud.user_id = user.id
+                LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON solicitud.user_id = detalle_usuario.usuario_id
+                ORDER BY solicitud.fecha_creacion 
+            '''
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+    
+    @classmethod
+    def get_by_user(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT user.first_name, user.last_name, detalle_usuario.foto, solicitud.token, solicitud.estado, solicitud.fecha_creacion,solicitud.path_Pdf, solicitud.id
+                FROM `solicitud_solicitudverificado` AS solicitudV
+                LEFT JOIN `solicitud_solicitud` AS solicitud ON solicitudV.solicitud_ptr_id = solicitud.id
+                LEFT JOIN `auth_user` AS user ON solicitud.user_id = user.id
+                LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON solicitud.user_id = detalle_usuario.usuario_id
+                WHERE solicitud.user_id = ''' + str(id) + '''
+                ORDER BY solicitud.fecha_creacion 
+            '''
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
 
 class SolicitudLugar(Solicitud):
-    lugar = models.ForeignKey(Lugar, on_delete=models.CASCADE)
+    lugar = models.ForeignKey(Lugar, on_delete=models.CASCADE) 
+
+    @classmethod
+    def get_by_id(cls, id):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT lugar.nombre, lugar.direccion, lugar.descripcion, lugar.id, lugar.imagen, lugar.ubicacion_id
+                FROM `solicitud_solicitudlugar` AS solicitud
+                LEFT JOIN `lugar_lugar` AS lugar ON solicitud.lugar_id = lugar.id
+                WHERE solicitud.id = ''' + str(id)
+            
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic
+
+
 
 
 class SolicitudVerificado(Solicitud):
     descripcion = models.TextField()
     imagen = models.TextField()
     usuarios = models.ManyToManyField(User)
+
+    @classmethod
+    def get_Usuarios(self, id):
+        cursor = connection.cursor()
+        sql = '''
+                SELECT user.first_name, user.last_name, detalle_usuario.foto, user.id
+                FROM `solicitud_solicitudverificado_usuarios` AS solicitud_usuario
+                LEFT JOIN `auth_user` AS user ON solicitud_usuario.user_id = user.id
+                LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON user.id = detalle_usuario.usuario_id
+                WHERE solicitud_usuario.solicitudverificado_id = ''' + str(id)
+            
+        cursor.execute(sql)
+        dic = []
+        detalles = cursor.fetchall()
+        for row in detalles:
+            diccionario = dict(zip([col[0] for col in cursor.description], row))
+            dic.append(diccionario)
+
+        cursor.close()
+        return dic

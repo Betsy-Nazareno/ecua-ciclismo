@@ -62,6 +62,29 @@ class Lugar(ModeloBase):
         return lugares
 
     @classmethod
+    def getTipoLugar(self,id_lugar):
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    CASE
+                        WHEN parqueadero.lugar_ptr_id IS NOT NULL THEN 'parqueadero'
+                        WHEN local.lugar_ptr_id IS NOT NULL THEN 'local'
+                        WHEN ciclovia.lugar_ptr_id IS NOT NULL THEN 'ciclovia'
+                        ELSE ''
+                    END AS tipo
+                FROM lugar_lugar as lugar 
+                LEFT JOIN lugar_parqueadero as parqueadero  ON lugar.id = parqueadero.lugar_ptr_id
+                LEFT JOIN lugar_local as local  ON lugar.id = local.lugar_ptr_id
+                LEFT JOIN lugar_ciclovia as ciclovia  ON lugar.id = ciclovia.lugar_ptr_id
+                WHERE lugar.id = %s 
+            """, [id_lugar])
+            row = cursor.fetchone()
+
+        if row:
+            return row[0]
+        else:
+            return None
+    @classmethod
     def getLugarById(self, lugar_id):
         with connection.cursor() as cursor:
             cursor.execute("""

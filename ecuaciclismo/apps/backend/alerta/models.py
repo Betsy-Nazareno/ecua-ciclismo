@@ -162,23 +162,6 @@ class ComentarioAlerta(ModeloBase):
         cursor.close()
         return dic
     
-    # @classmethod
-    # def get_respuestas_comentario(cls, comentario_id):
-    #     cursor = connection.cursor()
-    #     sql = '''
-    #         SELECT id, comentario, user_id, padre_id
-    #         FROM alerta_comentarioalerta
-    #         WHERE padre_id ='''+str(comentario_id)
-
-    #     cursor.execute(sql)
-    #     dic = []
-    #     detalles = cursor.fetchall()
-    #     for row in detalles:
-    #         diccionario = dict(zip([col[0] for col in cursor.description], row))
-    #         dic.append(diccionario)
-
-    #     cursor.close()
-    #     return dic
 
 class ParticipacionAlerta(ModeloBase):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

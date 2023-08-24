@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from heyoo import WhatsApp
 
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -394,7 +395,6 @@ class CustomAuthToken(ObtainAuthToken):
             'id_usuario': detalle_usuario.token,
             'username': usuario.username,
             'first_name': usuario.first_name,
-            'tipo': usuario.detalleusuario.tipo,
             'last_name': usuario.last_name,
             'email': usuario.email,
             # 'plan': Plan.obtener_plan(request.data['plan'] if request.data.get('plan') != None else None),
@@ -408,6 +408,7 @@ class CustomAuthToken(ObtainAuthToken):
             'peso': detalle_usuario.peso,
             'edad': detalle_usuario.edad,
             'nivel': detalle_usuario.nivel,
+            'tipo': detalle_usuario.tipo,
             'token_notificacion': detalle_usuario.token_notificacion,
             # 'avatar': settings.URL_DJANGO_SERVER + reverse(servir_imagen_perfil, args=[user.detalleusuario.token_publico]),
             # 'socialMedia': False
