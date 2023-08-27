@@ -86,7 +86,7 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         try:
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             solicitudes= Solicitud.get_all()
-
+            
             for solicitud in solicitudes:
                 solicitud['fecha_creacion']=datetime.strftime(solicitud['fecha_creacion'],'%Y-%m-%d %H:%M:%S')
                 solicitud['fecha_creacion']=str(solicitud['fecha_creacion'])

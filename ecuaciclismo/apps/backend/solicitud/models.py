@@ -15,8 +15,7 @@ class Solicitud(ModeloBase):
         cursor = connection.cursor()
         sql = '''
                 SELECT user.first_name, user.last_name, detalle_usuario.foto, solicitud.token, solicitud.estado, solicitud.fecha_creacion,solicitud.path_Pdf, solicitud.id
-                FROM `solicitud_solicitudverificado` AS solicitudV
-                LEFT JOIN `solicitud_solicitud` AS solicitud ON solicitudV.solicitud_ptr_id = solicitud.id
+                FROM `solicitud_solicitud` AS solicitud
                 LEFT JOIN `auth_user` AS user ON solicitud.user_id = user.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON solicitud.user_id = detalle_usuario.usuario_id
                 ORDER BY solicitud.fecha_creacion 
@@ -36,8 +35,7 @@ class Solicitud(ModeloBase):
         cursor = connection.cursor()
         sql = '''
                 SELECT user.first_name, user.last_name, detalle_usuario.foto, solicitud.token, solicitud.estado, solicitud.fecha_creacion,solicitud.path_Pdf, solicitud.id
-                FROM `solicitud_solicitudverificado` AS solicitudV
-                LEFT JOIN `solicitud_solicitud` AS solicitud ON solicitudV.solicitud_ptr_id = solicitud.id
+                FROM `solicitud_solicitud` AS solicitud
                 LEFT JOIN `auth_user` AS user ON solicitud.user_id = user.id
                 LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON solicitud.user_id = detalle_usuario.usuario_id
                 WHERE solicitud.user_id = ''' + str(id) + '''
@@ -63,7 +61,7 @@ class SolicitudLugar(Solicitud):
                 SELECT lugar.nombre, lugar.direccion, lugar.descripcion, lugar.id, lugar.imagen, lugar.ubicacion_id
                 FROM `solicitud_solicitudlugar` AS solicitud
                 LEFT JOIN `lugar_lugar` AS lugar ON solicitud.lugar_id = lugar.id
-                WHERE solicitud.id = ''' + str(id)
+                WHERE solicitud.solicitud_ptr_id =''' + str(id)
             
         cursor.execute(sql)
         dic = []
