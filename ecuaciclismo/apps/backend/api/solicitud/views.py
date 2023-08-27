@@ -1,6 +1,5 @@
 from django.db import transaction
 from django.forms import ValidationError
-from rest_framework import viewsets
 from datetime import datetime
 from ecuaciclismo.apps.backend.api.solicitud.SolicitudSerializer import SolicitudSerializer
 from rest_framework import viewsets
@@ -24,20 +23,26 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         transaction.set_autocommit(False)
         try:
             data = request.data
-            if data.get('path_Pdf') is not None:
-                solicitud = Solicitud()
-                solicitud.path_Pdf=data['path_Pdf']
-            else:
+            mensaje = ''
+            if data['token_lugar']:
+                mensaje = 'Solicitud de lugar creado con éxito'
                 solicitud = SolicitudLugar()
                 lugar=get_or_none(Lugar, token=data['token_lugar'])
                 solicitud.lugar = lugar
+                if data['path_Pdf']:
+                    mensaje = 'Solicitud de registro local creado con éxito'
+                    solicitud.path_Pdf=data['path_Pdf']
+            else:
+                mensaje = 'Solicitud de membresia creado con éxito'
+                solicitud = Solicitud()
+                solicitud.path_Pdf=data['path_Pdf']
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             solicitud.user = token.user
             solicitud.estado = 'Pendiente'
             solicitud.save()
             transaction.commit()
 
-            return jsonx({'status': 'success', 'message': 'Solicitud de lugar creado con éxito'})
+            return jsonx({'status': 'success', 'message': mensaje})
         except ValidationError as e:
             return jsonx({'status': 'error', 'message': e.message_dict})
         except ApplicationError as msg:
@@ -106,6 +111,7 @@ class SolicitudViewSet(viewsets.ModelViewSet):
                     solicitud['nombre']="Solicitud Verificación"
                     solicitud['tipo']="Verificacion"
                     solicitud['descripcion']=solicitudVerificado.descripcion
+    
                 
             return jsonx({'status': 'success', 'message': 'Solicitudes obtenidas con éxito','solicitudes':solicitudes})
         except ValidationError as e:
@@ -147,6 +153,7 @@ class SolicitudViewSet(viewsets.ModelViewSet):
                     solicitud['nombre']="Solicitud Verificación"
                     solicitud['tipo']="Verificacion"
                     solicitud['descripcion']=solicitudVerificado.descripcion
+                    solicitud['fotUser']=solicitudVerificado.user.foto
                 
             return jsonx({'status': 'success', 'message': 'Solicitudes obtenidas con éxito','solicitudes':solicitudes})
         except ValidationError as e:
