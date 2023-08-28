@@ -147,7 +147,7 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         transaction.set_autocommit(False)
         try:
             data = request.data
-            solicitud = Solicitud.objects.get(id=data['token_solicitud'])
+            solicitud = get_or_none(Solicitud, token=data['token_solicitud'])
             solicitud.estado=data['estado']
             solicitud.motivo_rechazo=data['motivo_rechazo']
             solicitud.save()
