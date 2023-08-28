@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 from ecuaciclismo.apps.backend.lugar.models import Lugar
 from ecuaciclismo.apps.backend.ruta.models import Coordenada, Ubicacion
 from ecuaciclismo.apps.backend.solicitud.models import Solicitud, SolicitudLugar, SolicitudVerificado
+from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
 from rest_framework.authtoken.models import Token
 from ecuaciclismo.helpers.jsonx import jsonx
@@ -150,6 +151,19 @@ class SolicitudViewSet(viewsets.ModelViewSet):
             solicitud = get_or_none(Solicitud, token=data['token_solicitud'])
             solicitud.estado=data['estado']
             solicitud.motivo_rechazo=data['motivo_rechazo']
+            print(data['tipo'])
+            if(data['tipo']=='Recomendados' or data['tipo']=='Registro Local'):
+                solicitudLugar = get_or_none(SolicitudLugar, solicitud_ptr_id=solicitud.id)
+                lugar=get_or_none(Lugar, id=solicitudLugar.lugar_id)
+                lugar.isActived=True
+                lugar.save()
+            else:
+                detalleUsuario=get_or_none(DetalleUsuario, usuario_id=solicitud.user_id)
+                if data['tipo']=='Membresia':
+                    detalleUsuario.tipo='Miembro'
+                #Aqui va la parte para aprobar la solicitud de verificacion
+                detalleUsuario.save()
+
             solicitud.save()
             transaction.commit()
             return jsonx({'status': 'success', 'message': 'Solicitud respondida con éxito'})
