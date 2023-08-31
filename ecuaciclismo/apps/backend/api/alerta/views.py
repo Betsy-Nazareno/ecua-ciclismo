@@ -253,16 +253,16 @@ class AlertaViewSet(viewsets.ModelViewSet):
 
     
 
-    # @action(detail=False, url_path='new_etiqueta', methods=['post'])
-    # def new_etiqueta(self, request):
-    #     try:
-    #         data = request.data
-    #         etiqueta= EtiquetaAlerta()
-    #         etiqueta.nombre=data['nombre']
-    #         etiqueta.value=data['value']
-    #         etiqueta.save()
-    #         return jsonx({'status': 'success', 'message': 'Etiqueta creada.'})
-    #     except ApplicationError as msg:
-    #         return jsonx({'status': 'error', 'message': str(msg)})
-    #     except Exception as e:
-    #         return jsonx({'status': 'error', 'message': str(e)})
+    @action(detail=False, url_path='new_etiqueta', methods=['post'])
+    def new_etiqueta(self, request):
+        try:
+            data = request.data
+            etiqueta= EtiquetaAlerta()
+            etiqueta.nombre=data['nombre']
+            etiqueta.value=data['value']
+            etiqueta.save()
+            return jsonx({'status': 'success', 'message': 'Etiqueta creada.'})
+        except ApplicationError as msg:
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
