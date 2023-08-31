@@ -26,7 +26,7 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         try:
             data = request.data
             mensaje = ''
-            if data['token_lugar']:
+            if data.get('token_lugar') is not None:
                 mensaje = 'Solicitud de lugar creado con éxito'
                 solicitud = SolicitudLugar()
                 lugar=get_or_none(Lugar, token=data['token_lugar'])
