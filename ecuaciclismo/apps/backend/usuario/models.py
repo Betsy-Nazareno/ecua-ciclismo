@@ -71,7 +71,8 @@ class DetalleUsuario(ModeloBase):
     def get_all_users(cls):
         cursor = connection.cursor()
         sql = '''
-        SELECT detalle_usuario.admin, detalle_usuario.token AS token_usuario,detalle_usuario.isPropietary, detalle_usuario.tipo, usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.usuario_id, detalle_usuario.usuario_id FROM `usuario_detalleusuario` AS detalle_usuario
+        SELECT detalle_usuario.admin, detalle_usuario.token AS token_usuario,detalle_usuario.isPropietary, detalle_usuario.tipo, usuario.username, usuario.first_name, usuario.last_name, detalle_usuario.foto, detalle_usuario.usuario_id, detalle_usuario.usuario_id 
+        FROM `usuario_detalleusuario` AS detalle_usuario
         LEFT JOIN `auth_user` AS usuario ON detalle_usuario.usuario_id = usuario.id'''
 
         cursor.execute(sql)
