@@ -155,7 +155,10 @@ class SolicitudViewSet(viewsets.ModelViewSet):
             if(data['tipo']=='Recomendados' or data['tipo']=='Registro Local'):
                 solicitudLugar = get_or_none(SolicitudLugar, solicitud_ptr_id=solicitud.id)
                 lugar=get_or_none(Lugar, id=solicitudLugar.lugar_id)
-                lugar.isActived=True
+                if data['estado']=='Aprobada':
+                    lugar.isActived=True
+                else:
+                    lugar.isActived=False
                 lugar.save()
             else:
                 detalleUsuario=get_or_none(DetalleUsuario, usuario_id=solicitud.user_id)
