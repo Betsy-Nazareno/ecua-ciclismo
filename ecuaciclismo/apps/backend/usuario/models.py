@@ -22,7 +22,7 @@ class DetalleUsuario(ModeloBase):
     peso = models.FloatField(null=True)
     bicicleta = models.OneToOneField(Bicicleta, on_delete=models.PROTECT, null=True)
     # Nuevos atributos agregados:
-    tipo = models.CharField(max_length=20, null=True, default="Miembro")
+    tipo = models.CharField(max_length=20, null=True, default="No verificado")
     isPropietary = models.BooleanField(default=False)
     silenciar_notificaciones = models.BooleanField(default=False)
     telefono = models.CharField(max_length=15, null=True)
