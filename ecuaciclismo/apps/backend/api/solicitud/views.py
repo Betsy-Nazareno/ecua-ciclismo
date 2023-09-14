@@ -161,7 +161,8 @@ class SolicitudViewSet(viewsets.ModelViewSet):
                 detalleUsuario=get_or_none(DetalleUsuario, usuario_id=solicitud.user_id)
                 if data['tipo']=='Membresia':
                     detalleUsuario.tipo='Miembro'
-                #Aqui va la parte para aprobar la solicitud de verificacion
+                else:
+                    detalleUsuario.tipo='Verificado'
                 detalleUsuario.save()
 
             solicitud.save()
@@ -175,5 +176,30 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         except Exception as e:
             transaction.rollback()
             return jsonx(False, str(e))
+        
+    #Para posible switch para setear a verificado
+    @action(detail=False,url_path='setear_verificado',methods=['post'])
+    def setear_verificado(self,request):
+        try:
+            data=request.data
+            token=Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            if detalle_usuario.admin == 0:
+                return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
+            usuario = DetalleUsuario.objects.get(token=data['token_usuario'])
+            if usuario.tipo=='No verificado':
+                usuario.tipo='Verificado'
+                usuario.save()
+            return jsonx({'status': 'success', 'message': 'Se ha modificado con éxito el usuario.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+
 
                 
