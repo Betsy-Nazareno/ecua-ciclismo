@@ -46,11 +46,15 @@ INSTALLED_APPS = [
     'ecuaciclismo.base',
     'ecuaciclismo.helpers',
 
+
     'ecuaciclismo.apps.backend.usuario',
     'ecuaciclismo.apps.backend.consejodia',
     'ecuaciclismo.apps.backend.publicacion',
     'ecuaciclismo.apps.backend.ruta',
     'ecuaciclismo.apps.backend.alerta',
+    'ecuaciclismo.apps.backend.lugar',
+    'ecuaciclismo.apps.backend.solicitud',
+
 ]
 
 MIDDLEWARE = [
