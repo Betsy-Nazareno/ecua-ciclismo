@@ -7,11 +7,11 @@
 # Ignorar migrations
 #*/migrations/
 #!**/migrations/_init_.py
-**/migrations/**
+#**/migrations/**
 !**/migrations
-!**/migrations/_init_.py
+#!**/migrations/_init_.py
 #settings.py
-ecuaciclismo/settings.py
+#ecuaciclismo/settings.py
 
 # Archivos Subidos
 media/

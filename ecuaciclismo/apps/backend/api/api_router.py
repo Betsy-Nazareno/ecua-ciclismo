@@ -10,6 +10,7 @@ from ecuaciclismo.apps.backend.api.ruta.views import RutaViewSet
 from ecuaciclismo.apps.backend.api.solicitud.views import SolicitudViewSet
 from ecuaciclismo.apps.backend.api.usuario.views import UsuarioViewSet, DetalleUsuarioViewSet, \
     UsuarioRecuperarCredencialesViewSet
+from ecuaciclismo.apps.backend.api.logs.views import CrearLogView
 
 router = DefaultRouter()
 
@@ -30,6 +31,8 @@ router.register(r'alerta', AlertaViewSet)
 router.register(r'lugar', LugarViewSet)
 router.register(r'solicitud', SolicitudViewSet)
 router.register(r'recuperar_credenciales', UsuarioRecuperarCredencialesViewSet)
+router.register(r'logs', CrearLogView)
+
 
 
 
