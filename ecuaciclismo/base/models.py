@@ -1,5 +1,6 @@
 # coding=utf-8
 # django
+from base64 import urlsafe_b64encode
 import io
 import os
 
@@ -8,6 +9,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.encoding import smart_str
+from django.utils.http import urlsafe_base64_encode
 
 
 from django.template.loader import get_template
@@ -16,6 +18,7 @@ from datetime import date, datetime
 from ecuaciclismo.helpers.models import ModeloBase
 from ecuaciclismo.helpers.tools_utilities import email_embed_image, email_embed_logos, get_or_none
 from ecuaciclismo.helpers.xlsxwriter_styles import cargarFormatos
+from django.contrib.auth import views as auth_views
 
 
 class LogActividad(models.Model):
@@ -95,7 +98,7 @@ class RegistroCambiarClave(models.Model):
         from ecuaciclismo.helpers.classes import MensajeCorreoElectronico
 
         if settings.ENVIAR_NOTIFICACIONES_EMAIL_GLOBAL:
-            my_url = settings.HTTP + settings.URLC + '/web_app/'+'reset-password/'+str(self.token)+'/'
+            my_url = settings.HTTP + settings.URLC + '/api/recuperar_credenciales/reset_password/'+ self.token
             contenido = get_template('email_templates/email_notificacion.html').render({
                 'titulo': 'Comextweb Aaranceles: Recuperación de Contraseña',
                 'mensaje': 'Hemos recibido su solicitud',
@@ -132,6 +135,10 @@ class RegistroCambiarClave(models.Model):
 
         except Exception:
             return False
+        
+    
+        
+
 
 # class ImagenTemporal(models.Model):
 #     archivo     = models.FileField(upload_to='tmp/img', null=True, default=None)

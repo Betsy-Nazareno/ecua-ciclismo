@@ -186,3 +186,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_ALLOW_ALL = True
 DJANGO_CELERY_BEAT_TZ_AWARE = False
+
+SERVER_EMAIL = 'ecuaciclismo.appmovil@gmail.com'
+EMAIL_DEVELOPER = 'ecuaciclismo.appmovil@gmail.com'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_SUBJECT_PREFIX = '[Aranceles-DEV]'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'ecuaciclismo.appmovil@gmail.com'
+EMAIL_HOST_PASSWORD = 'zccjjgblxbhslecf'
+
+ENVIAR_NOTIFICACIONES_EMAIL_GLOBAL = True
+
+URL = 'ecuaciclismoapp.pythonanywhere.com'
+URLC = 'ecuaciclismoapp.pythonanywhere.com' 
+HTTP = 'http://'

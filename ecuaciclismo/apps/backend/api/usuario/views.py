@@ -6,9 +6,13 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 from rest_framework import viewsets, status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
@@ -443,6 +447,7 @@ class UsuarioRecuperarCredencialesViewSet(viewsets.ModelViewSet):
         transaction.set_autocommit(False)
         try:
             email = request.data.get('email')  # El unico campo que es unique
+            print(email)
             usuario = get_or_none(User, email=email)
             if usuario:
                 registro = RegistroCambiarClave(usuario=usuario, token=str(uuid.uuid4()))
@@ -452,7 +457,7 @@ class UsuarioRecuperarCredencialesViewSet(viewsets.ModelViewSet):
                 respuesta = {'status': 'success', 'mensaje': 'Correo de recuperación enviado. Revise su correo electrónico para reiniciar su contraseña.'}
             else:
                 transaction.rollback()
-                respuesta = {'status': 'error', 'mensaje': 'No se puede realizar la acción.'}
+                respuesta = {'status': 'error', 'mensaje': 'El Correo No Existe'}
 
         except ApplicationError as msg:
             transaction.rollback()
@@ -472,7 +477,7 @@ class UsuarioRecuperarCredencialesViewSet(viewsets.ModelViewSet):
             token                       = request.data.get('token')
             nueva_clave                 = request.data.get('nueva_clave')
             nueva_clave_confirmacion    = request.data.get('nueva_clave_confirmacion')
-
+ 
             if not token or not nueva_clave or not nueva_clave_confirmacion:
                 return Response({'status': 'error', 'mensaje': 'Parámetros insuficientes.'})
 
@@ -482,7 +487,7 @@ class UsuarioRecuperarCredencialesViewSet(viewsets.ModelViewSet):
                 registro.usuario.save()
                 registro.delete()
                 transaction.commit()
-                respuesta = {'status': 'success', 'mensaje': 'Clave cambiada con éxito. Por favor inicie sesión.'}
+                return render(request, 'exito.html')
             else:
                 transaction.rollback()
                 respuesta = {'status': 'error', 'mensaje': 'La confirmación y la nueva clave deben ser iguales.'}
@@ -504,5 +509,18 @@ class UsuarioRecuperarCredencialesViewSet(viewsets.ModelViewSet):
         token_publico = request.data.get('token')
         respuesta = RegistroCambiarClave.verificarToken(token_publico=token_publico)
         return jsonx({'status': 'success', 'mensaje': 'ok', 'data': respuesta})
-
     
+
+    @action(detail=False, url_path='reset_password/(?P<token>[^/.]+)', methods=['get'], permission_classes=[AllowAny])
+    def reset_password(self, request, token=None):
+        try:
+            registro = get_or_none(RegistroCambiarClave, token=token)
+            if (registro is None):
+                return render(request, 'password-reset.html')
+            
+            usuario = get_object_or_404(User, id=registro.usuario_id)
+            return render(request, 'password-confirm.html', {'token': token})
+        except RegistroCambiarClave.DoesNotExist:
+            return render(request, 'password_reset_error.html')
+        except User.DoesNotExist:
+            return render(request, 'password_reset_error.html')
