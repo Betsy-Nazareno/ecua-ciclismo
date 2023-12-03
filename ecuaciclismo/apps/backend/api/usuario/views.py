@@ -11,6 +11,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate
 
 User = get_user_model()
 from rest_framework import viewsets, status
@@ -375,59 +376,60 @@ class DetalleUsuarioViewSet(viewsets.ModelViewSet):
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
-        usuario = get_or_none(User,email= request.data.get("user").get("email"))
-        if usuario:
+        email = request.data.get("user").get("email")
+        password = request.data.get("user").get("password")
+
+        usuario = get_or_none(User, email=email)
+
+        if usuario is not None:
+            # Se verifica si el usuario está activo
             if not usuario.is_active:
-                return HttpResponse(status=400, content=json.dumps({"non_field_errors": ["La cuenta no ha sido activada."]}), content_type="application/json")
+                return HttpResponse(
+                    status=400,
+                    content=json.dumps({"non_field_errors": ["La cuenta no ha sido activada."]}),
+                    content_type="application/json"
+                )
 
-        # serializer = self.serializer_class(data=request.data['email'], context={'request': request})
-        # try:
-        #     serializer.is_valid(raise_exception=True)
-        # except:
-        #     return HttpResponse(status=400, content=json.dumps({"non_field_errors":["No puede iniciar sesión con las credenciales proporcionadas."]}), content_type="application/json")
-        detalle_usuario = get_or_none(DetalleUsuario, usuario=usuario)
-        if (request.data.get("user").get("token_notificacion")):
-            detalle_usuario.token_notificacion = request.data.get("user").get("token_notificacion")
-            detalle_usuario.save()
-        # user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=usuario)
-        response = {
-            'token': token.key,
-            # 'token_publico': user.detalleusuario.token_publico, #para no hacer visible el ID se usa token de DetalleUsuario
-            # 'id': str(user.id),
-            'id_usuario': detalle_usuario.token,
-            'username': usuario.username,
-            'first_name': usuario.first_name,
-            'last_name': usuario.last_name,
-            'email': usuario.email,
-            # 'plan': Plan.obtener_plan(request.data['plan'] if request.data.get('plan') != None else None),
-            'is_staff': usuario.is_staff,
-            'is_superuser': usuario.is_superuser,
-            'is_active': usuario.is_active,
-            'admin': detalle_usuario.admin,
-            'foto': detalle_usuario.foto,
-            'genero': detalle_usuario.genero,
-            'telefono': detalle_usuario.telefono,
-            'peso': detalle_usuario.peso,
-            'edad': detalle_usuario.edad,
-            'nivel': detalle_usuario.nivel,
-            'tipo': detalle_usuario.tipo,
-            'token_notificacion': detalle_usuario.token_notificacion,
-            # 'avatar': settings.URL_DJANGO_SERVER + reverse(servir_imagen_perfil, args=[user.detalleusuario.token_publico]),
-            # 'socialMedia': False
-        }
+            # Se autentica al usuario con las credenciales proporcionadas
+            user = authenticate(email=email, password=password)
 
-        # data = request.data.get('user')
-        # if data.get("token_publico"):
-        #     invitacion = Invitacion.objects.get(token_publico=data.get("token_publico"))
-        #     data_invitacion = {
-        #         'invitacion': invitacion,
-        #         'usuario': user
-        #     }
-        #     invitacion.aceptarInvitacion(data=data_invitacion)
+            if user is not None:
+                detalle_usuario = get_or_none(DetalleUsuario, usuario=usuario)
+                if request.data.get("user").get("token_notificacion"):
+                    detalle_usuario.token_notificacion = request.data.get("user").get("token_notificacion")
+                    detalle_usuario.save()
 
-        return Response(response)
+                # Se crea o se obtiene el token de autenticación
+                token, created = Token.objects.get_or_create(user=usuario)
 
+                response = {
+                    'token': token.key,
+                    'id_usuario': detalle_usuario.token,
+                    'username': usuario.username,
+                    'first_name': usuario.first_name,
+                    'last_name': usuario.last_name,
+                    'email': usuario.email,
+                    'is_staff': usuario.is_staff,
+                    'is_superuser': usuario.is_superuser,
+                    'is_active': usuario.is_active,
+                    'admin': detalle_usuario.admin,
+                    'foto': detalle_usuario.foto,
+                    'genero': detalle_usuario.genero,
+                    'telefono': detalle_usuario.telefono,
+                    'peso': detalle_usuario.peso,
+                    'edad': detalle_usuario.edad,
+                    'nivel': detalle_usuario.nivel,
+                    'tipo': detalle_usuario.tipo,
+                    'token_notificacion': detalle_usuario.token_notificacion,
+                }
+
+                return Response(response)
+        
+        return HttpResponse(
+            status=400,
+            content=json.dumps({"non_field_errors": ["No puede iniciar sesión con las credenciales proporcionadas."]}),
+            content_type="application/json"
+        )
 
 class Logout(APIView):
     def post(self, request, format=None):
