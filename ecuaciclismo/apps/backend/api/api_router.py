@@ -33,7 +33,7 @@ router.register(r'lugar', LugarViewSet)
 router.register(r'solicitud', SolicitudViewSet)
 router.register(r'recuperar_credenciales', UsuarioRecuperarCredencialesViewSet)
 router.register(r'logs', CrearLogView)
-router.register(r'biclicleta', BicicletaViewSet)
+router.register(r'bicicleta', BicicletaViewSet)
 
 
 
