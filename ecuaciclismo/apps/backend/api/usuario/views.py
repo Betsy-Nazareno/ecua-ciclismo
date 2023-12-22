@@ -378,9 +378,7 @@ class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         email = request.data.get("user").get("email")
         password = request.data.get("user").get("password")
-        print(password)
         usuario = get_or_none(User, email=email)
-        print(usuario)
         if usuario is not None:
             # Se verifica si el usuario está activo
             if not usuario.is_active:
@@ -394,7 +392,6 @@ class CustomAuthToken(ObtainAuthToken):
             user = None
             if usuario.check_password(password):
                 user = usuario
-            print(user)
             if user is not None:
                 detalle_usuario = get_or_none(DetalleUsuario, usuario=usuario)
                 if request.data.get("user").get("token_notificacion"):
