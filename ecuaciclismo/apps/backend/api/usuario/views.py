@@ -159,7 +159,8 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             user.last_name = data['apellido']
             user.save()
             detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
-            detalle_usuario.foto = data['foto']
+            if data.get('foto'):
+                detalle_usuario.foto = data['foto']
             detalle_usuario.genero = data['genero']
             detalle_usuario.edad = data['edad']
             detalle_usuario.nivel = data['nivel']
