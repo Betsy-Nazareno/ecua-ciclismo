@@ -153,19 +153,29 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             from rest_framework.authtoken.models import Token
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             user = token.user
-            user.username = data['usuario']
-            user.email = data['email']
-            user.first_name = data['nombre']
-            user.last_name = data['apellido']
+            
+            if data.get('usuario'):
+                user.username = data['usuario']
+            if data.get('email'):
+                user.email = data['email']
+            if data.get('nombre'):
+                user.first_name = data['nombre']
+            if data.get('apellido'):
+                user.last_name = data['apellido']
             user.save()
             detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
             if data.get('foto'):
                 detalle_usuario.foto = data['foto']
-            detalle_usuario.genero = data['genero']
-            detalle_usuario.edad = data['edad']
-            detalle_usuario.nivel = data['nivel']
-            detalle_usuario.telefono= data['telefono']
-            detalle_usuario.peso = data['peso']
+            if data.get('genero'):
+                detalle_usuario.genero = data['genero']
+            if data.get('edad'):
+                detalle_usuario.edad = data['edad']
+            if data.get('nivel'):
+                detalle_usuario.nivel = data['nivel']
+            if data.get('telefono'):
+                detalle_usuario.telefono= data['telefono']
+            if data.get('peso'):
+                detalle_usuario.peso = data['peso']
             detalle_usuario.save()
 
 
