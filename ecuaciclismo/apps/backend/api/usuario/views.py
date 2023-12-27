@@ -166,17 +166,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             detalle_usuario.telefono= data['telefono']
             detalle_usuario.peso = data['peso']
             detalle_usuario.save()
-            if detalle_usuario.bicicleta is None:
-                bicicleta = Bicicleta()
-            else:
-                bicicleta = Bicicleta.objects.get(id=detalle_usuario.bicicleta_id)
-            bicicleta.marca = data['marca']
-            bicicleta.tipo = data['tipoBicicleta']
-            bicicleta.codigo = data['codigo']
-            bicicleta.foto_bicicleta = data['foto_bicicleta']
-            bicicleta.save()
-            detalle_usuario.bicicleta = bicicleta
-            detalle_usuario.save()
+
 
             detalles_etiquetarutausuario = DetalleEtiquetaRutaUsuario.objects.filter(user=user)
             for detalle_etiquetarutausuario in detalles_etiquetarutausuario:
