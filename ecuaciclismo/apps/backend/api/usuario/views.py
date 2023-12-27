@@ -165,6 +165,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             detalle_usuario.nivel = data['nivel']
             detalle_usuario.telefono= data['telefono']
             detalle_usuario.peso = data['peso']
+            detalle_usuario.save()
             if detalle_usuario.bicicleta is None:
                 bicicleta = Bicicleta()
             else:
