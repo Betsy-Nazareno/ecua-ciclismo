@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-6ruzu9lgr@)okzkxu-d+mg*f+v3r+6fmr=7hum&@!-dl57hi#k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['ecuaciclismoapp.pythonanywhere.com']
 
 
 # Application definition
@@ -51,6 +51,12 @@ INSTALLED_APPS = [
     'ecuaciclismo.apps.backend.publicacion',
     'ecuaciclismo.apps.backend.ruta',
     'ecuaciclismo.apps.backend.alerta',
+    'ecuaciclismo.apps.backend.lugar',
+    'ecuaciclismo.apps.backend.solicitud',
+    'ecuaciclismo.apps.backend.logs',
+    'ecuaciclismo.apps.backend.bicicleta',
+
+
 ]
 
 MIDDLEWARE = [
@@ -91,10 +97,10 @@ WSGI_APPLICATION = 'ecuaciclismo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ecuaciclismo',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
+        'NAME': 'ecuaciclismoApp$ecuaciclismobd',
+        'USER': 'ecuaciclismoApp',
+        'PASSWORD': 'electronico1',
+        'HOST': 'ecuaciclismoApp.mysql.pythonanywhere-services.com',
         # 'HOST': '/Applications/MAMP/tmp/mysql/mysql.sock',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
         'OPTIONS': {'init_command': 'SET default_storage_engine=INNODB'},
@@ -174,15 +180,17 @@ CURRENT_DIR = os.path.dirname(__file__)
 CURRENT_DIR = CURRENT_DIR.replace('\\','/')
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_ALLOW_ALL = True
+DJANGO_CELERY_BEAT_TZ_AWARE = False
 
 SERVER_EMAIL = 'ecuaciclismo.appmovil@gmail.com'
+EMAIL_DEVELOPER = 'ecuaciclismo.appmovil@gmail.com'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -195,6 +203,6 @@ EMAIL_HOST_PASSWORD = 'zccjjgblxbhslecf'
 
 ENVIAR_NOTIFICACIONES_EMAIL_GLOBAL = True
 
-URL = '127.0.0.1' #PONER URL DEL FRONT
-URLC = '127.0.0.1:8000' #PONER URL DEL FRONT
+URL = 'ecuaciclismoapp.pythonanywhere.com'
+URLC = 'ecuaciclismoapp.pythonanywhere.com'
 HTTP = 'http://'

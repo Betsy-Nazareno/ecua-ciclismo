@@ -195,7 +195,7 @@ EMAIL_DEVELOPER = 'ecuaciclismo.appmovil@gmail.com'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_SUBJECT_PREFIX = '[Aranceles-DEV]'
+EMAIL_SUBJECT_PREFIX = '[Ecuaciclismo-DEV]'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587

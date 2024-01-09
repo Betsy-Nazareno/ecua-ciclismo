@@ -68,7 +68,7 @@ class MensajeCorreoElectronico(object):
 
         message = EmailMessage(subject=titulo, body=contenido, to=correos_destinatarios, cc=correos_en_copia,
                                from_email=configuracion_correo_notificacion['server_email'], bcc=correo_developer,
-                               reply_to=lista_correo_para_respuesta, connection=con,  headers={'From': 'Signathor <'+configuracion_correo_notificacion['server_email']+'>'})
+                               reply_to=lista_correo_para_respuesta, connection=con,  headers={'From': 'Ecuaciclismo <'+configuracion_correo_notificacion['server_email']+'>'})
         message.content_subtype = "html"
 
         if attachment:
@@ -83,15 +83,5 @@ class MensajeCorreoElectronico(object):
             attachment.add_header('Content-Disposition', 'attachment',
                                   filename=os.path.basename(filename))
             message.attach(attachment)
-
-        # try:
-        #     if empresa and empresa.logo:
-        #         email_embed_image(message, 'logo-empresa', open(empresa.get_ruta_logo(), 'rb').read())
-        #     else:
-        #         email_embed_image(message, 'logo-empresa', open(
-        #             '%sstatic/img_email_template/general/logo_comextweb_270x78.png' % settings.STATIC_ROOT,
-        #             'rb').read())
-        # except IOError:
-        #     pass
 
         return message

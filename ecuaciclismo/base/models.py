@@ -104,7 +104,7 @@ class RegistroCambiarClave(models.Model):
             contenido = get_template('email_templates/email_notificacion.html').render({
                 'titulo': 'Comextweb Aaranceles: Recuperación de Contraseña',
                 'mensaje': 'Hemos recibido su solicitud',
-                'empresa': '',
+                'empresa': 'Ecuaciclismo',
                 'tipo': 'cambio de contraseña',
                 'cuerpo': 'Hola ' + self.usuario.first_name + ', para restablecer su contraseña por favor ingrese al siguiente enlace:',
                 'descripcion_boton': 'Restablecer',
@@ -120,7 +120,7 @@ class RegistroCambiarClave(models.Model):
 
             correo_thread = threading.Thread(target=enviar_correo)
             correo_thread.start()
-            
+
     @classmethod
     def verificarToken(cls, token_publico=None):
         try:
