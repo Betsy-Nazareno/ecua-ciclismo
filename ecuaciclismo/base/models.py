@@ -25,6 +25,7 @@ import logging
 from django.template.loader import get_template
 from django.conf import settings
 from ecuaciclismo.helpers.classes import MensajeCorreoElectronico
+import threading
 
 class LogActividad(models.Model):
     """ Modelo que almacena las actividades de los usuarios realizadas en el sistema"""
@@ -116,11 +117,10 @@ class RegistroCambiarClave(models.Model):
             msg = MensajeCorreoElectronico.get_mensaje_conexion2(titulo='Recuperación de Contraseña',contenido=contenido, correos_destinatarios=[self.usuario.email])
 
             try:
-                import _thread
-                #_thread.start_new_thread(msg.send, ())
-                msg.send()
+                thread = threading.Thread(target=msg.send)
+                thread.start()
+                thread.join()
             except Exception as e:
-                pass
                 print(e)
 
     @classmethod
