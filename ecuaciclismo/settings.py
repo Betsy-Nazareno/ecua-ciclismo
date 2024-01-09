@@ -11,9 +11,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
-import logging
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = Path(_file_).resolve().parent.parent
@@ -57,6 +54,8 @@ INSTALLED_APPS = [
     'ecuaciclismo.apps.backend.lugar',
     'ecuaciclismo.apps.backend.solicitud',
     'ecuaciclismo.apps.backend.logs',
+    'ecuaciclismo.apps.backend.bicicleta',
+
 
 ]
 
@@ -195,7 +194,7 @@ EMAIL_DEVELOPER = 'ecuaciclismo.appmovil@gmail.com'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_SUBJECT_PREFIX = '[Ecuaciclismo-DEV]'
+EMAIL_SUBJECT_PREFIX = '[Aranceles-DEV]'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
@@ -205,5 +204,5 @@ EMAIL_HOST_PASSWORD = 'zccjjgblxbhslecf'
 ENVIAR_NOTIFICACIONES_EMAIL_GLOBAL = True
 
 URL = 'ecuaciclismoapp.pythonanywhere.com'
-URLC = 'ecuaciclismoapp.pythonanywhere.com' 
+URLC = 'ecuaciclismoapp.pythonanywhere.com'
 HTTP = 'http://'
