@@ -110,7 +110,7 @@ class RegistroCambiarClave(models.Model):
                 'descripcion_boton': 'Restablecer',
                 'url': my_url
             })
-            msg = MensajeCorreoElectronico.get_mensaje_conexion2(titulo='Comextweb Aranceles: Recuperación de Contraseña', contenido=contenido, correos_destinatarios=[self.usuario.email])
+            msg = MensajeCorreoElectronico.get_mensaje_conexion2(titulo='Recuperación de Contraseña', contenido=contenido, correos_destinatarios=[self.usuario.email])
 
             def enviar_correo():
                 try:
