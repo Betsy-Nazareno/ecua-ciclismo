@@ -20,6 +20,11 @@ from ecuaciclismo.helpers.tools_utilities import email_embed_image, email_embed_
 from ecuaciclismo.helpers.xlsxwriter_styles import cargarFormatos
 from django.contrib.auth import views as auth_views
 
+import threading
+import logging
+from django.template.loader import get_template
+from django.conf import settings
+from ecuaciclismo.helpers.classes import MensajeCorreoElectronico
 
 class LogActividad(models.Model):
     """ Modelo que almacena las actividades de los usuarios realizadas en el sistema"""
@@ -108,18 +113,16 @@ class RegistroCambiarClave(models.Model):
                 'descripcion_boton': 'Restablecer',
                 'url': my_url
             })
-            msg = MensajeCorreoElectronico.get_mensaje_conexion2(titulo='Recuperación de Contraseña',contenido=contenido, correos_destinatarios=[self.usuario.email])
-            # email_embed_image(msg, 'logo-empresa',
-            #                   open('%sstatic/email_images/signatur-e.png' % settings.STATIC_ROOT,
-            #                        'rb').read())
-            # email_embed_logos(msg)
-            try:
-                import _thread
-                _thread.start_new_thread(msg.send, ())
-                # msg.send()
-            except Exception as e:
-                pass
-                # print(e)
+            msg = MensajeCorreoElectronico.get_mensaje_conexion2(titulo='Comextweb Aranceles: Recuperación de Contraseña', contenido=contenido, correos_destinatarios=[self.usuario.email])
+
+            def enviar_correo():
+                try:
+                    msg.send()
+                except Exception as e:
+                    logging.error(f'Error al enviar correo: {e}')
+
+            correo_thread = threading.Thread(target=enviar_correo)
+            correo_thread.start()
 
     @classmethod
     def verificarToken(cls, token_publico=None):
