@@ -301,8 +301,12 @@ class UsuarioViewSet(viewsets.ModelViewSet):
                 return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
             usuario = DetalleUsuario.objects.get(token=data['token_usuario'])
             if(data['miembro']):
-                usuario.tipo = "Miembro"
-            usuario.save()
+                usuario.tipo = "Miembro" 
+                usuario.save()
+            else:
+                usuario.tipo = "No verificado"
+                usuario.save()
+             
             return jsonx({'status': 'success', 'message': 'Se ha modificado con éxito el usuario el tipo de usuario.'})
         except ApplicationError as msg:
             transaction.rollback()
