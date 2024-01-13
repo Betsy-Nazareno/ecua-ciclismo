@@ -287,6 +287,34 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         except Exception as e:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(e)})
+        
+    
+    @action(detail=False, url_path='setear_miembro', methods=['post'])
+    def setear_miembro(self, request):
+        try:
+            data = request.data
+            from django.contrib.auth.models import User
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            if detalle_usuario.admin == 0:
+                return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
+            usuario = DetalleUsuario.objects.get(token=data['token_usuario'])
+            if(data['miembro']):
+                usuario.tipo = "Miembro"
+            usuario.save()
+            return jsonx({'status': 'success', 'message': 'Se ha modificado con éxito el usuario el tipo de usuario.'})
+        except ApplicationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(msg)})
+        except ValidationError as msg:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': list(msg)})
+        except Exception as e:
+            transaction.rollback()
+            return jsonx({'status': 'error', 'message': str(e)})
+        
+
     @action(detail=False, url_path='agregar_contacto_seguro', methods=['post'])
     def agregar_contacto_seguro(self, request):
         transaction.set_autocommit(False)
