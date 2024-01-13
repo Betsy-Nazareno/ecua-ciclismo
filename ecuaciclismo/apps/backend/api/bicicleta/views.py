@@ -23,9 +23,13 @@ class BicicletaViewSet(viewsets.ModelViewSet):
             data = request.data
             bicicleta = Bicicleta()
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            bicicleta.tipo = data['tipo']
+            bicicleta.modelo = data['modelo']
             bicicleta.marca =data['marca']
-            #bicicleta.codigo =data['codigo']
+            bicicleta.modalidad = data['modalidad']
+            bicicleta.n_serie =data['n_serie']
+            bicicleta.factura = data['factura']
+            bicicleta.color =data['color']
+            bicicleta.tienda_origen =data['tienda_origen']      
             bicicleta.save()
             bicicleta.codigo = bicicleta.id
             bicicleta.save()

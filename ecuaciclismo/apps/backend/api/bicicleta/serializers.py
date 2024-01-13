@@ -25,7 +25,7 @@ class BicicletaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bicicleta
-        fields = ('id','tipo', 'marca', 'imagenes', 'propietario')
+        fields = ('id','modelo','modalidad','n_serie','tienda_origen', 'factura','color','marca', 'imagenes', 'propietario')
 
     def create(self, validated_data):
         imagenes_data = validated_data.pop('imagenes', [])
