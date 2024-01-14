@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from ecuaciclismo.apps.backend.api.bicicleta.serializers import BicicletaSerializer
 from ecuaciclismo.apps.backend.bicicleta.models import Bicicleta, ImagenBicicleta, PropietarioBicicleta
+from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario
 from ecuaciclismo.helpers import jsonx
 from ecuaciclismo.helpers.tools_utilities import ApplicationError
 from rest_framework.permissions import IsAuthenticated
@@ -65,6 +66,37 @@ class BicicletaViewSet(viewsets.ModelViewSet):
             usuario = token.user
             bicicletas_usuario = PropietarioBicicleta.objects.filter(usuario=usuario).select_related('bicicleta')
             
+            bicicletas = [prop.bicicleta for prop in bicicletas_usuario]
+            serializer = BicicletaSerializer(bicicletas, many=True)
+            
+            return Response({
+                "status": "success",
+                "message": "Información obtenida",
+                "data": serializer.data
+            })
+
+        except Token.DoesNotExist:
+            return Response({
+                "status": "error",
+                "message": "Token no válido"
+            })
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": str(e)
+            })
+        
+    @action(detail=False, methods=['get'], url_path='user_bicicletas')
+    def get_bicicletas_por_usuario(self, request):
+        try:
+            data = request.data
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            if detalle_usuario.admin == 0:
+                return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
+            
+            usuario = DetalleUsuario.objects.get(token=data['token_usuario'])
+            bicicletas_usuario = PropietarioBicicleta.objects.filter(usuario=usuario).select_related('bicicleta')
             bicicletas = [prop.bicicleta for prop in bicicletas_usuario]
             serializer = BicicletaSerializer(bicicletas, many=True)
             
