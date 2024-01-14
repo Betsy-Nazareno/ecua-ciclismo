@@ -87,7 +87,7 @@ class BicicletaViewSet(viewsets.ModelViewSet):
             })
         
     @action(detail=False, methods=['get'], url_path='user_bicicletas')
-    def get_bicicletas_por_usuario(self, request):
+    def get_bicicletas_por_usuario_admin(self, request):
         try:
             data = request.data
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
