@@ -300,6 +300,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             if detalle_usuario.admin == 0:
                 return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
             usuario = DetalleUsuario.objects.get(token=data['token_usuario'])
+            print(usuario)
             if(data['miembro']):
                 usuario.tipo = "Miembro" 
                 usuario.save()
