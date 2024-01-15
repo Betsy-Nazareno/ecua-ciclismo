@@ -92,12 +92,11 @@ class BicicletaViewSet(viewsets.ModelViewSet):
         try:
             data = request.data
 
-            # Evita el conflicto de nombres cambiando el nombre de la variable local
             token_obj = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             detalle_usuario = DetalleUsuario.objects.get(usuario=token_obj.user)
 
             if detalle_usuario.admin == 0:
-                return Response({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
+                return Response({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'}, status=status.HTTP_403_FORBIDDEN)
 
             token_usuario = Token.objects.get(key=request.data['token_usuario'])
             print(token_usuario)
@@ -116,12 +115,12 @@ class BicicletaViewSet(viewsets.ModelViewSet):
             return Response({
                 "status": "error",
                 "message": "Token no válido"
-            })
+            }, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             return Response({
                 "status": "error",
                 "message": str(e)
-            })
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         
     @action(detail=True, methods=['delete'], url_path='eliminar_bicicleta')
