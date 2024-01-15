@@ -99,7 +99,7 @@ class BicicletaViewSet(viewsets.ModelViewSet):
             if detalle_usuario.admin == 0:
                 return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
             
-            usuario_token = DetalleUsuario.objects.get(data['token_usuario'])
+            usuario_token = DetalleUsuario.objects.get(token=data['token_usuario'])
             bicicletas_usuario = PropietarioBicicleta.objects.filter(usuario=usuario_token.usuario).select_related('bicicleta')
             bicicletas = [prop.bicicleta for prop in bicicletas_usuario]
             serializer = BicicletaSerializer(bicicletas, many=True)
