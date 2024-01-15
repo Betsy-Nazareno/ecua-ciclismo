@@ -94,8 +94,8 @@ class BicicletaViewSet(viewsets.ModelViewSet):
             from django.contrib.auth.models import User
             from rest_framework.authtoken.models import Token
 
-            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
+            token_obj = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token_obj.user)
             if detalle_usuario.admin == 0:
                 return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
             
