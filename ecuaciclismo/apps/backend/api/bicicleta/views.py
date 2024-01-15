@@ -59,6 +59,33 @@ class BicicletaViewSet(viewsets.ModelViewSet):
         
     
     
+    @action(detail=False, methods=['get'], url_path='mis_bicicletas')
+    def get_bicicletas_por_usuario(self, request):
+        try:
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            usuario = token.user
+            bicicletas_usuario = PropietarioBicicleta.objects.filter(usuario=usuario).select_related('bicicleta')
+            
+            bicicletas = [prop.bicicleta for prop in bicicletas_usuario]
+            serializer = BicicletaSerializer(bicicletas, many=True)
+            
+            return Response({
+                "status": "success",
+                "message": "Información obtenida",
+                "data": serializer.data
+            })
+
+        except Token.DoesNotExist:
+            return Response({
+                "status": "error",
+                "message": "Token no válido"
+            })
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": str(e)
+            })
+        
     @action(detail=False, methods=['get'], url_path='user_bicicletas')
     def get_bicicletas_por_usuario_admin(self, request):
         try:
@@ -102,41 +129,6 @@ class BicicletaViewSet(viewsets.ModelViewSet):
                 "status": "error",
                 "message": str(e)
             })
-        
-    @action(detail=False, methods=['get'], url_path='user_bicicletas')
-    def get_bicicletas_por_usuario_admin(self, request):
-        try:
-            data = request.data
-            from django.contrib.auth.models import User
-            from rest_framework.authtoken.models import Token
-            
-            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
-            if detalle_usuario.admin == 0:
-                return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
-            
-            usuario_token = DetalleUsuario.objects.get(token=data['token_usuario'])
-            bicicletas_usuario = PropietarioBicicleta.objects.filter(usuario=usuario_token.usuario).select_related('bicicleta')
-            bicicletas = [prop.bicicleta for prop in bicicletas_usuario]
-            serializer = BicicletaSerializer(bicicletas, many=True)
-            
-            return Response({
-                "status": "success",
-                "message": "Información obtenida",
-                "data": serializer.data
-            })
-
-        except Token.DoesNotExist:
-            return Response({
-                "status": "error",
-                "message": "Token no válido"
-            })
-        except Exception as e:
-            return Response({
-                "status": "error",
-                "message": str(e)
-            })
-        
         
     @action(detail=True, methods=['delete'], url_path='eliminar_bicicleta')
     def eliminar_bicicleta(self, request, pk=None):
