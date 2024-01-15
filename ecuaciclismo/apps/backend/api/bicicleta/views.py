@@ -91,20 +91,19 @@ class BicicletaViewSet(viewsets.ModelViewSet):
     def get_bicicletas_por_usuario_admin(self, request):
         try:
             data = request.data
-
-            token_obj = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
-            detalle_usuario = DetalleUsuario.objects.get(usuario=token_obj.user)
-
+            from django.contrib.auth.models import User
+            from rest_framework.authtoken.models import Token
+            
+            token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
+            detalle_usuario = DetalleUsuario.objects.get(usuario=token.user)
             if detalle_usuario.admin == 0:
-                return Response({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'}, status=status.HTTP_403_FORBIDDEN)
-
-            token_usuario = Token.objects.get(key=request.data['token_usuario'])
-            print(token_usuario)
-
-            bicicletas_usuario = PropietarioBicicleta.objects.filter(usuario=token_usuario.user).select_related('bicicleta')
+                return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
+            
+            usuario_token = DetalleUsuario.objects.get(data['token_usuario'])
+            bicicletas_usuario = PropietarioBicicleta.objects.filter(usuario=usuario_token.usuario).select_related('bicicleta')
             bicicletas = [prop.bicicleta for prop in bicicletas_usuario]
             serializer = BicicletaSerializer(bicicletas, many=True)
-
+            
             return Response({
                 "status": "success",
                 "message": "Información obtenida",
@@ -115,12 +114,12 @@ class BicicletaViewSet(viewsets.ModelViewSet):
             return Response({
                 "status": "error",
                 "message": "Token no válido"
-            }, status=status.HTTP_401_UNAUTHORIZED)
+            })
         except Exception as e:
             return Response({
                 "status": "error",
                 "message": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            })
         
         
     @action(detail=True, methods=['delete'], url_path='eliminar_bicicleta')
