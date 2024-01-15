@@ -62,7 +62,7 @@ class BicicletaViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='user_bicicletas')
     def get_bicicletas_por_usuario_admin(self, request):
         try:
-            token_usuario = self.kwargs.get('token_usuario')
+            token_usuario = request.query_params.get('token_usuario')
 
             if not token_usuario:
                 return Response({
