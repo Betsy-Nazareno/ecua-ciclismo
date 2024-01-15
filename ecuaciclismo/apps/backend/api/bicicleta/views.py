@@ -64,6 +64,7 @@ class BicicletaViewSet(viewsets.ModelViewSet):
         try:
             token = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             usuario = token.user
+            print(usuario)
             bicicletas_usuario = PropietarioBicicleta.objects.filter(usuario=usuario).select_related('bicicleta')
             
             bicicletas = [prop.bicicleta for prop in bicicletas_usuario]
@@ -96,7 +97,7 @@ class BicicletaViewSet(viewsets.ModelViewSet):
                 return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
             
             usuario_token = DetalleUsuario.objects.get(token=data['token_usuario'])
-
+            print(usuario_token.usuario)
             bicicletas_usuario = PropietarioBicicleta.objects.filter(usuario=usuario_token.usuario).select_related('bicicleta')
             bicicletas = [prop.bicicleta for prop in bicicletas_usuario]
             serializer = BicicletaSerializer(bicicletas, many=True)
