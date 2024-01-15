@@ -91,20 +91,21 @@ class BicicletaViewSet(viewsets.ModelViewSet):
     def get_bicicletas_por_usuario_admin(self, request):
         try:
             data = request.data
-            from django.contrib.auth.models import User
-            from rest_framework.authtoken.models import Token
 
+            # Evita el conflicto de nombres cambiando el nombre de la variable local
             token_obj = Token.objects.get(key=request.headers['Authorization'].split('Token ')[1])
             detalle_usuario = DetalleUsuario.objects.get(usuario=token_obj.user)
+
             if detalle_usuario.admin == 0:
-                return jsonx({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
-            
+                return Response({'status': 'error', 'message': 'No tiene permiso para realizar esta acción.'})
+
             token_usuario = Token.objects.get(key=request.data['token_usuario'])
             print(token_usuario)
+
             bicicletas_usuario = PropietarioBicicleta.objects.filter(usuario=token_usuario.user).select_related('bicicleta')
             bicicletas = [prop.bicicleta for prop in bicicletas_usuario]
             serializer = BicicletaSerializer(bicicletas, many=True)
-            
+
             return Response({
                 "status": "success",
                 "message": "Información obtenida",
