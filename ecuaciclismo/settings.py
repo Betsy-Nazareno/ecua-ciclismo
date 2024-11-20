@@ -29,6 +29,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['ecuaciclismoapp.pythonanywhere.com']
 
+if DEBUG:
+    ALLOWED_HOSTS += [ '127.0.0.1' ]
+
 
 # Application definition
 
@@ -97,10 +100,10 @@ WSGI_APPLICATION = 'ecuaciclismo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ecuaciclismoApp$ecuaciclismobd',
-        'USER': 'ecuaciclismoApp',
-        'PASSWORD': 'electronico1',
-        'HOST': 'ecuaciclismoApp.mysql.pythonanywhere-services.com',
+        'NAME': 'ecuaciclismo_app',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
         # 'HOST': '/Applications/MAMP/tmp/mysql/mysql.sock',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
         'OPTIONS': {'init_command': 'SET default_storage_engine=INNODB'},

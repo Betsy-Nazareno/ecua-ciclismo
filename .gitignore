@@ -33,3 +33,6 @@ frontend/node_modules
 #/ecuaciclismo/apps/frontend/package-lock.json
 #
 #/ecuaciclismo/apps/frontend/src/assets/utils/rutas.json
+
+# vscode editor
+.vscode
