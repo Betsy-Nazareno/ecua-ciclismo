@@ -38,3 +38,8 @@ Colocar todo el codigo referente a esa caracteristicas dentro de los archivos qu
 Procurar usar **Class Based Views** o **Viewset** con Django Rest Framework
 - https://www.django-rest-framework.org/tutorial/3-class-based-views/
 - https://www.django-rest-framework.org/api-guide/viewsets/
+
+Si toca sobresecribir funcionalidades del modelo o consultas, usar modelos Proxy u Model Managers. (Solo usarlo si se considera necesario)
+
+- https://docs.djangoproject.com/en/5.1/topics/db/models/#proxy-models
+- https://docs.djangoproject.com/en/5.1/topics/db/managers/
