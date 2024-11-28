@@ -58,8 +58,9 @@ INSTALLED_APPS = [
     'ecuaciclismo.apps.backend.solicitud',
     'ecuaciclismo.apps.backend.logs',
     'ecuaciclismo.apps.backend.bicicleta',
-
-
+    
+    # 
+    'ecuaciclismo.apps.safepoint.autenticacion',
 ]
 
 MIDDLEWARE = [

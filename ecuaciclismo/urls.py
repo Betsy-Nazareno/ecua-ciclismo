@@ -39,4 +39,6 @@ urlpatterns = [
     url('^api/token-auth/', CustomAuthToken.as_view()),
     url(r'^api/logout/', Logout.as_view()),
     # url(r'^auth/', include('rest_framework_social_oauth2.urls')),
+    
+    path("safepoint/", include("ecuaciclismo.apps.safepoint.urls"))
 ]
