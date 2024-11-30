@@ -65,14 +65,17 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
     
     def validate(self, attrs):
-        usuario: UsuarioNegocio = UsuarioNegocio.objects.filter(
-            Q(username=attrs['email_username']) | Q(email=attrs['email_username'])).first()
+        usuario = self._obtener_usuario_negocio(attrs['email_username'])
         
         if not usuario or not usuario.check_password(attrs['password']):
             raise exceptions.AuthenticationFailed({ 'message': 'Las credenciales no son correctas' })
         
         attrs['usuario'] = usuario
         return attrs
+    
+    def _obtener_usuario_negocio(self, email_username) -> UsuarioNegocio:
+        return UsuarioNegocio.objects.filter(detalleusuario__isPropietary=True)\
+            .filter(Q(username=email_username) | Q(email=email_username)).first()
         
     
 class LocalInfoUsuarioSerializer(serializers.ModelSerializer):

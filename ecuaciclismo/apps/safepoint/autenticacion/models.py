@@ -21,19 +21,18 @@ class UsuarioNegocio(User):
     def detalles(self) -> DetalleUsuario:
         return DetalleUsuario.objects.filter(usuario=self).first()
         
-    def save(self):
+    def save(self, *args, **kwargs):
         """
         Sobreescritura del metodo save. 
         Este adjunta un negocio en caso de que el usuario sea nuevo, asimismo adjunta sus respectivos detalles
         """
         
         es_nuevo = self.pk is None
-        super().save()
+        super().save(args, kwargs)
         
         if es_nuevo:
             self._crear_detalle_usuario()
             self._asociar_negocio_vacio()
-            self._crear_solicitud()
         
     def _crear_detalle_usuario(self):
         detalle = DetalleUsuario(
@@ -55,11 +54,3 @@ class UsuarioNegocio(User):
         local.save()
         
         return local
-    
-    def _crear_solicitud(self):
-        Solicitud(
-            user=self,
-            estado='Pendiente'
-        ).save()
-    
-    
