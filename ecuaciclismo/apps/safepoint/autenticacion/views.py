@@ -26,6 +26,9 @@ class ObtenerInfoUsuarioNegocioMixin:
     
 
 class RegistroView(ObtenerInfoUsuarioNegocioMixin, generics.CreateAPIView):
+    """
+    Clase para registrar usuarios.
+    """
     permission_classes = (AllowAny,)
     serializer_class = RegistroSerializer
     
@@ -38,6 +41,9 @@ class RegistroView(ObtenerInfoUsuarioNegocioMixin, generics.CreateAPIView):
         return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
 class LoginView(ObtenerInfoUsuarioNegocioMixin, generics.GenericAPIView):
+    """
+    Clase para inicio de sesion
+    """
     permission_classes = (AllowAny,)
     serializer_class = LoginSerializer
     

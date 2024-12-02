@@ -66,7 +66,6 @@ class LoginSerializer(serializers.Serializer):
     
     def validate(self, attrs):
         usuario = self._obtener_usuario_negocio(attrs['email_username'])
-        
         if not usuario or not usuario.check_password(attrs['password']):
             raise exceptions.AuthenticationFailed({ 'message': 'Las credenciales no son correctas' })
         
@@ -93,9 +92,9 @@ class LocalInfoUsuarioSerializer(serializers.ModelSerializer):
 
 class UsuarioNegocioSerializer(serializers.ModelSerializer):
     negocio = LocalInfoUsuarioSerializer()
-    foto = serializers.CharField(source='detalleusuario.foto')
-    es_propietario = serializers.BooleanField(source='detalleusuario.isPropietary')
-    tipo = serializers.CharField(source='detalleusuario.tipo')
+    foto = serializers.CharField(source='detalles.foto')
+    es_propietario = serializers.BooleanField(source='detalles.isPropietary')
+    tipo = serializers.CharField(source='detalles.tipo')
     
     class Meta:
         model = UsuarioNegocio
