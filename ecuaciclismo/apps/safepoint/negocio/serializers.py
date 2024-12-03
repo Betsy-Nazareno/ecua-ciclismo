@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from rest_framework import serializers, status, validators, exceptions
 from django.db.models import Q
 
@@ -27,6 +29,8 @@ class UbicacionNegocioSerializer(serializers.ModelSerializer):
 
 class NegocioSerializer(serializers.ModelSerializer):
     ubicacion = UbicacionNegocioSerializer()
+    imagen = serializers.CharField(required=False)
+    descripcion = serializers.CharField(required=False)
     
     class Meta:
         model = Local
@@ -41,6 +45,35 @@ class NegocioSerializer(serializers.ModelSerializer):
             'ubicacion'
         )
 
+    def update(self, instance, validated_data: OrderedDict):
+        ubicacion_data = validated_data.pop('ubicacion')
+        negocio: Local = super().update(instance, validated_data)
+        negocio.ubicacion = self._actualizar_ubicacion(negocio.ubicacion, ubicacion_data)
+        negocio.save()
+        
+        return negocio
+        
+    def _actualizar_ubicacion(self, ubicacion: Ubicacion, data: OrderedDict):
+        if not ubicacion:
+            coordenada_x = Coordenada(**data['coordenada_x'])
+            coordenada_x.save()
+            coordenada_y = Coordenada(**data['coordenada_y'])
+            coordenada_y.save()
+            
+            ubicacion_negocio = Ubicacion(
+                coordenada_x=coordenada_x,
+                coordenada_y=coordenada_y,
+            )
+            ubicacion_negocio.save()
+            
+            return ubicacion_negocio
+        
+        Coordenada.objects.filter(id=ubicacion.coordenada_x.id).update(**data['coordenada_x'])
+        Coordenada.objects.filter(id=ubicacion.coordenada_y.id).update(**data['coordenada_y'])            
+        ubicacion.refresh_from_db()
+        
+        return ubicacion
+        
 
 class SolicitudNegocioSerializer(serializers.ModelSerializer):
     
@@ -50,31 +83,49 @@ class SolicitudNegocioSerializer(serializers.ModelSerializer):
 
 
 class SolicitudNegocioCreacionSerializer(serializers.ModelSerializer):
-    lugar = serializers.PrimaryKeyRelatedField(required=True)
     
     class Meta:
         model = SolicitudLugar
-        fields = "__all__"
+        exclude = (
+            'token',
+            'user'
+        )
+        read_only_fields = (
+            'id',
+            'estado',
+            'motivo_rechazo',
+            'path_Pdf',
+            'fecha_creacion',
+            'ultimo_cambio'
+        )
         
     def create(self, validated_data):
         usuario = self.context.get('request').user
         
         solicitud: SolicitudLugar = self._obtener_ultima_solicitud(usuario, validated_data['lugar'])
-        if solicitud and solicitud.estado == "Pendiente":
-            return solicitud
-        
+        if solicitud:
+            if solicitud.estado == "Pendiente":
+                raise exceptions.APIException(
+                    detail= { 'message': 'Ya existe una solicitud de verificacion para este negocio' },
+                    code=status.HTTP_422_UNPROCESSABLE_ENTITY
+                )
+            elif solicitud.estado == "Aprobada":
+                raise exceptions.APIException(
+                    detail= { 'message': 'Este negocio ya tiene una solicitud aprobada' },
+                    code=status.HTTP_422_UNPROCESSABLE_ENTITY
+                )
+            
         solicitud = SolicitudLugar(
             user=usuario,
-            lugar__id=validated_data['lugar'],
+            lugar=validated_data['lugar'],
             estado='Pendiente',
         )
         solicitud.save()
         return solicitud
         
-    def _obtener_ultima_solicitud(self, usuario, negocio_id):
+    def _obtener_ultima_solicitud(self, usuario, negocio):
         return SolicitudLugar.objects\
-            .filter(lugar__id=negocio_id)\
+            .filter(lugar=negocio)\
             .filter(user=usuario)\
-            .filter(Q(estado='Pendiente') | Q(estado='Rechazada'))\
             .order_by("-fecha_creacion")\
             .first()

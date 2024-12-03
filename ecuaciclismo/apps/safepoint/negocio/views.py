@@ -42,10 +42,15 @@ class ObtenerEstadoNegocioView(ObtenerNegocioPorUsuarioMixin, generics.RetrieveA
     serializer_class = SolicitudNegocioSerializer
     
     def get_object(self):
-        negocio = super(ObtenerNegocioPorUsuarioMixin, self).get_object()
-        return SolicitudLugar.objects.filter(lugar=negocio.lugar).filter(user=self.request.user)\
+        negocio: Local = super().get_object()
+        return SolicitudLugar.objects.filter(lugar=negocio).filter(user=self.request.user)\
             .order_by("-fecha_creacion").first()
 
 
 class CrearSolicitudNegocioView(generics.CreateAPIView):
     serializer_class = SolicitudNegocioCreacionSerializer
+
+class UpdateNegocioView(generics.UpdateAPIView):
+    serializer_class = NegocioSerializer
+    queryset = Local.objects.all()
+    permission_classes = (AllowAny,)
