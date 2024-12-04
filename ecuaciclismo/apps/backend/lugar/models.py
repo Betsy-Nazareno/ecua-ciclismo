@@ -14,7 +14,7 @@ class Lugar(ModeloBase):
     direccion = models.CharField(max_length=100)
     imagen = models.TextField()
     ciudad = models.CharField(max_length=100, null=True)
-    ubicacion = models.ForeignKey(Ubicacion, on_delete=models.CASCADE)
+    ubicacion = models.ForeignKey(Ubicacion, on_delete=models.CASCADE, null=True)
     isActived = models.BooleanField(default=0)
 
     @classmethod
