@@ -13,14 +13,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path,re_path
-from django.conf.urls import include, url
+from django.urls import path, include, re_path
 from django.views.static import serve
 
 from ecuaciclismo import views
-from ecuaciclismo.apps.backend.api.api_router import *
 from ecuaciclismo.apps.backend.api.api_router import router
 from ecuaciclismo.apps.backend.api.usuario.views import CustomAuthToken, Logout
 
@@ -28,17 +27,16 @@ urlpatterns = [
     path('politica/', views.current_datetime),
     path('admin/', admin.site.urls),
     path("update_server/", views.update, name="update"),
-    # url(r'^(?P<application>[a-z1234567890/_-]+)/(?P<folder>media|erplib/media)/$', mediaurl, name='mediaurl'),
-    # url(r'^(?P<application>[a-z1234567890/_-]+)/(?P<folder>media|erplib/media)/(?P<path>.*)$', mediaurl, name='mediaurl'),
-    # url(r'^media/$', mediaurl),
-    # url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 
-    #api
-    url('^api/', include(router)),
-    url('^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url('^api/token-auth/', CustomAuthToken.as_view()),
-    url(r'^api/logout/', Logout.as_view()),
-    # url(r'^auth/', include('rest_framework_social_oauth2.urls')),
-    
-    path("safepoint/", include("ecuaciclismo.apps.safepoint.urls"))
+    # API
+    re_path(r'^api/', include(router.urls)),
+    re_path(r'^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
+    re_path(r'^api/token-auth/', CustomAuthToken.as_view(), name="token_auth"),
+    re_path(r'^api/logout/', Logout.as_view(), name="logout"),
+
+    # SafePoint
+    path("safepoint/", include("ecuaciclismo.apps.safepoint.urls")),
+
+    # Static files
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]

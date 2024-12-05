@@ -27,15 +27,13 @@ SECRET_KEY = 'django-insecure-6ruzu9lgr@)okzkxu-d+mg*f+v3r+6fmr=7hum&@!-dl57hi#k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ecuaciclismoapp.pythonanywhere.com']
-
-if DEBUG:
-    ALLOWED_HOSTS += [ '127.0.0.1' ]
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -102,10 +100,10 @@ WSGI_APPLICATION = 'ecuaciclismo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ecuaciclismo_app',
+        'NAME': 'ecuaciclismo',
         'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'PASSWORD': 'root',
+        'HOST': '127.0.0.1',
         # 'HOST': '/Applications/MAMP/tmp/mysql/mysql.sock',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
         'OPTIONS': {'init_command': 'SET default_storage_engine=INNODB'},
