@@ -42,13 +42,21 @@ class NegocioSerializer(serializers.ModelSerializer):
             'hora_fin',
             'descripcion',
             'direccion',
-            'ubicacion'
+            'ubicacion',
+            'tipo_productos',
+            'servicio_detalles'
         )
 
     def update(self, instance, validated_data: OrderedDict):
         ubicacion_data = validated_data.pop('ubicacion')
+        tipo_productos_data = validated_data.pop('tipo_productos')
+        servicio_detalles_data = validated_data.pop('servicio_detalles')
+        
         negocio: Local = super().update(instance, validated_data)
         negocio.ubicacion = self._actualizar_ubicacion(negocio.ubicacion, ubicacion_data)
+        negocio.tipo_productos.set(tipo_productos_data)
+        negocio.servicio_detalles.set(servicio_detalles_data)
+        
         negocio.save()
         
         return negocio
@@ -60,10 +68,7 @@ class NegocioSerializer(serializers.ModelSerializer):
             coordenada_y = Coordenada(**data['coordenada_y'])
             coordenada_y.save()
             
-            ubicacion_negocio = Ubicacion(
-                coordenada_x=coordenada_x,
-                coordenada_y=coordenada_y,
-            )
+            ubicacion_negocio = Ubicacion(coordenada_x=coordenada_x,coordenada_y=coordenada_y)
             ubicacion_negocio.save()
             
             return ubicacion_negocio
@@ -73,7 +78,6 @@ class NegocioSerializer(serializers.ModelSerializer):
         ubicacion.refresh_from_db()
         
         return ubicacion
-        
 
 class SolicitudNegocioSerializer(serializers.ModelSerializer):
     

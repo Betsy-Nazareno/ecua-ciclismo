@@ -18,10 +18,13 @@ class ObtenerInfoUsuarioNegocioMixin:
     
     def autenticar_usuario(self, usuario: UsuarioNegocio):
         token, created = Token.objects.get_or_create(user=usuario)
+        primer_inicio_sesion = usuario.last_login is None
+        
         update_last_login(None, usuario)
         return {
             'token': token.key,
-            'usuario': UsuarioNegocioSerializer(instance=usuario).data
+            'usuario': UsuarioNegocioSerializer(instance=usuario).data,
+            'primer_inicio_sesion': primer_inicio_sesion
         } 
     
 
