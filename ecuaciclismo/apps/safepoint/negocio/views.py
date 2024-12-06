@@ -8,7 +8,7 @@ from ecuaciclismo.apps.backend.lugar.models import Local
 from ecuaciclismo.apps.backend.solicitud.models import SolicitudLugar
 from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario
 
-from .serializers import NegocioSerializer, SolicitudNegocioSerializer, SolicitudNegocioCreacionSerializer
+from .serializers import *
 
 class ObtenerNegocioPorUsuarioMixin:
     """
@@ -54,3 +54,27 @@ class UpdateNegocioView(generics.UpdateAPIView):
     serializer_class = NegocioSerializer
     queryset = Local.objects.all()
     permission_classes = (AllowAny,)
+
+# 
+# API Views de ayuda
+#
+class ServicioLocalListaView(generics.ListAPIView):
+    """
+    Clase de vista de API que devuelve todos los servicios disponibles para asignarle a un local.
+    """
+    serializer_class = ServicioSerializer
+    queryset = Servicio.objects.all()
+
+class ProductoListaView(generics.ListAPIView):
+    """
+    Clase de vista de API que devuelve todos los productos disponibles para asignarle a un local.
+    """
+    serializer_class = ProductosSerializer
+    queryset = Producto.objects.all()
+    
+class ServiciosAdicionalesListaView(generics.ListAPIView):
+    """
+    Clase de vista de API que devuelve todos los servicios adicionales disponibles para asignarle a un local.
+    """
+    serializer_class = ServiciosAdicionalesSerializer
+    queryset = ServicioAdicional.objects.all()

@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models, connection
 
 from ecuaciclismo.apps.backend.ruta.models import Ubicacion
-from ecuaciclismo.apps.backend.local_detalles.models import TipoProducto, ServicioDetalle
+from ecuaciclismo.apps.backend.local_detalles.models import Producto, ServicioAdicional
 
 from ecuaciclismo.helpers.models import ModeloBase
 
@@ -166,8 +166,8 @@ class Local(Lugar):
     isBeneficios = models.BooleanField(default=0)
     isVerificado = models.BooleanField(default=0)
     isParqueadero= models.BooleanField(null=True)
-    tipo_productos = models.ManyToManyField(TipoProducto, related_name='locales')
-    servicio_detalles = models.ManyToManyField(ServicioDetalle, related_name='locales')
+    productos = models.ManyToManyField(Producto, related_name='locales')
+    servicios_adicionales = models.ManyToManyField(ServicioAdicional, related_name='locales')
     
     @classmethod
     def getLocalById(self, lugar_id):

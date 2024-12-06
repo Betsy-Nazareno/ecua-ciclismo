@@ -3,9 +3,10 @@ from collections import OrderedDict
 from rest_framework import serializers, status, validators, exceptions
 from django.db.models import Q
 
-from ecuaciclismo.apps.backend.lugar.models import Local
+from ecuaciclismo.apps.backend.lugar.models import Local, Servicio
 from ecuaciclismo.apps.backend.solicitud.models import SolicitudLugar
 from ecuaciclismo.apps.backend.ruta.models import Coordenada, Ubicacion
+from ecuaciclismo.apps.backend.local_detalles.models import Producto, ServicioAdicional
 
 
 class CoordenadaNegocioSerializer(serializers.ModelSerializer):
@@ -49,13 +50,13 @@ class NegocioSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data: OrderedDict):
         ubicacion_data = validated_data.pop('ubicacion')
-        tipo_productos_data = validated_data.pop('tipo_productos')
-        servicio_detalles_data = validated_data.pop('servicio_detalles')
+        productos_data = validated_data.pop('tipo_productos')
+        servicios_adicionales_data = validated_data.pop('servicio_detalles')
         
         negocio: Local = super().update(instance, validated_data)
         negocio.ubicacion = self._actualizar_ubicacion(negocio.ubicacion, ubicacion_data)
-        negocio.tipo_productos.set(tipo_productos_data)
-        negocio.servicio_detalles.set(servicio_detalles_data)
+        negocio.productos.set(productos_data)
+        negocio.servicios_adicionales.set(servicios_adicionales_data)
         
         negocio.save()
         
@@ -133,3 +134,32 @@ class SolicitudNegocioCreacionSerializer(serializers.ModelSerializer):
             .filter(user=usuario)\
             .order_by("-fecha_creacion")\
             .first()
+
+
+class ServicioSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Servicio
+        fields = (
+            'id',
+            'nombre'
+        )
+
+class ProductosSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Producto
+        fields = (
+            'id',
+            'nombre'
+        )
+
+
+class ServiciosAdicionalesSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ServicioAdicional
+        fields = (
+            'id',
+            'nombre'
+        )
