@@ -12,8 +12,10 @@ from ecuaciclismo.apps.backend.local_detalles.models import Producto, ServicioAd
 class CoordenadaNegocioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coordenada
-        exclude = (
-            'token',
+        fields = (
+            'id',
+            'latitud',
+            'longitud'
         )
 
       
@@ -23,8 +25,10 @@ class UbicacionNegocioSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Ubicacion
-        exclude = (
-            'token',
+        fields = (
+            'id',
+            'coordenada_x',
+            'coordenada_y'
         )
 
 
@@ -32,11 +36,13 @@ class NegocioSerializer(serializers.ModelSerializer):
     ubicacion = UbicacionNegocioSerializer()
     imagen = serializers.CharField(required=False)
     descripcion = serializers.CharField(required=False)
+    tiene_solicitud_pendiente = serializers.SerializerMethodField()
     
     class Meta:
         model = Local
         fields = (
             'id',
+            'nombre',
             'servicio',
             'imagen',
             'hora_inicio',
@@ -44,9 +50,15 @@ class NegocioSerializer(serializers.ModelSerializer):
             'descripcion',
             'direccion',
             'ubicacion',
-            'tipo_productos',
-            'servicio_detalles'
+            'productos',
+            'servicios_adicionales',
+            'tiene_solicitud_pendiente'
         )
+        
+    def get_tiene_solicitud_pendiente(self, obj):
+        solicitud: SolicitudLugar = SolicitudLugar.objects.filter(lugar=obj)\
+            .order_by("-fecha_creacion").first()
+        return solicitud.estado == "Pendiente"
 
     def update(self, instance, validated_data: OrderedDict):
         ubicacion_data = validated_data.pop('ubicacion')
@@ -79,6 +91,7 @@ class NegocioSerializer(serializers.ModelSerializer):
         ubicacion.refresh_from_db()
         
         return ubicacion
+
 
 class SolicitudNegocioSerializer(serializers.ModelSerializer):
     
