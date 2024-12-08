@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = Path(_file_).resolve().parent.parent
@@ -30,7 +33,10 @@ DEBUG = True
 ALLOWED_HOSTS = ['ecuaciclismoapp.pythonanywhere.com']
 
 if DEBUG:
-    ALLOWED_HOSTS += [ '127.0.0.1' ]
+    ALLOWED_HOSTS += [ 
+        os.environ.get('URL_LOCALHOST', ''),
+        os.environ.get('URL_TEST', ''),
+    ]
 
 
 # Application definition
@@ -103,10 +109,11 @@ WSGI_APPLICATION = 'ecuaciclismo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ecuaciclismo',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': '127.0.0.1',
+        'NAME': os.environ.get('DB_NAME', 'ecuaciclismoApp$ecuaciclismobd'),
+        'USER': os.environ.get('DB_USER', 'ecuaciclismoApp'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        # 'PASSWORD': os.environ.get('DB_PASSWORD', 'electronico1'),
+        'HOST': os.environ.get('DB_HOST', 'ecuaciclismoApp.mysql.pythonanywhere-services.com'),
         # 'HOST': '/Applications/MAMP/tmp/mysql/mysql.sock',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
         'OPTIONS': {'init_command': 'SET default_storage_engine=INNODB'},
