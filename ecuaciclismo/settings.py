@@ -32,11 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['ecuaciclismoapp.pythonanywhere.com']
 
-if DEBUG:
-    ALLOWED_HOSTS += [ 
-        os.environ.get('URL_LOCALHOST', ''),
-        os.environ.get('URL_TEST', ''),
-    ]
+if DEBUG and os.environ.get('DEV_ALLOW_ALL_URLS', False):
+    ALLOWED_HOSTS = [ '*' ]
 
 
 # Application definition
@@ -111,8 +108,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME', 'ecuaciclismoApp$ecuaciclismobd'),
         'USER': os.environ.get('DB_USER', 'ecuaciclismoApp'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        # 'PASSWORD': os.environ.get('DB_PASSWORD', 'electronico1'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'electronico1'),
         'HOST': os.environ.get('DB_HOST', 'ecuaciclismoApp.mysql.pythonanywhere-services.com'),
         # 'HOST': '/Applications/MAMP/tmp/mysql/mysql.sock',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
