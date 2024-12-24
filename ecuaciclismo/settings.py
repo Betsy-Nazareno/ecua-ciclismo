@@ -30,12 +30,12 @@ SECRET_KEY = 'django-insecure-6ruzu9lgr@)okzkxu-d+mg*f+v3r+6fmr=7hum&@!-dl57hi#k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ecuaciclismoapp.pythonanywhere.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '6ff9-191-99-40-140.ngrok-free.app']
 
 if DEBUG:
     ALLOWED_HOSTS += [ 
-        os.environ.get('URL_LOCALHOST', ''),
-        os.environ.get('URL_TEST', ''),
+        os.environ.get('URL_LOCALHOST', ' https://6ff9-191-99-40-140.ngrok-free.appp'),
+        os.environ.get('URL_TEST', ' https://6ff9-191-99-40-140.ngrok-free.app'),
     ]
 
 

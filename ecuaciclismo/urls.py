@@ -22,6 +22,8 @@ from django.views.static import serve
 from ecuaciclismo import views
 from ecuaciclismo.apps.backend.api.api_router import router
 from ecuaciclismo.apps.backend.api.usuario.views import CustomAuthToken, Logout
+from django.shortcuts import redirect
+
 
 urlpatterns = [
     path('politica/', views.current_datetime),
