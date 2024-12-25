@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Count, Q, F
 
 from ecuaciclismo.helpers.models import ModeloBase
 
@@ -14,3 +15,12 @@ class ServicioAdicional(ModeloBase):
     
     def __str__(self):
         return self.nombre
+
+class EstadisticaCiclistaLocal(ModeloBase):
+    
+    class TipoEstadistica(models.TextChoices):
+        VISTA_MAPA_ECUACICLISMO = "VISTA_MAPA"
+    
+    usuario = models.ForeignKey("auth.User", on_delete=models.CASCADE)
+    local = models.ForeignKey("lugar.Local", on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=100, choices=TipoEstadistica.choices, default=TipoEstadistica.VISTA_MAPA_ECUACICLISMO)

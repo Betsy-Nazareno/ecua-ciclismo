@@ -79,6 +79,7 @@ class LoginSerializer(serializers.Serializer):
     
 class LocalInfoUsuarioSerializer(serializers.ModelSerializer):
     activo = serializers.BooleanField(source='isActived')
+    es_verificado = serializers.BooleanField(source='isVerificado')
     
     class Meta:
         model = Local
@@ -86,7 +87,8 @@ class LocalInfoUsuarioSerializer(serializers.ModelSerializer):
             'id',
             'nombre',
             'imagen',
-            'activo'
+            'activo',
+            'es_verificado'
         )
 
 

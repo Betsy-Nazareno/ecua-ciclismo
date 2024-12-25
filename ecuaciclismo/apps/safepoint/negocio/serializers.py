@@ -36,7 +36,7 @@ class NegocioSerializer(serializers.ModelSerializer):
     ubicacion = UbicacionNegocioSerializer()
     imagen = serializers.CharField(required=False)
     descripcion = serializers.CharField(required=False)
-    tiene_solicitud_pendiente = serializers.SerializerMethodField()
+    debe_enviar_solicitud = serializers.SerializerMethodField()
     
     class Meta:
         model = Local
@@ -52,18 +52,22 @@ class NegocioSerializer(serializers.ModelSerializer):
             'ubicacion',
             'productos',
             'servicios_adicionales',
-            'tiene_solicitud_pendiente'
+            'debe_enviar_solicitud'
         )
         
-    def get_tiene_solicitud_pendiente(self, obj):
+    def get_debe_enviar_solicitud(self, obj):
         solicitud: SolicitudLugar = SolicitudLugar.objects.filter(lugar=obj)\
             .order_by("-fecha_creacion").first()
-        return solicitud.estado == "Pendiente"
+        if not solicitud:
+            return True
+        if solicitud.estado == "Aprobada" or solicitud.estado == "Pendiente":
+            return False
+        return solicitud.estado == "Rechazada"
 
     def update(self, instance, validated_data: OrderedDict):
         ubicacion_data = validated_data.pop('ubicacion')
-        productos_data = validated_data.pop('tipo_productos')
-        servicios_adicionales_data = validated_data.pop('servicio_detalles')
+        productos_data = validated_data.pop('productos')
+        servicios_adicionales_data = validated_data.pop('servicios_adicionales')
         
         negocio: Local = super().update(instance, validated_data)
         negocio.ubicacion = self._actualizar_ubicacion(negocio.ubicacion, ubicacion_data)
@@ -92,6 +96,16 @@ class NegocioSerializer(serializers.ModelSerializer):
         
         return ubicacion
 
+class EstadoNegocioSerializer(serializers.ModelSerializer):
+    activo = serializers.BooleanField(source='isActived')
+    es_verificado = serializers.BooleanField(source='isVerificado')
+    
+    class Meta:
+        model = Local
+        fields = (
+            'activo',
+            'es_verificado'
+        )
 
 class SolicitudNegocioSerializer(serializers.ModelSerializer):
     
@@ -176,3 +190,26 @@ class ServiciosAdicionalesSerializer(serializers.ModelSerializer):
             'id',
             'nombre'
         )
+
+class EstadisticasNegocioMesSerializer(serializers.Serializer):
+    mes = serializers.SerializerMethodField()
+    vistas = serializers.IntegerField(read_only=True)
+    
+    MESES = {
+        1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril", 5: "Mayo", 6: "Junio", 7: "Julio", 
+        8: "Agosto", 9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
+    }
+    
+    def get_mes(self, obj):
+        return self.MESES[obj['mes']]
+
+class EstadisticasNegocioDiasSerializer(serializers.Serializer):
+    dia = serializers.SerializerMethodField()
+    vistas = serializers.IntegerField(read_only=True)
+    
+    DIAS = {
+        1: "Lunes", 2: "Martes", 3: "Miercoles", 4: "Jueves", 5: "Viernes", 6: "Sabado", 7: "Domingo"
+    }
+    
+    def get_dia(self, obj):
+        return self.DIAS[obj['dia']]
