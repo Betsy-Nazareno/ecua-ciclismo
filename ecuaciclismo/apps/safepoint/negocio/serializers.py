@@ -34,7 +34,7 @@ class UbicacionNegocioSerializer(serializers.ModelSerializer):
 
 class NegocioSerializer(serializers.ModelSerializer):
     ubicacion = UbicacionNegocioSerializer()
-    imagen = serializers.CharField(required=False)
+    imagen = serializers.CharField(required=False, allow_blank=True)
     descripcion = serializers.CharField(required=False)
     debe_enviar_solicitud = serializers.SerializerMethodField()
     

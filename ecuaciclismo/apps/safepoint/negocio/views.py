@@ -135,8 +135,11 @@ class EstadisticaNegocioView(ObtenerNegocioPorUsuarioMixin, views.APIView):
     
     def _obtener_estadisticas_semana(self):
         semana_actual = datetime.date.today().isocalendar()[1]
+        anyo_actual = datetime.date.today().isocalendar()[0]
+        
         return self._obtener_estadisticas_base()\
             .filter(fecha_creacion__week=semana_actual)\
+            .filter(fecha_creacion__year=anyo_actual)\
             .annotate(dia=ExtractWeekDay('fecha_creacion'))\
             .values('dia')\
             .annotate(vistas=Count('usuario'))\
