@@ -59,16 +59,6 @@ class UpdateNegocioView(generics.UpdateAPIView):
     serializer_class = NegocioSerializer
     queryset = Local.objects.all()
     permission_classes = (AllowAny,)
-    
-class ObtenerTokensNotificacionAdministrador(generics.ListAPIView):
-    """
-    Clase de vista de API que devuelve todos los tokens de notificacion de los administradores.
-    """
-    
-    def list(self, request, *args, **kwargs):
-        tokens = DetalleUsuario.objects.filter(admin=True)\
-            .filter(token_notificacion__isnull=False).values_list('token_notificacion', flat=True)
-        return Response(tokens, status=status.HTTP_200_OK)
 
 class ObtenerEstadoVisibilidadNegocio(ObtenerNegocioPorUsuarioMixin, generics.RetrieveAPIView):
     """
@@ -116,6 +106,8 @@ class EstadisticaNegocioView(ObtenerNegocioPorUsuarioMixin, views.APIView):
     def obtener_estadisticas(self):
         if self.request.query_params.get('tipo') == 'semana':
             resultados = self._obtener_estadisticas_semana()
+            # print(resultados.query)
+            
             return EstadisticasNegocioDiasSerializer(resultados, many=True)
             
         resultados = self._obtener_estadisticas_mes()
@@ -144,4 +136,23 @@ class EstadisticaNegocioView(ObtenerNegocioPorUsuarioMixin, views.APIView):
             .values('dia')\
             .annotate(vistas=Count('usuario'))\
             .order_by('dia')
-            
+
+class ActualizarEstadisticasPorCiclistaView(generics.CreateAPIView):
+    """
+    API endpoint que agrega un nuevo regsitro a las estadisticas de un negocio
+    """
+    serializer_class = EstadisticasActualizarVistaSerializer
+    
+    def create(self, request, *args, **kwargs):
+        super().create(request, args, kwargs)
+        return Response({ "message": "Se actualizaron las estadisticas correctamente" }, status=status.HTTP_200_OK)
+
+class RegistrarAvisosNegocioView(generics.CreateAPIView):
+    """
+    API endpoint que realiza el registro de los llamados al 911 o entidades de seguridad
+    """
+    serializer_class = AgregarRegistroAvisoNegocio
+    
+    def create(self, request, *args, **kwargs):
+        super().create(request, args, kwargs)
+        return Response({ "message": "Se creo el registro correctamente" }, status=status.HTTP_200_OK)

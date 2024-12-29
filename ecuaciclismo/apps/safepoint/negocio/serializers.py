@@ -1,12 +1,16 @@
 from collections import OrderedDict
+import uuid
 
 from rest_framework import serializers, status, validators, exceptions
+
 from django.db.models import Q
+from django.contrib.auth.models import User
 
 from ecuaciclismo.apps.backend.lugar.models import Local, Servicio
 from ecuaciclismo.apps.backend.solicitud.models import SolicitudLugar
 from ecuaciclismo.apps.backend.ruta.models import Coordenada, Ubicacion
-from ecuaciclismo.apps.backend.local_detalles.models import Producto, ServicioAdicional
+from ecuaciclismo.apps.backend.logs.models import Log
+from ecuaciclismo.apps.backend.local_detalles.models import Producto, ServicioAdicional, EstadisticaCiclistaLocal
 
 
 class CoordenadaNegocioSerializer(serializers.ModelSerializer):
@@ -208,8 +212,53 @@ class EstadisticasNegocioDiasSerializer(serializers.Serializer):
     vistas = serializers.IntegerField(read_only=True)
     
     DIAS = {
-        1: "Lunes", 2: "Martes", 3: "Miercoles", 4: "Jueves", 5: "Viernes", 6: "Sabado", 7: "Domingo"
+        1: "Domingo", 2: "Lunes", 3: "Martes", 4: "Miercoles", 5: "Jueves", 6: "Viernes", 7: "Sabado"
     }
     
     def get_dia(self, obj):
         return self.DIAS[obj['dia']]
+
+class EstadisticasActualizarVistaSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = EstadisticaCiclistaLocal
+        fields = (
+            'local',
+        )
+    
+    def create(self, validated_data):
+        ciclista: User = self.context.get('request').user
+        if not ciclista:
+            return exceptions.APIException("Usuario no encontrado")
+        
+        estadistica = EstadisticaCiclistaLocal(
+            usuario=ciclista, 
+            local=validated_data['local'],
+            tipo=EstadisticaCiclistaLocal.TipoEstadistica.VISTA_MAPA_ECUACICLISMO
+        )
+        
+        estadistica.save()
+        return estadistica
+    
+class AgregarRegistroAvisoNegocio(serializers.ModelSerializer):
+    descripcion = serializers.CharField(required=False, allow_blank=True)
+    
+    class Meta:
+        model = Log
+        fields = (
+            'descripcion',
+        )
+    
+    def create(self, validated_data):
+        usuario: User = self.context.get('request').user
+        descripcion = validated_data.get("descripcion", "Aviso al 911")
+        
+        log = Log(
+            uuidLog=uuid.uuid4(),
+            usuario=usuario,
+            tipo_evento="Safepoint - Registro de aviso",
+            descripcion_evento = descripcion
+        )
+        
+        log.save()
+        return log
