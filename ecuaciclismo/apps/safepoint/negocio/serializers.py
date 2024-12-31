@@ -206,7 +206,19 @@ class EstadisticasNegocioMesSerializer(serializers.Serializer):
     
     def get_mes(self, obj):
         return self.MESES[obj['mes']]
-
+    
+    @classmethod
+    def obtener_estadisticas_por_mes(cls, data_list: list):
+        estadisticas = {
+            'Enero': 0, 'Febrero': 0, 'Marzo': 0, 'Abril': 0, 'Mayo': 0,
+            'Junio': 0, 'Julio': 0, 'Agosto': 0, 'Septiembre': 0, 'Octubre': 0,
+            'Noviembre': 0, 'Diciembre': 0,
+        }
+        
+        for data in data_list:
+            estadisticas[data["mes"]] = data["vistas"]
+        return estadisticas
+        
 class EstadisticasNegocioDiasSerializer(serializers.Serializer):
     dia = serializers.SerializerMethodField()
     vistas = serializers.IntegerField(read_only=True)
@@ -217,6 +229,17 @@ class EstadisticasNegocioDiasSerializer(serializers.Serializer):
     
     def get_dia(self, obj):
         return self.DIAS[obj['dia']]
+    
+    @classmethod
+    def obtener_estadisticas_por_dia(cls, data_list: list):
+        estadisticas = {
+            "Domingo": 0, "Lunes": 0, "Martes": 0, "Miercoles": 0, 
+            "Jueves": 0, "Viernes": 0, "Sabado": 0
+        }
+        
+        for data in data_list:
+            estadisticas[data["dia"]] = data["vistas"]
+        return estadisticas
 
 class EstadisticasActualizarVistaSerializer(serializers.ModelSerializer):
     
