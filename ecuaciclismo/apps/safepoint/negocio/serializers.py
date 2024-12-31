@@ -1,12 +1,16 @@
 from collections import OrderedDict
+import uuid
 
 from rest_framework import serializers, status, validators, exceptions
+
 from django.db.models import Q
+from django.contrib.auth.models import User
 
 from ecuaciclismo.apps.backend.lugar.models import Local, Servicio
 from ecuaciclismo.apps.backend.solicitud.models import SolicitudLugar
 from ecuaciclismo.apps.backend.ruta.models import Coordenada, Ubicacion
-from ecuaciclismo.apps.backend.local_detalles.models import Producto, ServicioAdicional
+from ecuaciclismo.apps.backend.logs.models import Log
+from ecuaciclismo.apps.backend.local_detalles.models import Producto, ServicioAdicional, EstadisticaCiclistaLocal
 
 
 class CoordenadaNegocioSerializer(serializers.ModelSerializer):
@@ -34,9 +38,9 @@ class UbicacionNegocioSerializer(serializers.ModelSerializer):
 
 class NegocioSerializer(serializers.ModelSerializer):
     ubicacion = UbicacionNegocioSerializer()
-    imagen = serializers.CharField(required=False)
+    imagen = serializers.CharField(required=False, allow_blank=True)
     descripcion = serializers.CharField(required=False)
-    tiene_solicitud_pendiente = serializers.SerializerMethodField()
+    debe_enviar_solicitud = serializers.SerializerMethodField()
     
     class Meta:
         model = Local
@@ -52,18 +56,22 @@ class NegocioSerializer(serializers.ModelSerializer):
             'ubicacion',
             'productos',
             'servicios_adicionales',
-            'tiene_solicitud_pendiente'
+            'debe_enviar_solicitud'
         )
         
-    def get_tiene_solicitud_pendiente(self, obj):
+    def get_debe_enviar_solicitud(self, obj):
         solicitud: SolicitudLugar = SolicitudLugar.objects.filter(lugar=obj)\
             .order_by("-fecha_creacion").first()
-        return solicitud.estado == "Pendiente"
+        if not solicitud:
+            return True
+        if solicitud.estado == "Aprobada" or solicitud.estado == "Pendiente":
+            return False
+        return solicitud.estado == "Rechazada"
 
     def update(self, instance, validated_data: OrderedDict):
         ubicacion_data = validated_data.pop('ubicacion')
-        productos_data = validated_data.pop('tipo_productos')
-        servicios_adicionales_data = validated_data.pop('servicio_detalles')
+        productos_data = validated_data.pop('productos')
+        servicios_adicionales_data = validated_data.pop('servicios_adicionales')
         
         negocio: Local = super().update(instance, validated_data)
         negocio.ubicacion = self._actualizar_ubicacion(negocio.ubicacion, ubicacion_data)
@@ -92,6 +100,16 @@ class NegocioSerializer(serializers.ModelSerializer):
         
         return ubicacion
 
+class EstadoNegocioSerializer(serializers.ModelSerializer):
+    activo = serializers.BooleanField(source='isActived')
+    es_verificado = serializers.BooleanField(source='isVerificado')
+    
+    class Meta:
+        model = Local
+        fields = (
+            'activo',
+            'es_verificado'
+        )
 
 class SolicitudNegocioSerializer(serializers.ModelSerializer):
     
@@ -176,3 +194,71 @@ class ServiciosAdicionalesSerializer(serializers.ModelSerializer):
             'id',
             'nombre'
         )
+
+class EstadisticasNegocioMesSerializer(serializers.Serializer):
+    mes = serializers.SerializerMethodField()
+    vistas = serializers.IntegerField(read_only=True)
+    
+    MESES = {
+        1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril", 5: "Mayo", 6: "Junio", 7: "Julio", 
+        8: "Agosto", 9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
+    }
+    
+    def get_mes(self, obj):
+        return self.MESES[obj['mes']]
+
+class EstadisticasNegocioDiasSerializer(serializers.Serializer):
+    dia = serializers.SerializerMethodField()
+    vistas = serializers.IntegerField(read_only=True)
+    
+    DIAS = {
+        1: "Domingo", 2: "Lunes", 3: "Martes", 4: "Miercoles", 5: "Jueves", 6: "Viernes", 7: "Sabado"
+    }
+    
+    def get_dia(self, obj):
+        return self.DIAS[obj['dia']]
+
+class EstadisticasActualizarVistaSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = EstadisticaCiclistaLocal
+        fields = (
+            'local',
+        )
+    
+    def create(self, validated_data):
+        ciclista: User = self.context.get('request').user
+        if not ciclista:
+            return exceptions.APIException("Usuario no encontrado")
+        
+        estadistica = EstadisticaCiclistaLocal(
+            usuario=ciclista, 
+            local=validated_data['local'],
+            tipo=EstadisticaCiclistaLocal.TipoEstadistica.VISTA_MAPA_ECUACICLISMO
+        )
+        
+        estadistica.save()
+        return estadistica
+    
+class AgregarRegistroAvisoNegocio(serializers.ModelSerializer):
+    descripcion = serializers.CharField(required=False, allow_blank=True)
+    
+    class Meta:
+        model = Log
+        fields = (
+            'descripcion',
+        )
+    
+    def create(self, validated_data):
+        usuario: User = self.context.get('request').user
+        descripcion = validated_data.get("descripcion", "Aviso al 911")
+        
+        log = Log(
+            uuidLog=uuid.uuid4(),
+            usuario=usuario,
+            tipo_evento="Safepoint - Registro de aviso",
+            descripcion_evento = descripcion
+        )
+        
+        log.save()
+        return log

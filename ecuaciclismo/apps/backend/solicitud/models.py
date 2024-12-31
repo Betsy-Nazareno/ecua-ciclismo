@@ -34,7 +34,7 @@ class Solicitud(ModeloBase):
             LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON 
                 solicitud.user_id = detalle_usuario.usuario_id
             ORDER BY 
-                solicitud.fecha_creacion 
+                solicitud.fecha_creacion DESC
             '''
         cursor.execute(sql)
         dic = []

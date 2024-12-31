@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
 from django.contrib.auth.models import update_last_login
+from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario
 
 from .serializers import RegistroSerializer, LoginSerializer, UsuarioNegocioSerializer
 from .models import UsuarioNegocio
@@ -61,3 +62,13 @@ class LogoutView(views.APIView):
     def post(self, request, format=None):
         request.user.auth_token.delete()
         return Response(status=status.HTTP_200_OK)
+    
+class ObtenerTokensNotificacionAdministrador(generics.ListAPIView):
+    """
+    Clase de vista de API que devuelve todos los tokens de notificacion de los administradores.
+    """
+    
+    def list(self, request, *args, **kwargs):
+        tokens = DetalleUsuario.objects.filter(admin=True)\
+            .filter(token_notificacion__isnull=False).values_list('token_notificacion', flat=True)
+        return Response(tokens, status=status.HTTP_200_OK)
