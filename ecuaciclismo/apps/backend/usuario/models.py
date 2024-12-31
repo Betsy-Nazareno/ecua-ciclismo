@@ -108,10 +108,10 @@ class DetalleEtiquetaRutaUsuario(ModeloBase):
         return dic
         
 class ContactoSeguro(ModeloBase):
- 	user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
- 	celular = models.CharField(max_length=15, null=True)
- 	nombre = models.CharField(max_length=100)
- 	isUser = models.BooleanField()
+    user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+    celular = models.CharField(max_length=15, null=True)
+    nombre = models.CharField(max_length=100)
+    isUser = models.BooleanField()
 
 
 class GrupoContactoSeguro(ModeloBase):

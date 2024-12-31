@@ -66,6 +66,8 @@ INSTALLED_APPS = [
     # 
     'ecuaciclismo.apps.safepoint.autenticacion',
     'ecuaciclismo.apps.safepoint.negocio',
+    'ecuaciclismo.apps.safepoint.inscripcion',
+    'ecuaciclismo.apps.safepoint.consejo',
 ]
 
 MIDDLEWARE = [
