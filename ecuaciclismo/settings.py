@@ -30,13 +30,10 @@ SECRET_KEY = 'django-insecure-6ruzu9lgr@)okzkxu-d+mg*f+v3r+6fmr=7hum&@!-dl57hi#k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '6ff9-191-99-40-140.ngrok-free.app']
+ALLOWED_HOSTS = ['ecuaciclismoapp.pythonanywhere.com']
 
-if DEBUG:
-    ALLOWED_HOSTS += [ 
-        os.environ.get('URL_LOCALHOST', ' https://6ff9-191-99-40-140.ngrok-free.appp'),
-        os.environ.get('URL_TEST', ' https://6ff9-191-99-40-140.ngrok-free.app'),
-    ]
+if DEBUG and os.environ.get('DEV_ALLOW_ALL_URLS', False):
+    ALLOWED_HOSTS = [ '*' ]
 
 
 # Application definition
@@ -69,6 +66,8 @@ INSTALLED_APPS = [
     # 
     'ecuaciclismo.apps.safepoint.autenticacion',
     'ecuaciclismo.apps.safepoint.negocio',
+    'ecuaciclismo.apps.safepoint.inscripcion',
+    'ecuaciclismo.apps.safepoint.consejo',
 ]
 
 MIDDLEWARE = [
@@ -111,8 +110,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('DB_NAME', 'ecuaciclismoApp$ecuaciclismobd'),
         'USER': os.environ.get('DB_USER', 'ecuaciclismoApp'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        # 'PASSWORD': os.environ.get('DB_PASSWORD', 'electronico1'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'electronico1'),
         'HOST': os.environ.get('DB_HOST', 'ecuaciclismoApp.mysql.pythonanywhere-services.com'),
         # 'HOST': '/Applications/MAMP/tmp/mysql/mysql.sock',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
