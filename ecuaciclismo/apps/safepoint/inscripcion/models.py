@@ -29,6 +29,7 @@ class ReservaRuta(models.Model):
     # Configuración adicional
     class Meta:
         db_table = 'reserva_ruta'
+        managed = False
 
     def __str__(self):
         return f'Reserva de {self.id_usuario} en la ruta {self.id_ruta}'
