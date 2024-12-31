@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('fecha_creacion', models.DateTimeField(auto_now_add=True)),
                 ('ultimo_cambio', models.DateTimeField(auto_now=True)),
-                ('etiqueta', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='ruta.etiqueta')),
+                ('etiqueta', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='ruta.etiquetaruta')),
                 ('publicacion', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='publicacion.publicacion')),
             ],
             options={

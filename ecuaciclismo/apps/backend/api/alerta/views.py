@@ -15,6 +15,7 @@ from ecuaciclismo.apps.backend.usuario.models import ContactoSeguro, GrupoContac
 from ecuaciclismo.helpers.tools_utilities import ApplicationError, get_or_none
 from rest_framework.authtoken.models import Token
 from ecuaciclismo.helpers.jsonx import jsonx
+from django.utils import timezone
 
 class AlertaViewSet(viewsets.ModelViewSet):
 
@@ -264,5 +265,37 @@ class AlertaViewSet(viewsets.ModelViewSet):
             return jsonx({'status': 'success', 'message': 'Etiqueta creada.'})
         except ApplicationError as msg:
             return jsonx({'status': 'error', 'message': str(msg)})
+        except Exception as e:
+            return jsonx({'status': 'error', 'message': str(e)})
+        
+    @action(detail=False, url_path='get_ultima_alerta', methods=['get'])
+    def get_ultima_alerta(self, request):
+        try:
+            ultima_alerta = Alerta.objects.latest('fecha_creacion')
+            if ultima_alerta.estado != 'En curso':
+                return jsonx({'status': 'error', 'message': 'ÚLtima alerta cancelada o atendida.'})
+
+            data = {
+                "id": ultima_alerta.id,
+                "descripcion": ultima_alerta.descripcion,
+                "estado": ultima_alerta.estado,
+                "fecha_creacion": ultima_alerta.fecha_creacion.isoformat(),  
+                "user": ultima_alerta.user.username if ultima_alerta.user else None,    
+                "ubicacion": {
+                    "coordenada_x": {
+                        "latitude": ultima_alerta.ubicacion.coordenada_x.latitud,
+                        "longitude": ultima_alerta.ubicacion.coordenada_x.longitud,
+                    },
+                    "coordenada_y": {
+                        "latitude": ultima_alerta.ubicacion.coordenada_y.latitud,
+                        "longitude": ultima_alerta.ubicacion.coordenada_y.longitud,
+                    },
+                } if ultima_alerta.ubicacion else None,
+            }
+
+            return jsonx({'status': 'success', 'message': 'Última alerta en curso obtenida.', 'data': data})
+
+        except Alerta.DoesNotExist:
+            return jsonx({'status': 'error', 'message': 'No se encontraron alertas.'})
         except Exception as e:
             return jsonx({'status': 'error', 'message': str(e)})

@@ -14,12 +14,27 @@ class Solicitud(ModeloBase):
     def get_all(cls):
         cursor = connection.cursor()
         sql = '''
-                SELECT user.first_name, user.last_name,token.key as token_usuario,detalle_usuario.foto, detalle_usuario.token_notificacion, solicitud.token, solicitud.estado, solicitud.fecha_creacion,solicitud.path_Pdf, solicitud.id, solicitud.motivo_rechazo
-                FROM `solicitud_solicitud` AS solicitud
-                LEFT JOIN `auth_user` AS user ON solicitud.user_id = user.id
-                LEFT JOIN `authtoken_token` AS token ON solicitud.user_id = token.user_id
-                LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON solicitud.user_id = detalle_usuario.usuario_id
-                ORDER BY solicitud.fecha_creacion 
+            SELECT 
+                user.first_name, 
+                user.last_name,
+                token.key as token_usuario,
+                detalle_usuario.foto, 
+                detalle_usuario.token_notificacion,
+                detalle_usuario.isPropietary AS es_propietario,
+                solicitud.token, solicitud.estado, 
+                solicitud.fecha_creacion,
+                solicitud.path_Pdf, 
+                solicitud.id, 
+                solicitud.motivo_rechazo
+            FROM `solicitud_solicitud` AS solicitud
+            LEFT JOIN `auth_user` AS user ON 
+                solicitud.user_id = user.id
+            LEFT JOIN `authtoken_token` AS token ON 
+                solicitud.user_id = token.user_id
+            LEFT JOIN `usuario_detalleusuario` AS detalle_usuario ON 
+                solicitud.user_id = detalle_usuario.usuario_id
+            ORDER BY 
+                solicitud.fecha_creacion DESC
             '''
         cursor.execute(sql)
         dic = []

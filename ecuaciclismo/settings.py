@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR = Path(_file_).resolve().parent.parent
@@ -29,10 +32,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['ecuaciclismoapp.pythonanywhere.com']
 
+if DEBUG and os.environ.get('DEV_ALLOW_ALL_URLS', False):
+    ALLOWED_HOSTS = [ '*' ]
+
 
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,8 +62,12 @@ INSTALLED_APPS = [
     'ecuaciclismo.apps.backend.solicitud',
     'ecuaciclismo.apps.backend.logs',
     'ecuaciclismo.apps.backend.bicicleta',
-
-
+    'ecuaciclismo.apps.backend.local_detalles',
+    # 
+    'ecuaciclismo.apps.safepoint.autenticacion',
+    'ecuaciclismo.apps.safepoint.negocio',
+    'ecuaciclismo.apps.safepoint.inscripcion',
+    'ecuaciclismo.apps.safepoint.consejo',
 ]
 
 MIDDLEWARE = [
@@ -97,10 +108,10 @@ WSGI_APPLICATION = 'ecuaciclismo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ecuaciclismoApp$ecuaciclismobd',
-        'USER': 'ecuaciclismoApp',
-        'PASSWORD': 'electronico1',
-        'HOST': 'ecuaciclismoApp.mysql.pythonanywhere-services.com',
+        'NAME': os.environ.get('DB_NAME', 'ecuaciclismoApp$ecuaciclismobd'),
+        'USER': os.environ.get('DB_USER', 'ecuaciclismoApp'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'electronico1'),
+        'HOST': os.environ.get('DB_HOST', 'ecuaciclismoApp.mysql.pythonanywhere-services.com'),
         # 'HOST': '/Applications/MAMP/tmp/mysql/mysql.sock',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
         'OPTIONS': {'init_command': 'SET default_storage_engine=INNODB'},

@@ -139,6 +139,9 @@ class LugarViewSet(viewsets.ModelViewSet):
                     dataLugar['local_seguro']=local['local_seguro']
                     dataLugar['nombre_propietario']=local['nombre_propietario']
                     dataLugar['apellido_propietario']=local['apellido_propietario']
+                    dataLugar['descripcion'] = lugarLocal.descripcion
+                    dataLugar['tipos_productos'] = list(lugarLocal.productos.values_list('nombre', flat=True))
+                    dataLugar['servicios_adicionales'] = list(lugarLocal.servicios_adicionales.values_list('nombre', flat=True))
             elif dataLugar['tipo'] == 'parqueadero':
                 parqueadero=Parqueadero.getParqueaderoById(lugar.id)
                 dataLugar['capacidad']=parqueadero['capacidad']

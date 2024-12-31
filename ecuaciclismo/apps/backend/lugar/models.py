@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models, connection
+
 from ecuaciclismo.apps.backend.ruta.models import Ubicacion
+from ecuaciclismo.apps.backend.local_detalles.models import Producto, ServicioAdicional
 
 from ecuaciclismo.helpers.models import ModeloBase
 
@@ -14,7 +16,7 @@ class Lugar(ModeloBase):
     direccion = models.CharField(max_length=100)
     imagen = models.TextField()
     ciudad = models.CharField(max_length=100, null=True)
-    ubicacion = models.ForeignKey(Ubicacion, on_delete=models.CASCADE)
+    ubicacion = models.ForeignKey(Ubicacion, on_delete=models.CASCADE, null=True)
     isActived = models.BooleanField(default=0)
 
     @classmethod
@@ -35,12 +37,22 @@ class Lugar(ModeloBase):
                     local.isVerificado AS local_seguro,
                     lugar.direccion AS direccion,
                     lugar.token AS token,
-                    lugar.ciudad AS ciudad          
-                FROM lugar_lugar as lugar 
-                LEFT JOIN lugar_parqueadero as parqueadero  ON lugar.id = parqueadero.lugar_ptr_id
-                LEFT JOIN lugar_local as local  ON lugar.id = local.lugar_ptr_id
-                LEFT JOIN lugar_ciclovia as ciclovia  ON lugar.id = ciclovia.lugar_ptr_id
-                WHERE lugar.isActived = %s 
+                    lugar.ciudad AS ciudad,
+                    IF(local.isVerificado AND detalle_usuario.isPropietary, 1, 0) AS local_safepoint
+                FROM
+                    lugar_lugar AS lugar
+                LEFT JOIN lugar_parqueadero AS parqueadero ON
+                    lugar.id = parqueadero.lugar_ptr_id
+                LEFT JOIN lugar_local AS local ON
+                    lugar.id = local.lugar_ptr_id
+                LEFT JOIN auth_user AS usuario ON 
+                    usuario.id = local.user_id
+                LEFT JOIN usuario_detalleusuario AS detalle_usuario ON
+                    (detalle_usuario.usuario_id = usuario.id)
+                LEFT JOIN lugar_ciclovia AS ciclovia ON
+                    lugar.id = ciclovia.lugar_ptr_id
+                WHERE 
+                    lugar.isActived = %s 
             """, [activo])
             result = cursor.fetchall()
 
@@ -56,6 +68,7 @@ class Lugar(ModeloBase):
                 'direccion': row[6],
                 'token': row[7],
                 'ciudad': row[8],
+                'local_safepoint': row[9]
             }
             lugares.append(lugar_info)
 
@@ -164,6 +177,9 @@ class Local(Lugar):
     isBeneficios = models.BooleanField(default=0)
     isVerificado = models.BooleanField(default=0)
     isParqueadero= models.BooleanField(null=True)
+    productos = models.ManyToManyField(Producto, related_name='locales')
+    servicios_adicionales = models.ManyToManyField(ServicioAdicional, related_name='locales')
+    
     @classmethod
     def getLocalById(self, lugar_id):
         with connection.cursor() as cursor:

@@ -5,7 +5,7 @@ from ecuaciclismo.apps.backend.api.solicitud.SolicitudSerializer import Solicitu
 from rest_framework import viewsets
 from django.contrib.auth.models import User
 from rest_framework.decorators import action
-from ecuaciclismo.apps.backend.lugar.models import Lugar
+from ecuaciclismo.apps.backend.lugar.models import Lugar, Local
 from ecuaciclismo.apps.backend.ruta.models import Coordenada, Ubicacion
 from ecuaciclismo.apps.backend.solicitud.models import Solicitud, SolicitudLugar, SolicitudVerificado
 from ecuaciclismo.apps.backend.usuario.models import DetalleUsuario
@@ -118,7 +118,12 @@ class SolicitudViewSet(viewsets.ModelViewSet):
 
                     if solicitud.get('path_Pdf') is not None:
                         solicitud['tipo']="Registro Local"
-                
+                    if solicitud.get('es_propietario', False):
+                        local = get_or_none(Local, lugar_ptr_id=datoLugar[0]['id'])
+                        solicitud['tipo']="Registro Local Safepoint"
+                        solicitud['servicio_local'] = local.servicio.nombre
+                        solicitud['servicios_extra'] = list(local.servicios_adicionales.values_list('nombre', flat=True))
+                        solicitud['tipos_productos'] = list(local.productos.values_list('nombre', flat=True))
                 else:
                     solicitud['nombre']="Solicitud Membresia"
                     solicitud['tipo']="Membresia"
@@ -151,7 +156,9 @@ class SolicitudViewSet(viewsets.ModelViewSet):
             solicitud = get_or_none(Solicitud, token=data['token_solicitud'])
             solicitud.estado=data['estado']
             solicitud.motivo_rechazo=data['motivo_rechazo']
+            
             print(data['tipo'])
+            
             if(data['tipo']=='Recomendados' or data['tipo']=='Registro Local'):
                 solicitudLugar = get_or_none(SolicitudLugar, solicitud_ptr_id=solicitud.id)
                 lugar=get_or_none(Lugar, id=solicitudLugar.lugar_id)
@@ -160,6 +167,22 @@ class SolicitudViewSet(viewsets.ModelViewSet):
                 else:
                     lugar.isActived=False
                 lugar.save()
+            
+            elif data['tipo'] == "Registro Local Safepoint":
+                solicitudLugar = get_or_none(SolicitudLugar, solicitud_ptr_id=solicitud.id)
+                detalleUsuario=get_or_none(DetalleUsuario, usuario_id=solicitud.user_id)
+                local = get_or_none(Local, lugar_ptr_id=solicitudLugar.lugar_id)
+                
+                if data['estado']=='Aprobada':
+                    local.isActived = True
+                    local.isVerificado = True
+                    detalleUsuario.tipo = "Verificado"
+                else:
+                    local.isActived=False
+                    local.isVerificado = False
+                local.save()
+                detalleUsuario.save()
+                
             else:
                 detalleUsuario=get_or_none(DetalleUsuario, usuario_id=solicitud.user_id)
                 if data['tipo']=='Membresia':
