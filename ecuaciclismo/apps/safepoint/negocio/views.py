@@ -106,8 +106,6 @@ class EstadisticaNegocioView(ObtenerNegocioPorUsuarioMixin, views.APIView):
     def obtener_estadisticas(self):
         if self.request.query_params.get('tipo') == 'semana':
             resultados = self._obtener_estadisticas_semana()
-            # print(resultados.query)
-            
             return EstadisticasNegocioDiasSerializer(resultados, many=True)
             
         resultados = self._obtener_estadisticas_mes()
