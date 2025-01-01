@@ -58,6 +58,11 @@ class NegocioSerializer(serializers.ModelSerializer):
             'servicios_adicionales',
             'debe_enviar_solicitud'
         )
+        extra_kwargs = {
+            'direccion': { 'required': False, 'allow_blank': True },
+            'productos': { 'required': False, 'allow_empty': True },
+            'servicios_adicionales': { 'required': False, 'allow_empty': True }
+        }
         
     def get_debe_enviar_solicitud(self, obj):
         solicitud: SolicitudLugar = SolicitudLugar.objects.filter(lugar=obj)\
