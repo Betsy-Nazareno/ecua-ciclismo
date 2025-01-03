@@ -63,18 +63,27 @@ class LoginSerializer(serializers.Serializer):
     """
     email_username = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
+    token = serializers.CharField(required=False, allow_blank=True)
     
     def validate(self, attrs):
         usuario = self._obtener_usuario_negocio(attrs['email_username'])
         if not usuario or not usuario.check_password(attrs['password']):
             raise exceptions.AuthenticationFailed({ 'message': 'Las credenciales no son correctas' })
         
+        self._actualizar_token(usuario, attrs)
         attrs['usuario'] = usuario
         return attrs
     
     def _obtener_usuario_negocio(self, email_username) -> UsuarioNegocio:
         return UsuarioNegocio.objects.filter(detalleusuario__isPropietary=True)\
             .filter(Q(username=email_username) | Q(email=email_username)).first()
+            
+    def _actualizar_token(self, usuario: UsuarioNegocio, attrs: OrderedDict):
+        if not attrs.get('token') or attrs.get('token', '') == '':
+            return
+        usuario_detalles: DetalleUsuario = usuario.detalles
+        usuario_detalles.token = attrs.get('token')
+        usuario_detalles.save()
         
     
 class LocalInfoUsuarioSerializer(serializers.ModelSerializer):
