@@ -161,6 +161,6 @@ class ObtenerTodosNegociosView(generics.ListAPIView):
     """
     API que devuelve la información completa de todos los negocios.
     """
-    serializer_class = NegocioSerializer
+    serializer_class = NegocioInfoSerializer
     queryset = Local.objects.all()
     permission_classes = [AllowAny]
