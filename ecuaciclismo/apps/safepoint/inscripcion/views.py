@@ -9,3 +9,4 @@ class ReservaRutaCreateView(generics.CreateAPIView):
 class ReservaRutaListView(generics.ListAPIView):
     queryset = ReservaRuta.objects.all()
     serializer_class = ReservaRutaSerializer
+    pagination_class = None
