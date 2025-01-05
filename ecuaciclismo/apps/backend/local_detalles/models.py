@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import Count, Q, F
 
 from ecuaciclismo.helpers.models import ModeloBase
 

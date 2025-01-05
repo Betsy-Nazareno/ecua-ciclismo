@@ -100,16 +100,18 @@ class EstadisticaNegocioView(ObtenerNegocioPorUsuarioMixin, views.APIView):
     """
     
     def get(self, request, *args, **kwargs):
-        serializer = self.obtener_estadisticas()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        resultados = self.obtener_estadisticas()
+        return Response(resultados, status=status.HTTP_200_OK)
     
     def obtener_estadisticas(self):
         if self.request.query_params.get('tipo') == 'semana':
             resultados = self._obtener_estadisticas_semana()
-            return EstadisticasNegocioDiasSerializer(resultados, many=True)
+            serializador = EstadisticasNegocioDiasSerializer(resultados, many=True)
+            return EstadisticasNegocioDiasSerializer.obtener_estadisticas_por_dia(serializador.data)
             
         resultados = self._obtener_estadisticas_mes()
-        return EstadisticasNegocioMesSerializer(resultados, many=True)
+        serializador = EstadisticasNegocioMesSerializer(resultados, many=True)
+        return EstadisticasNegocioMesSerializer.obtener_estadisticas_por_mes(serializador.data)
     
     def _obtener_estadisticas_base(self):
         negocio = self.get_object()
@@ -124,12 +126,12 @@ class EstadisticaNegocioView(ObtenerNegocioPorUsuarioMixin, views.APIView):
             .order_by('mes')
     
     def _obtener_estadisticas_semana(self):
-        semana_actual = datetime.date.today().isocalendar()[1]
-        anyo_actual = datetime.date.today().isocalendar()[0]
+        anyo_actual = datetime.datetime.now().year
+        mes_actual = datetime.datetime.now().month
         
         return self._obtener_estadisticas_base()\
-            .filter(fecha_creacion__week=semana_actual)\
             .filter(fecha_creacion__year=anyo_actual)\
+            .filter(fecha_creacion__month=mes_actual)\
             .annotate(dia=ExtractWeekDay('fecha_creacion'))\
             .values('dia')\
             .annotate(vistas=Count('usuario'))\

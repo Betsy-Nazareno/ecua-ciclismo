@@ -7,6 +7,7 @@ class Consejo(models.Model):
 
     class Meta:
         db_table = 'consejos_negocios'  # Nombre correcto de la tabla en la base de datos
+        managed = False
 
     def __str__(self):
         return self.nombre
@@ -20,6 +21,7 @@ class Tip(models.Model):
 
     class Meta:
         db_table = 'tip_consejo'  # Nombre correcto de la tabla en la base de datos
+        managed = False
 
     def __str__(self):
         return self.titulo
