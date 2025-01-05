@@ -121,7 +121,7 @@ class SolicitudViewSet(viewsets.ModelViewSet):
                     if solicitud.get('es_propietario', False):
                         local = get_or_none(Local, lugar_ptr_id=datoLugar[0]['id'])
                         solicitud['tipo']="Registro Local Safepoint"
-                        solicitud['servicio_local'] = local.servicio.nombre
+                        solicitud['servicio_local'] = local.servicio.nombre if local.servicio else "No establecido"
                         solicitud['servicios_extra'] = list(local.servicios_adicionales.values_list('nombre', flat=True))
                         solicitud['tipos_productos'] = list(local.productos.values_list('nombre', flat=True))
                 else:
