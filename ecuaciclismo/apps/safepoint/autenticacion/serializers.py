@@ -82,7 +82,7 @@ class LoginSerializer(serializers.Serializer):
         if not attrs.get('token') or attrs.get('token', '') == '':
             return
         usuario_detalles: DetalleUsuario = usuario.detalles
-        usuario_detalles.token = attrs.get('token')
+        usuario_detalles.token_notificacion = attrs.get('token')
         usuario_detalles.save()
         
     
