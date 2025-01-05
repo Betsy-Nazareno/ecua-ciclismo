@@ -75,6 +75,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
                 usuarios=DetalleUsuario.get_all_users()
                 locales=[user_data for user_data in usuarios if user_data['isPropietary'] == 1]
                 for user_data in locales:
+                    usuarioDetalle = get_or_none(DetalleUsuario, usuario_id=user_data['usuario_id'])
                     if usuarioDetalle.silenciar_notificaciones == 0:
                                 token_usuario.append(usuarioDetalle.token_notificacion)
                     usuario = User.objects.get(id=user_data['usuario_id'])
