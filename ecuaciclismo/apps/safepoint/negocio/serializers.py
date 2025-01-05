@@ -290,3 +290,24 @@ class AgregarRegistroAvisoNegocio(serializers.ModelSerializer):
         
         log.save()
         return log
+
+class NegocioSerializer(serializers.ModelSerializer):
+    ubicacion = UbicacionNegocioSerializer()
+    imagen = serializers.CharField(required=False, allow_blank=True)
+    descripcion = serializers.CharField(required=False)
+    
+    class Meta:
+        model = Local
+        fields = (
+            'id',
+            'nombre',
+            'direccion',
+            'ubicacion',
+            'imagen',
+            'descripcion',
+            'hora_inicio',
+            'hora_fin',
+            'productos',
+            'servicios_adicionales',
+            'servicio',
+        )
