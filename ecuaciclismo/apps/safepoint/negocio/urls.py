@@ -15,6 +15,8 @@ urlpatterns = [
     path('obtener_estadisticas', views.EstadisticaNegocioView.as_view(), name="obtener_estadisticas"),
     path("actualizar_estadistica", views.ActualizarEstadisticasPorCiclistaView.as_view(), name="actualizar_estadistica"),
     
-    path("registrar_aviso", views.RegistrarAvisosNegocioView.as_view(), name="registrar_aviso")
+    path("registrar_aviso", views.RegistrarAvisosNegocioView.as_view(), name="registrar_aviso"),
+    path('todos_negocios', views.ObtenerTodosNegociosView.as_view(), name='todos_negocios'),
+
     # path('actualizar/<int:pk>', views.UpdateNegocioView.as_view(), name='obtener_actualizar_negocio'),    
 ]
