@@ -52,7 +52,8 @@ class Lugar(ModeloBase):
                 LEFT JOIN lugar_ciclovia AS ciclovia ON
                     lugar.id = ciclovia.lugar_ptr_id
                 WHERE 
-                    lugar.isActived = %s 
+                    lugar.isActived = %s
+                    AND lugar.ubicacion_id IS NOT NULL
             """, [activo])
             result = cursor.fetchall()
 
