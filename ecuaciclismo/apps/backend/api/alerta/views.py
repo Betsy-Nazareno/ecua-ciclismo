@@ -125,6 +125,9 @@ class AlertaViewSet(viewsets.ModelViewSet):
                                 participacionAlerta.save()
             
             transaction.commit()
+            
+            token_usuario = [ token for token in token_usuario if token is not None ]
+            token_usuarios_negocio = [ token for token in token_usuarios_negocio if token is not None ]
             return jsonx({'status': 'success', 'message': 'Alerta creada con éxito.', 'data':token_usuario, 'token_usuarios_negocio':token_usuarios_negocio})
         except ApplicationError as msg:
             transaction.rollback()
