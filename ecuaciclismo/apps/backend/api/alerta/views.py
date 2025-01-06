@@ -30,6 +30,8 @@ class AlertaViewSet(viewsets.ModelViewSet):
     def new_alerta(self, request):
         transaction.set_autocommit(False)
         token_usuario=[]
+        token_usuarios_negocio = []
+        
         try:
             data = request.data
             alerta = Alerta()
@@ -77,7 +79,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
                 for user_data in locales:
                     usuarioDetalle = get_or_none(DetalleUsuario, usuario_id=user_data['usuario_id'])
                     if usuarioDetalle.silenciar_notificaciones == 0:
-                                token_usuario.append(usuarioDetalle.token_notificacion)
+                        token_usuarios_negocio.append(usuarioDetalle.token_notificacion)
                     usuario = User.objects.get(id=user_data['usuario_id'])
                     participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia=0)
                     if created:
@@ -123,7 +125,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
                                 participacionAlerta.save()
             
             transaction.commit()
-            return jsonx({'status': 'success', 'message': 'Alerta creada con éxito.', 'data':token_usuario})
+            return jsonx({'status': 'success', 'message': 'Alerta creada con éxito.', 'data':token_usuario, 'token_usuarios_negocio':token_usuarios_negocio})
         except ApplicationError as msg:
             transaction.rollback()
             return jsonx({'status': 'error', 'message': str(msg)})
