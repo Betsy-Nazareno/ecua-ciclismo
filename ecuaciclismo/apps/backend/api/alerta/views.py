@@ -94,7 +94,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
                             if cs.isUser==1:
                                 usuario=User.objects.get(id=cs.user_id)
                                 usuarioDetalle=get_or_none(DetalleUsuario, usuario_id=usuario.id)
-                                if usuarioDetalle.silenciar_notificaciones == 0:
+                                if usuarioDetalle.silenciar_notificaciones == 0 and not usuarioDetalle.isPropietary:
                                     token_usuario.append(usuarioDetalle.token_notificacion)
                                 participacionAlerta=ParticipacionAlerta()
                                 participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia = 0)
@@ -107,7 +107,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
                             usuario = User.objects.get(id=user_data['usuario_id'])
                             usuarioDetalle=get_or_none(DetalleUsuario, usuario_id=usuario.id)
                             
-                            if usuarioDetalle.silenciar_notificaciones == 0:
+                            if usuarioDetalle.silenciar_notificaciones == 0 and not usuarioDetalle.isPropietary:
                                 token_usuario.append(usuarioDetalle.token_notificacion)
                             participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia=0)
                             if created:
@@ -118,7 +118,7 @@ class AlertaViewSet(viewsets.ModelViewSet):
                         for user_data in usuarios_miembros:
                             usuario = User.objects.get(id=user_data['usuario_id'])
                             usuarioDetalle=get_or_none(DetalleUsuario, usuario_id=usuario.id)
-                            if usuarioDetalle.silenciar_notificaciones == 0:
+                            if usuarioDetalle.silenciar_notificaciones == 0 and not usuarioDetalle.isPropietary:
                                 token_usuario.append(usuarioDetalle.token_notificacion)
                             participacionAlerta, created = ParticipacionAlerta.objects.get_or_create(user=usuario, alerta=alerta, isAsistencia=0)
                             if created:
